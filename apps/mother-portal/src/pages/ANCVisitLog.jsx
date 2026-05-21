@@ -1,4 +1,4 @@
-import db from '@/api/base44Client';
+import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Heart, Activity, Calendar, AlertTriangle, ChevronRight } from 'lucide-react';

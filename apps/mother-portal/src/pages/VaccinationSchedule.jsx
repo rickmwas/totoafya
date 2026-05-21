@@ -1,4 +1,4 @@
-import db from '@/api/base44Client';
+import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, AlertCircle, Circle, Check } from 'lucide-react';

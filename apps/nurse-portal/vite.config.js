@@ -8,7 +8,7 @@ export default defineConfig({
   envDir: '../../',
   resolve: {
     alias: {
-      '@/api/base44Client': '@base44/api-client',
+      '@/api/totoafyaClient': '@totoafya/api-client',
       '@': path.resolve(__dirname, './src'),
     },
   },

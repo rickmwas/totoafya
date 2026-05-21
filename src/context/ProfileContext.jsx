@@ -1,4 +1,4 @@
-import db from '@/api/base44Client';
+import db from '@/api/totoafyaClient';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 

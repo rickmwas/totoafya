@@ -2,7 +2,7 @@ import { supabaseDb } from './supabaseClient';
 
 const isSupabase = import.meta.env.VITE_DATABASE_PROVIDER === 'supabase';
 
-// Local localStorage-backed database — no base44 dependencies
+// Local localStorage-backed database — no totoafya dependencies
 
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -130,8 +130,8 @@ const integrations = {
 const localDb = { auth, entities, integrations };
 
 export const db = isSupabase ? supabaseDb : localDb;
-export const base44 = db;
+export const totoafya = db;
 export default db;
 
-// Make available globally for files using globalThis.__B44_DB__
-globalThis.__B44_DB__ = db;
+// Make available globally for files using globalThis.__TOTOAFYA_DB__
+globalThis.__TOTOAFYA_DB__ = db;

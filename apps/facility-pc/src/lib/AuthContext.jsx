@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import db from '@/api/base44Client';
+import db from '@/api/totoafyaClient';
 
 const AuthContext = createContext();
 

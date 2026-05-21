@@ -1,4 +1,4 @@
-import db from '@/api/base44Client';
+import db from '@/api/totoafyaClient';
 
 import React, { useState } from 'react';
 import { FileText, ChevronDown, ChevronUp, Printer, ArrowLeft, Code2, Monitor } from 'lucide-react';

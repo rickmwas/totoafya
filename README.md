@@ -18,7 +18,7 @@ TotoAfya Digital is a multi-portal digital health system designed to support mat
                     v                               v
          +--------------------+           +--------------------+
          |   Shared Package   |           |   Shared Package   |
-         |    @base44/shared-ui|           |  @base44/api-client|
+         |  @totoafya/shared-ui|           | @totoafya/api-client|
          +--------------------+           +--------------------+
                     ^                               ^
                     |                               |
