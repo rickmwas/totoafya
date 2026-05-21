@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+
+    --background: 38 50% 97%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 161 59% 37%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 38 30% 95%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 38 30% 95%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 38 30% 95%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 90% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 38 20% 88%;
+    --input: 38 20% 88%;
+    --ring: 161 59% 37%;
+    --radius: 1.5rem;
+
+    /* Semantic health colors */
+    --health-green: 158 47% 33%;
+    --health-amber: 43 95% 57%;
+    --health-red: 0 88% 48%;
+    --health-teal: 161 59% 37%;
+    --health-purple: 270 67% 55%;
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #F7F5F0;
+}

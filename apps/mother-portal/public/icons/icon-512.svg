@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1B6B5A"/>
+  <circle cx="256" cy="200" r="100" fill="#F7F5F0" opacity="0.10"/>
+  <circle cx="256" cy="200" r="64" fill="#F7F5F0" opacity="0.12"/>
+  <text x="256" y="232" font-family="Georgia, serif" font-size="140" font-weight="700" fill="#F7F5F0" text-anchor="middle">T</text>
+  <path d="M 140 360 Q 256 310 372 360" stroke="#F7F5F0" stroke-width="7" fill="none" opacity="0.4"/>
+  <circle cx="256" cy="400" r="22" fill="#C8813A"/>
+</svg>

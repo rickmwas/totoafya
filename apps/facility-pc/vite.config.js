@@ -1,0 +1,20 @@
+
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [react()],
+  envDir: '../../',
+  resolve: {
+    alias: {
+      '@/api/base44Client': '@base44/api-client',
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5002,
+    allowedHosts: true,
+  },
+});

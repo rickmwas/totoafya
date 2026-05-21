@@ -1,0 +1,79 @@
+{
+  "name": "Mother",
+  "type": "object",
+  "properties": {
+    "user_id": { "type": "string", "description": "Linked auth user id" },
+    "national_id": { "type": "string" },
+    "anc_number": { "type": "string" },
+    "full_name": { "type": "string" },
+    "phone": { "type": "string" },
+    "county": { "type": "string" },
+    "sub_county": { "type": "string" },
+    "date_of_birth": { "type": "string", "format": "date" },
+    "blood_group": {
+      "type": "string",
+      "enum": ["A+","A-","B+","B-","AB+","AB-","O+","O-","Unknown"]
+    },
+    "caregiver_type": {
+      "type": "string",
+      "enum": ["mother","father","guardian","other"],
+      "default": "mother",
+      "description": "Who is the primary caregiver registering"
+    },
+    "partner_email": {
+      "type": "string",
+      "description": "Email of invited partner/co-caregiver"
+    },
+    "partner_user_id": {
+      "type": "string",
+      "description": "User ID of linked partner once they accept the invite"
+    },
+    "pregnancy_status": {
+      "type": "string",
+      "enum": ["pregnant","postpartum","not_pregnant"],
+      "default": "pregnant"
+    },
+    "lmp": { "type": "string", "format": "date" },
+    "edd": { "type": "string", "format": "date" },
+    "gravida": { "type": "number" },
+    "parity": { "type": "number" },
+    "risk_score": { "type": "number" },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low","medium","high","critical"],
+      "default": "low"
+    },
+    "chv_alerted": { "type": "boolean", "default": false },
+    "facility_name": { "type": "string" },
+    "language_preference": {
+      "type": "string",
+      "enum": ["en","sw"],
+      "default": "en"
+    },
+    "profile_complete": { "type": "boolean", "default": false },
+    "avatar_url": { "type": "string" }
+  },
+  "required": ["full_name"],
+  "rls": {
+    "create": { "created_by": "{{user.email}}" },
+    "read": {
+      "$or": [
+        { "created_by": "{{user.email}}" },
+        { "partner_email": "{{user.email}}" },
+        { "user_condition": { "role": "admin" } },
+        { "user_condition": { "role": "nurse" } }
+      ]
+    },
+    "update": {
+      "$or": [
+        { "created_by": "{{user.email}}" },
+        { "partner_email": "{{user.email}}" },
+        { "user_condition": { "role": "admin" } },
+        { "user_condition": { "role": "nurse" } }
+      ]
+    },
+    "delete": {
+      "user_condition": { "role": "admin" }
+    }
+  }
+}
