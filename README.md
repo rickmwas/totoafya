@@ -1,41 +1,131 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
+# TotoAfya Digital 🏥🤱
 
-**Welcome to your Base44 project** 
+TotoAfya Digital is a multi-portal digital health system designed to support maternal and child health management. The system is split into three dedicated frontends sharing a common database and client layer in an **npm workspaces monorepo**.
 
-**About**
+---
 
-View and Edit  your app on [db.com](http://db.com) 
+## 1. System Architecture
 
-This project contains everything you need to run your app locally.
-
-**Edit the code in your local development environment**
-
-Any change pushed to the repo will also be reflected in the Base44 Builder.
-
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
+```text
+                  +-----------------------------------+
+                  |        Supabase PostgreSQL        |
+                  |         (Central Cloud DB)        |
+                  +-----------------------------------+
+                                    ^
+                                    |
+                    +---------------+---------------+
+                    |                               |
+                    v                               v
+         +--------------------+           +--------------------+
+         |   Shared Package   |           |   Shared Package   |
+         |    @base44/shared-ui|           |  @base44/api-client|
+         +--------------------+           +--------------------+
+                    ^                               ^
+                    |                               |
+        +-----------+-----------+-------------------+-----------+
+        |                       |                               |
+        v                       v                               v
++---------------+       +---------------+               +---------------+
+|  apps/mother  |       |  apps/nurse   |               | apps/facility |
+|  - Mobile PWA |       |  - Tablet/Web |               | - PC Desktop  |
+|  - Mother UI  |       |  - Nurse UI   |               | - Admin UI    |
++---------------+       +---------------+               +---------------+
 ```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
 
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.db.app
+---
+
+## 2. Directory Structure
+
+The project uses **npm workspaces** to separate concerns while sharing reusable styling and API logic:
+
+* **`/apps`**:
+  * **`mother-portal`**: A mobile-first, installable Progressive Web App (PWA) tailored for mothers. Includes growth tracking, vaccination schedules, AI-assisted health chat, and ANC log viewing.
+  * **`nurse-portal`**: A tablet/web application designed for clinical nurses to register patient details, log growth metrics, record vaccinations, and record ANC visit logs.
+  * **`facility-pc`**: A desktop dashboard for administrators to monitor facility-wide metrics and system alerts, packaged as a **Tauri** desktop app.
+* **`/packages`**:
+  * **`api-client`**: Central client managing requests. Supports dual-mode: local `localStorage` mock database (for offline development) and cloud **Supabase** (for production).
+  * **`shared-ui`**: Central styling system housing design tokens and custom CSS.
+
+---
+
+## 3. Getting Started
+
+### Prerequisites
+1. **Node.js**: Ensure you have Node.js (version 18+) installed.
+2. **Rust & VS Build Tools** *(Optional)*: Required only if you want to compile the desktop Tauri app locally. Read more at [Tauri Prerequisites](https://tauri.app/start/prerequisites/).
+
+### Installation
+Clone the repository, navigate into the project directory, and install dependencies:
+```bash
+npm install
 ```
 
-Run the app: `npm run dev`
+### Database & Environment Setup
+Create a `.env.local` file at the root of the project to configure the database provider:
 
-**Publish your changes**
+```bash
+# Toggle between 'local' (localStorage mock) and 'supabase'
+VITE_DATABASE_PROVIDER=supabase
 
-Open [db.com](http://db.com) and click on Publish.
+# Supabase Credentials (obtain from your Supabase Dashboard)
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
 
-**Docs & Support**
+*Note: The three sub-apps are configured to automatically load this root environment file.*
 
-Documentation: [https://docs.db.com/Integrations/Using-GitHub](https://docs.db.com/Integrations/Using-GitHub)
+---
 
-Support: [https://app.db.com/support](https://app.db.com/support)
+## 4. Database Migrations (Supabase)
+
+If you are setting up a fresh Supabase database:
+1. Copy the contents of the root `schema.sql` file.
+2. In your Supabase Dashboard, go to **SQL Editor > New Query**.
+3. Paste the contents and click **Run**. This will create the tables, indexes, and triggers required by the applications.
+
+---
+
+## 5. Development Scripts
+
+You can start, build, or analyze the portals from the root directory:
+
+| Action | Mother Portal | Nurse Portal | Facility Portal (Web) |
+| :--- | :--- | :--- | :--- |
+| **Run Dev Server** | `npm run dev:mother` | `npm run dev:nurse` | `npm run dev:facility` |
+| **Build Project** | `npm run build:mother` | `npm run build:nurse` | `npm run build:facility` |
+
+### Running the Apps Concurrently
+The dev servers run on independent local ports to avoid conflicts:
+* **Mother Portal**: [http://localhost:5000](http://localhost:5000)
+* **Nurse Portal**: [http://localhost:5001](http://localhost:5001)
+* **Facility Portal**: [http://localhost:5002](http://localhost:5002)
+
+### Running Facility App in Tauri Desktop Mode
+To run the admin app inside a native PC window wrapper:
+```bash
+npm run tauri:facility -- dev
+```
+*(Requires Rust installed on your machine).*
+
+---
+
+## 6. Deployment & Packaging
+
+### Deploying the Web Portals (Mother & Nurse)
+You can deploy the web applications to **Vercel**, **Netlify**, or other static hosting providers by setting up separate projects pointed to the monorepo subdirectories:
+
+1. **Mother Portal**:
+   * Root Directory: `apps/mother-portal`
+   * Build Command: `npm run build`
+2. **Nurse Portal**:
+   * Root Directory: `apps/nurse-portal`
+   * Build Command: `npm run build`
+
+### Packaging the Facility PC App (Tauri)
+To package the administrator app into a standalone Windows installer (`.exe`):
+1. Run the build command:
+   ```bash
+   npm run tauri:facility -- build
+   ```
+2. Locate the generated executable in:
+   `apps/facility-pc/src-tauri/target/release/bundle/nsis/`
