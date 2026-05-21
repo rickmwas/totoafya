@@ -234,7 +234,7 @@ export default function Onboarding() {
 
   // ── STEP 1: Who are you? ─────────────────────────────────────────────────────
   if (step === 1) return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10">
       <BackBtn onClick={() => setStep(0)} />
       <ProgressDots current={0} total={4} />
 
@@ -242,7 +242,7 @@ export default function Onboarding() {
         <p className="text-[11px] tracking-[0.15em] font-bold uppercase text-[#1B6B5A] mb-2">
           {lang === 'sw' ? 'HATUA 1 YA 4' : 'STEP 1 OF 4'}
         </p>
-        <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+        <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
           {lang === 'sw' ? 'Wewe ni nani?' : 'Who are you?'}
         </h2>
         <p className="text-[14px] text-[#999] mt-1.5">
@@ -291,7 +291,7 @@ export default function Onboarding() {
 
   // ── STEP 2: Journey Selection ────────────────────────────────────────────────
   if (step === 2) return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
       <BackBtn onClick={() => setStep(1)} />
       <ProgressDots current={1} total={4} />
 
@@ -299,7 +299,7 @@ export default function Onboarding() {
         <p className="text-[11px] tracking-[0.15em] font-bold uppercase text-[#1B6B5A] mb-2">
           {lang === 'sw' ? 'HATUA 2 YA 4' : 'STEP 2 OF 4'}
         </p>
-        <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+        <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
           {lang === 'sw' ? 'Uko wapi katika safari yako?' : 'Where are you in your journey?'}
         </h2>
         <p className="text-[14px] text-[#999] mt-1.5">
@@ -394,13 +394,13 @@ export default function Onboarding() {
     const dotTotal = isCaregiverOnly ? 3 : 4;
 
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
+      <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
         <BackBtn onClick={() => setStep(isCaregiverOnly ? 1 : 2)} />
         <ProgressDots current={dotIndex} total={dotTotal} />
 
         <div className="mb-7">
           <p className="text-[11px] tracking-[0.15em] font-bold uppercase text-[#1B6B5A] mb-2">{stepLabel}</p>
-          <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+          <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             {lang === 'sw' ? 'Maelezo Yako' : 'Your Details'}
           </h2>
           <p className="text-[14px] text-[#999] mt-1.5">
@@ -466,7 +466,7 @@ export default function Onboarding() {
 
   // ── STEP 4C: Father / Guardian ───────────────────────────────────────────────
   if (step === 4 && (caregiverType === 'father' || caregiverType === 'guardian')) return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
       <BackBtn onClick={() => setStep(3)} />
       <ProgressDots current={2} total={3} />
 
@@ -477,7 +477,7 @@ export default function Onboarding() {
             {lang === 'sw' ? (caregiverType === 'father' ? 'BABA' : 'MLEZI') : (caregiverType === 'father' ? 'FATHER' : 'GUARDIAN')}
           </span>
         </div>
-        <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+        <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
           {lang === 'sw' ? 'Watoto Wanaohusika' : 'Children in Your Care'}
         </h2>
         <p className="text-[14px] text-[#999] mt-1.5">
@@ -506,7 +506,7 @@ export default function Onboarding() {
                 {[{ v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', color: '#1B6B5A' }, { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', color: '#D946A8' }].map(({ v, icon, en, sw, color }) => (
                   <button key={v} onClick={() => setC('gender', v)}
                     className={cn('flex-1 py-3.5 rounded-[14px] flex items-center justify-center gap-2 border-2 transition-all active:scale-[0.97] font-semibold text-[14px]',
-                      childForm.gender === v ? 'border-current' : 'border-[#F0F0F0] bg-[#FAFAFA] text-[#666666]')}
+                      childForm.gender === v ? 'border-current' : 'border-[#F0F0F0] bg-[#F7F5F0] text-[#666666]')}
                     style={childForm.gender === v ? { borderColor: color, backgroundColor: color + '12', color } : {}}>
                     <span>{icon}</span> {lang === 'sw' ? sw : en}
                   </button>
@@ -536,7 +536,7 @@ export default function Onboarding() {
 
   // ── STEP 4A: Pregnancy Detail ────────────────────────────────────────────────
   if (step === 4 && mode === 'pregnant') return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
       <BackBtn onClick={() => setStep(3)} />
       <ProgressDots current={3} total={4} />
 
@@ -547,7 +547,7 @@ export default function Onboarding() {
             {lang === 'sw' ? 'HALI YA UJAUZITO' : 'PREGNANCY'}
           </span>
         </div>
-        <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+        <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
           {lang === 'sw' ? 'Kuhusu Ujauzito Wako' : 'About Your Pregnancy'}
         </h2>
       </div>
@@ -635,7 +635,7 @@ export default function Onboarding() {
 
   // ── STEP 4B: Child Detail ────────────────────────────────────────────────────
   if (step === 4 && mode === 'child') return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto px-5 pt-14 pb-10 overflow-y-auto">
       <BackBtn onClick={() => setStep(3)} />
       <ProgressDots current={3} total={4} />
 
@@ -646,7 +646,7 @@ export default function Onboarding() {
             {lang === 'sw' ? 'MAELEZO YA MTOTO' : 'CHILD DETAILS'}
           </span>
         </div>
-        <h2 className="text-[28px] font-extrabold leading-tight tracking-[-0.025em] text-[#0A0A0A]">
+        <h2 className="text-[30px] font-bold leading-tight text-[#1a1a1a]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
           {lang === 'sw' ? 'Mwambie kidogo kuhusu mtoto wako' : 'Tell us about your child'}
         </h2>
       </div>
