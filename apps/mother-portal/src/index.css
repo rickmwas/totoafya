@@ -41,4 +41,36 @@
 body {
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #F7F5F0;
+  
+  /* Prevent pull-to-refresh and horizontal history swipe-navigation */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  
+  /* Prevent text selection across the UI */
+  -webkit-user-select: none;
+  user-select: none;
+  
+  /* Prevent iOS link callouts / context menus on images/links */
+  -webkit-touch-callout: none;
 }
+
+/* Allow selection inside text input and editable elements */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Disable the default tap highlight color on mobile browsers */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Utility to respect notch safe-areas */
+.safe-padding-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-padding-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+

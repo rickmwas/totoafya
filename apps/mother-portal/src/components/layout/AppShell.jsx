@@ -65,7 +65,7 @@ export default function AppShell({ children }) {
       </main>
 
       {/* Mobile bottom nav — floating pill */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom,0px)]">
         <div className="mx-3 mb-3 bg-white/95 backdrop-blur-xl rounded-[28px] border border-[#E8E4DC] shadow-[0_8px_30px_rgba(0,0,0,0.08)] px-2 py-2">
           <div className="flex items-center justify-around">
             {navItems.map(({ to, icon: Icon, key }) => {
