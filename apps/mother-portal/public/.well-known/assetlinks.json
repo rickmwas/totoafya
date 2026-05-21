@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.mothertotoafya.twa",
+    "sha256_cert_fingerprints": ["3C:A1:17:A3:02:93:1E:F0:4C:44:75:67:F8:42:B8:EB:B3:40:4B:3D:73:F2:7A:8A:96:B0:C2:35:8C:B7:D8:F6"]
+  }
+}]
