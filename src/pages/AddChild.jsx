@@ -17,7 +17,7 @@ const InputField = ({ label, value, onChange, type = 'text', placeholder }) => (
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full h-14 px-4 bg-white border border-[#E5E5E5] rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] transition-colors"
+      className="w-full h-14 px-4 bg-white border border-[#E5E5E5] rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#1B6B5A] transition-colors"
     />
   </div>
 );
@@ -92,7 +92,7 @@ export default function AddChild() {
           <div className="flex flex-col items-center gap-3 py-2">
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             <button type="button" onClick={() => fileRef.current.click()}
-              className="relative w-20 h-20 rounded-[24px] overflow-hidden bg-[#F5F5F7] border-2 border-dashed border-[#E5E5E5] flex items-center justify-center active:scale-[0.97] transition-all hover:border-[#0047FF]">
+              className="relative w-20 h-20 rounded-[24px] overflow-hidden bg-[#F7F5F0] border-2 border-dashed border-[#E5E5E5] flex items-center justify-center active:scale-[0.97] transition-all hover:border-[#1B6B5A]">
               {uploadingPhoto ? (
                 <Loader2 size={22} className="animate-spin text-[#A0A0A0]" />
               ) : avatarUrl ? (
@@ -132,7 +132,7 @@ export default function AddChild() {
             </label>
             <div className="flex gap-3">
               {[
-                { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', color: '#0047FF' },
+                { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', color: '#1B6B5A' },
                 { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', color: '#D946A8' },
               ].map(({ v, icon, en, sw, color }) => (
                 <button
@@ -170,7 +170,7 @@ export default function AddChild() {
                   className={cn(
                     'flex-1 py-3 rounded-full text-[12px] font-semibold transition-all active:scale-[0.96] border',
                     form.birth_type === v
-                      ? 'bg-[#0047FF] text-white border-[#0047FF] shadow-blue-glow-sm'
+                      ? 'bg-[#1B6B5A] text-white border-[#1B6B5A] shadow-teal-glow-sm'
                       : 'bg-white border-[#E5E5E5] text-[#666666]'
                   )}
                 >
@@ -220,7 +220,7 @@ export default function AddChild() {
           <button
             onClick={handleSave}
             disabled={saving || !form.full_name || !form.date_of_birth || !form.gender}
-            className="w-full h-16 rounded-full bg-[#0047FF] text-white text-[16px] font-bold flex items-center justify-center gap-2 shadow-blue-glow active:scale-[0.97] transition-all disabled:opacity-40 mt-2"
+            className="w-full h-16 rounded-full bg-[#1B6B5A] text-white text-[16px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all disabled:opacity-40 mt-2"
           >
             {saving
               ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

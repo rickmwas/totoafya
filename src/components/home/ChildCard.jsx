@@ -5,7 +5,7 @@ import { ChevronRight, AlertTriangle } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
 const GENDER = {
-  male:   { accent: '#0047FF', bg: '#EFF4FF', initial: 'bg-[#0047FF]', bar: 'bg-[#0047FF]' },
+  male:   { accent: '#1B6B5A', bg: '#E6F4F1', initial: 'bg-[#1B6B5A]', bar: 'bg-[#1B6B5A]' },
   female: { accent: '#D946A8', bg: '#FFF0F9', initial: 'bg-[#D946A8]', bar: 'bg-[#D946A8]' },
 };
 
@@ -74,7 +74,7 @@ export default function ChildCard({ child, nextVaccine, lastGrowth }) {
                 </div>
               )}
               {nextVaccine && (
-                <div className="flex-1 rounded-[12px] px-3 py-2 bg-[#F5F5F7]">
+                <div className="flex-1 rounded-[12px] px-3 py-2 bg-[#F7F5F0]">
                   <p className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#A0A0A0] mb-0.5">
                     {lang === 'sw' ? 'Chanjo' : 'Vaccine'}
                   </p>

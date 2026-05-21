@@ -643,7 +643,7 @@ export default function PatentDocument() {
           <span className="text-[13px] font-bold text-[#0A0A0A]">Patent Document</span>
         </div>
         <button onClick={() => window.print()}
-          className="flex items-center gap-1.5 text-[12px] font-semibold text-white bg-[#0047FF] px-4 py-2 rounded-full shadow-blue-glow-sm active:scale-[0.97] transition-all">
+          className="flex items-center gap-1.5 text-[12px] font-semibold text-white bg-[#0047FF] px-4 py-2 rounded-full shadow-teal-glow-sm active:scale-[0.97] transition-all">
           <Printer size={13} /> Print / Export
         </button>
       </nav>
@@ -653,7 +653,7 @@ export default function PatentDocument() {
         {/* Cover */}
         <div className="bg-white rounded-[24px] border border-[#E5E5E5] p-8 mb-6 text-center shadow-card">
           <p className="text-[10px] tracking-[0.25em] font-bold uppercase text-[#A0A0A0] mb-3">PATENT APPLICATION — DRAFT</p>
-          <div className="w-14 h-14 rounded-[18px] bg-[#0047FF] flex items-center justify-center mx-auto mb-4 shadow-blue-glow">
+          <div className="w-14 h-14 rounded-[18px] bg-[#0047FF] flex items-center justify-center mx-auto mb-4 shadow-teal-glow">
             <FileText size={26} className="text-white" />
           </div>
           <h1 className="text-[18px] font-extrabold leading-tight tracking-[-0.02em] text-[#0A0A0A] mb-2 max-w-lg mx-auto">

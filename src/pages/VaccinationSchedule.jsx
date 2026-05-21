@@ -21,8 +21,8 @@ const KENYA_VACCINE_SCHEDULE = [
 ];
 
 const statusIcon = { given: CheckCircle2, due: Clock, overdue: AlertCircle, upcoming: Circle, scheduled: Circle, missed: AlertCircle };
-const statusColor = { given: '#2E7A5D', due: '#D97706', overdue: '#E51010', upcoming: '#A0A0A0', scheduled: '#0047FF', missed: '#E51010' };
-const leftBorderColor = { given: '#2E7A5D', due: '#F9A825', overdue: '#E51010', upcoming: '#0047FF', scheduled: '#0047FF', missed: '#E51010' };
+const statusColor = { given: '#2E7A5D', due: '#D97706', overdue: '#E51010', upcoming: '#A0A0A0', scheduled: '#1B6B5A', missed: '#E51010' };
+const leftBorderColor = { given: '#2E7A5D', due: '#F9A825', overdue: '#E51010', upcoming: '#1B6B5A', scheduled: '#1B6B5A', missed: '#E51010' };
 
 export default function VaccinationSchedule() {
   const { t, lang } = useLang();
@@ -87,7 +87,7 @@ export default function VaccinationSchedule() {
           <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#A0A0A0] mb-1">
             {lang === 'sw' ? 'RATIBA' : 'SCHEDULE'}
           </p>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#0A0A0A]">
+          <h1 className="text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
             {t('vaccination_schedule')}
           </h1>
         </div>
@@ -102,7 +102,7 @@ export default function VaccinationSchedule() {
                 className={cn(
                   'flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 active:scale-[0.96]',
                   selectedChild?.id === child.id
-                    ? 'bg-[#0047FF] text-white shadow-[0_4px_16px_rgba(0,71,255,0.25)]'
+                    ? 'bg-[#1B6B5A] text-white shadow-[0_4px_16px_rgba(27,107,90,0.25)]'
                     : 'bg-white border border-[#EBEBEB] text-[#666666]'
                 )}
               >
@@ -126,7 +126,7 @@ export default function VaccinationSchedule() {
                 { label: t('given'), status: 'given', color: '#2E7A5D', bg: '#F0FAF5' },
                 { label: t('due_soon'), status: 'due', color: '#D97706', bg: '#FFFBEB' },
                 { label: t('overdue'), status: 'overdue', color: '#E51010', bg: '#FFF5F5' },
-                { label: t('upcoming'), status: 'scheduled', color: '#0047FF', bg: '#EFF4FF' },
+                { label: t('upcoming'), status: 'scheduled', color: '#1B6B5A', bg: '#E6F4F1' },
               ].map(({ label, status, color, bg }) => (
                 <div key={status} className="rounded-[18px] p-3 border text-center" style={{ backgroundColor: bg, borderColor: color + '20' }}>
                   <p className="text-[22px] font-extrabold leading-none" style={{ color }}>{statsCount(status)}</p>
@@ -138,7 +138,7 @@ export default function VaccinationSchedule() {
             {/* Seed schedule button */}
             {vaccines.length === 0 && (
               <div className="px-4 mb-4">
-                <div className="bg-[#0047FF]/5 rounded-[20px] p-5 border border-[#0047FF]/15 text-center">
+                <div className="bg-[#1B6B5A]/5 rounded-[20px] p-5 border border-[#1B6B5A]/15 text-center">
                   <p className="text-[14px] font-semibold text-[#0A0A0A] mb-1">
                     {lang === 'sw' ? 'Hakuna ratiba ya chanjo bado' : 'No vaccine schedule yet'}
                   </p>
@@ -148,7 +148,7 @@ export default function VaccinationSchedule() {
                   <button
                     onClick={seedSchedule}
                     disabled={saving}
-                    className="bg-[#0047FF] text-white px-6 py-3 rounded-full text-[13px] font-bold shadow-[0_8px_24px_rgba(0,71,255,0.25)] active:scale-[0.97] transition-all"
+                    className="bg-[#1B6B5A] text-white px-6 py-3 rounded-full text-[13px] font-bold shadow-[0_8px_24px_rgba(27,107,90,0.25)] active:scale-[0.97] transition-all"
                   >
                     {saving ? '...' : (lang === 'sw' ? 'Tengeneza Ratiba' : 'Generate Schedule')}
                   </button>
@@ -165,7 +165,7 @@ export default function VaccinationSchedule() {
                 const isDue = vaccine.status === 'due';
                 const daysLeft = differenceInDays(parseISO(vaccine.scheduled_date), new Date());
                 const iconColor = statusColor[vaccine.status] || '#A0A0A0';
-                const borderLeft = leftBorderColor[vaccine.status] || '#0047FF';
+                const borderLeft = leftBorderColor[vaccine.status] || '#1B6B5A';
 
                 return (
                   <div

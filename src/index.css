@@ -6,49 +6,39 @@
 
 @layer base {
   :root {
-    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-inter: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 
-    --background: 0 0% 98.4%;
+    --background: 38 50% 97%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 222 100% 50%;
+    --primary: 161 59% 37%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
+    --secondary: 38 30% 95%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
+    --muted: 38 30% 95%;
     --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 96.1%;
+    --accent: 38 30% 95%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 90% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 222 100% 50%;
+    --border: 38 20% 88%;
+    --input: 38 20% 88%;
+    --ring: 161 59% 37%;
     --radius: 1.5rem;
 
     /* Semantic health colors */
     --health-green: 158 47% 33%;
     --health-amber: 43 95% 57%;
     --health-red: 0 88% 48%;
-    --health-blue: 222 100% 50%;
+    --health-teal: 161 59% 37%;
     --health-purple: 270 67% 55%;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-[#F5F5F7] text-[#0A0A0A] font-inter antialiased;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
-  }
-  input, textarea, select {
-    @apply text-base;
-    font-size: 16px !important; /* Prevents iOS zoom */
-  }
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #F7F5F0;
 }

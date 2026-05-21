@@ -45,9 +45,9 @@ export default function Settings() {
     return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 py-4 px-4 active:bg-[#F5F5F7] rounded-[16px] transition-all active:scale-[0.98] text-left"
+      className="w-full flex items-center gap-3 py-4 px-4 active:bg-[#F7F5F0] rounded-[16px] transition-all active:scale-[0.98] text-left"
     >
-      <div className={cn('w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0', danger ? 'bg-[#E51010]/10' : 'bg-[#F5F5F7]')}>
+      <div className={cn('w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0', danger ? 'bg-[#E51010]/10' : 'bg-[#F7F5F0]')}>
         <Icon size={17} className={danger ? 'text-[#E51010]' : 'text-[#666666]'} />
       </div>
       <div className="flex-1 min-w-0">
@@ -77,7 +77,7 @@ export default function Settings() {
         {mother && (
           <div className="mx-4 mb-5 bg-white rounded-[24px] p-5 border border-[#E5E5E5] shadow-card">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-[18px] bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-blue-glow-sm">
+              <div className="w-14 h-14 rounded-[18px] bg-[#1B6B5A] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
                 <span className="text-white text-[20px] font-extrabold">
                   {mother.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                 </span>
@@ -89,12 +89,12 @@ export default function Settings() {
               </div>
             </div>
             {mother.risk_level && (
-              <div className="mt-4 pt-4 border-t border-[#F5F5F7] flex items-center justify-between">
+              <div className="mt-4 pt-4 border-t border-[#F7F5F0] flex items-center justify-between">
                 <p className="text-[12px] text-[#A0A0A0]">
                   {lang === 'sw' ? 'Alama ya Hatari' : 'Risk Score'}
                 </p>
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-20 bg-[#F5F5F7] rounded-full overflow-hidden">
+                  <div className="h-1.5 w-20 bg-[#F7F5F0] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{
@@ -135,8 +135,8 @@ export default function Settings() {
                 className={cn(
                   'flex-1 py-3 rounded-[16px] flex flex-col items-center gap-1 transition-all duration-200 active:scale-[0.97] border',
                   lang === code
-                    ? 'bg-[#0047FF] border-[#0047FF] shadow-blue-glow-sm'
-                    : 'bg-[#F5F5F7] border-[#E5E5E5]'
+                    ? 'bg-[#1B6B5A] border-[#1B6B5A] shadow-teal-glow-sm'
+                    : 'bg-[#F7F5F0] border-[#E5E5E5]'
                 )}
               >
                 <span className="text-[20px]">{code === 'en' ? '🇬🇧' : '🇰🇪'}</span>
@@ -154,19 +154,19 @@ export default function Settings() {
             label={t('profile')}
             sublabel={mother?.anc_number ? `ANC: ${mother.anc_number}` : mother?.national_id}
           />
-          <div className="h-[0.5px] bg-[#F5F5F7] mx-4" />
+          <div className="h-[0.5px] bg-[#F7F5F0] mx-4" />
           <SettingsRow
             icon={Bell}
             label={t('notifications')}
             sublabel={lang === 'sw' ? 'Washa arifa za chanjo na ziara' : 'Enable vaccine & visit reminders'}
           />
-          <div className="h-[0.5px] bg-[#F5F5F7] mx-4" />
+          <div className="h-[0.5px] bg-[#F7F5F0] mx-4" />
           <SettingsRow
             icon={Shield}
             label={lang === 'sw' ? 'Faragha & Usalama' : 'Privacy & Security'}
             sublabel={lang === 'sw' ? 'Data yako ina usalama na AES-256' : 'Your data is secured with AES-256'}
           />
-          <div className="h-[0.5px] bg-[#F5F5F7] mx-4" />
+          <div className="h-[0.5px] bg-[#F7F5F0] mx-4" />
           <SettingsRow
             icon={Info}
             label={t('about')}
@@ -178,13 +178,13 @@ export default function Settings() {
         <div className="mx-4 mb-4 bg-white rounded-[24px] border border-[#E5E5E5] overflow-hidden">
           <div className="px-4 pt-4 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Phone size={14} className="text-[#0047FF]" />
+              <Phone size={14} className="text-[#1B6B5A]" />
               <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">
                 {lang === 'sw' ? 'NAMBARI ZA HOSPITALI' : 'FACILITY CONTACT NUMBERS'}
               </p>
             </div>
             <button onClick={() => setShowPhoneEdit(!showPhoneEdit)}
-              className="text-[12px] font-bold text-[#0047FF] px-3 py-1 rounded-full bg-[#0047FF]/8 active:scale-[0.96] transition-transform">
+              className="text-[12px] font-bold text-[#1B6B5A] px-3 py-1 rounded-full bg-[#1B6B5A]/8 active:scale-[0.96] transition-transform">
               {showPhoneEdit ? (lang === 'sw' ? 'Funga' : 'Cancel') : (lang === 'sw' ? 'Hariri' : 'Edit')}
             </button>
           </div>
@@ -195,7 +195,7 @@ export default function Settings() {
                 <p className="text-[12px] text-[#A0A0A0]">{lang === 'sw' ? 'Maswali' : 'Inquiry'}</p>
                 <p className="text-[13px] font-semibold text-[#0A0A0A]">{mother?.facility_phone || (lang === 'sw' ? 'Haijasajiliwa' : 'Not set')}</p>
               </div>
-              <div className="h-[0.5px] bg-[#F5F5F7]" />
+              <div className="h-[0.5px] bg-[#F7F5F0]" />
               <div className="flex items-center justify-between py-2">
                 <p className="text-[12px] text-[#A0A0A0]">{lang === 'sw' ? 'Dharura / Uzazi' : 'Emergency / Maternity'}</p>
                 <p className="text-[13px] font-semibold text-[#E51010]">{mother?.facility_emergency_phone || (lang === 'sw' ? 'Haijasajiliwa' : 'Not set')}</p>
@@ -209,7 +209,7 @@ export default function Settings() {
                 </label>
                 <input type="tel" value={facilityPhone} onChange={e => setFacilityPhone(e.target.value)}
                   placeholder="+254 7XX XXX XXX"
-                  className="w-full h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#0047FF]" />
+                  className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#1B6B5A]" />
               </div>
               <div>
                 <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] block mb-2">
@@ -217,10 +217,10 @@ export default function Settings() {
                 </label>
                 <input type="tel" value={facilityEmergencyPhone} onChange={e => setFacilityEmergencyPhone(e.target.value)}
                   placeholder="+254 7XX XXX XXX"
-                  className="w-full h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#E51010]" />
+                  className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#E51010]" />
               </div>
               <button onClick={savePhoneNumbers} disabled={saving}
-                className="w-full h-12 rounded-full bg-[#0047FF] text-white text-[13px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-50 shadow-blue-glow-sm">
+                className="w-full h-12 rounded-full bg-[#1B6B5A] text-white text-[13px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all disabled:opacity-50 shadow-teal-glow-sm">
                 {saving ? '...' : <><Check size={15} /> {lang === 'sw' ? 'Hifadhi' : 'Save Numbers'}</>}
               </button>
             </div>
@@ -240,7 +240,7 @@ export default function Settings() {
         {/* Branding footer */}
         <div className="pb-8 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2">
-            <Heart size={13} className="text-[#0047FF]" fill="#0047FF" />
+            <Heart size={13} className="text-[#1B6B5A]" fill="#1B6B5A" />
             <span className="text-[11px] font-bold tracking-[0.1em] text-[#0A0A0A]">TotoAfya Digital</span>
           </div>
           <p className="text-[10px] text-[#A0A0A0] tracking-wide">

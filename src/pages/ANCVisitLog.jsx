@@ -110,7 +110,7 @@ export default function ANCVisitLog() {
             {lang === 'sw' ? 'MAENDELEO YA ANC' : 'ANC PROGRESS'}
           </p>
           <div className="flex items-end gap-1 mb-3">
-            <span className="text-[48px] font-extrabold leading-none tracking-[-0.03em] text-[#0047FF]">
+            <span className="text-[48px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
               {visits.length}
             </span>
             <span className="text-[16px] text-[#666666] mb-2">/ 8 {lang === 'sw' ? 'ziara' : 'visits'}</span>
@@ -124,7 +124,7 @@ export default function ANCVisitLog() {
                   'w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all',
                   i < visits.length
                     ? 'bg-[#2E7A5D] text-white shadow-green-glow'
-                    : 'bg-[#F5F5F7] border border-[#E5E5E5] text-[#A0A0A0]'
+                    : 'bg-[#F7F5F0] border border-[#E5E5E5] text-[#A0A0A0]'
                 )}
               >
                 {i + 1}
@@ -145,7 +145,7 @@ export default function ANCVisitLog() {
           <div className="px-4 mb-4">
             <button
               onClick={() => setShowForm(true)}
-              className="w-full h-14 rounded-full bg-[#0047FF] text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-blue-glow active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-full bg-[#1B6B5A] text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all"
             >
               <Plus size={18} /> {t('add_visit')}
             </button>
@@ -162,12 +162,12 @@ export default function ANCVisitLog() {
                 <div className="flex-1">
                   <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">{t('date')}</label>
                   <input type="date" value={form.visit_date} onChange={e => setForm(f => ({...f, visit_date: e.target.value}))}
-                    className="w-full h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#0047FF]" />
+                    className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
                 </div>
                 <div className="w-20">
                   <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">Visit #</label>
                   <input type="number" value={form.visit_number} onChange={e => setForm(f => ({...f, visit_number: parseInt(e.target.value)}))}
-                    className="w-full h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#0047FF]" />
+                    className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
                 </div>
               </div>
 
@@ -177,7 +177,7 @@ export default function ANCVisitLog() {
                   {lang === 'sw' ? 'HOSPITALI' : 'FACILITY'}
                 </label>
                 <input type="text" value={form.facility} onChange={e => setForm(f => ({...f, facility: e.target.value}))} placeholder="e.g. Nairobi West Hospital"
-                  className="w-full h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#0047FF]" />
+                  className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
               </div>
 
               {/* Blood Pressure */}
@@ -185,10 +185,10 @@ export default function ANCVisitLog() {
                 <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">{t('blood_pressure')}</label>
                 <div className="flex items-center gap-2">
                   <input type="number" value={form.blood_pressure_systolic} onChange={e => setForm(f => ({...f, blood_pressure_systolic: e.target.value}))} placeholder="120"
-                    className="flex-1 h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#0047FF]" />
+                    className="flex-1 h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
                   <span className="text-[#A0A0A0] font-bold">/</span>
                   <input type="number" value={form.blood_pressure_diastolic} onChange={e => setForm(f => ({...f, blood_pressure_diastolic: e.target.value}))} placeholder="80"
-                    className="flex-1 h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#0047FF]" />
+                    className="flex-1 h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
                   <span className="text-[12px] text-[#A0A0A0]">mmHg</span>
                 </div>
                 {bpStatus(form.blood_pressure_systolic, form.blood_pressure_diastolic) === 'critical' && (
@@ -206,7 +206,7 @@ export default function ANCVisitLog() {
                   <div key={key}>
                     <label className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#A0A0A0] block mb-2">{label}</label>
                     <input type="number" value={form[key]} onChange={e => setForm(f => ({...f, [key]: e.target.value}))} placeholder={placeholder}
-                      className="w-full h-12 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[13px] outline-none focus:border-[#0047FF]" />
+                      className="w-full h-12 px-3 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[13px] outline-none focus:border-[#1B6B5A]" />
                   </div>
                 ))}
               </div>
@@ -229,7 +229,7 @@ export default function ANCVisitLog() {
                         'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98]',
                         form[key]
                           ? 'bg-[#2E7A5D]/8 border-[#2E7A5D]/30 text-[#2E7A5D]'
-                          : 'bg-[#F5F5F7] border-[#E5E5E5] text-[#666666]'
+                          : 'bg-[#F7F5F0] border-[#E5E5E5] text-[#666666]'
                       )}
                     >
                       <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0', form[key] ? 'bg-[#2E7A5D] border-[#2E7A5D]' : 'border-[#D0D0D0]')}>
@@ -258,7 +258,7 @@ export default function ANCVisitLog() {
                           'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98]',
                           active
                             ? 'bg-[#E51010]/8 border-[#E51010]/30 text-[#E51010]'
-                            : 'bg-[#F5F5F7] border-[#E5E5E5] text-[#666666]'
+                            : 'bg-[#F7F5F0] border-[#E5E5E5] text-[#666666]'
                         )}
                       >
                         <AlertTriangle size={14} className={active ? 'text-[#E51010]' : 'text-[#A0A0A0]'} />
@@ -273,7 +273,7 @@ export default function ANCVisitLog() {
                 <button onClick={() => setShowForm(false)} className="flex-1 h-12 rounded-full border border-[#E5E5E5] text-[13px] font-semibold text-[#666666] active:scale-[0.97]">
                   {t('cancel')}
                 </button>
-                <button onClick={saveVisit} disabled={saving} className="flex-1 h-12 rounded-full bg-[#0047FF] text-white text-[13px] font-bold shadow-blue-glow active:scale-[0.97] disabled:opacity-40">
+                <button onClick={saveVisit} disabled={saving} className="flex-1 h-12 rounded-full bg-[#1B6B5A] text-white text-[13px] font-bold shadow-teal-glow active:scale-[0.97] disabled:opacity-40">
                   {saving ? '...' : t('save')}
                 </button>
               </div>
@@ -319,21 +319,21 @@ export default function ANCVisitLog() {
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {visit.blood_pressure_systolic && (
-                        <div className={cn('rounded-[12px] p-2 text-center', bp === 'critical' ? 'bg-[#E51010]/8' : bp === 'warning' ? 'bg-[#F9A825]/8' : 'bg-[#F5F5F7]')}>
-                          <p className="text-[11px] font-extrabold" style={{ color: bp === 'critical' ? '#E51010' : bp === 'warning' ? '#F9A825' : '#0047FF' }}>
+                        <div className={cn('rounded-[12px] p-2 text-center', bp === 'critical' ? 'bg-[#E51010]/8' : bp === 'warning' ? 'bg-[#F9A825]/8' : 'bg-[#F7F5F0]')}>
+                          <p className="text-[11px] font-extrabold" style={{ color: bp === 'critical' ? '#E51010' : bp === 'warning' ? '#F9A825' : '#1B6B5A' }}>
                             {visit.blood_pressure_systolic}/{visit.blood_pressure_diastolic}
                           </p>
                           <p className="text-[9px] text-[#A0A0A0] mt-0.5">mmHg</p>
                         </div>
                       )}
                       {visit.weight_kg && (
-                        <div className="bg-[#F5F5F7] rounded-[12px] p-2 text-center">
+                        <div className="bg-[#F7F5F0] rounded-[12px] p-2 text-center">
                           <p className="text-[11px] font-extrabold text-[#2E7A5D]">{visit.weight_kg}kg</p>
                           <p className="text-[9px] text-[#A0A0A0] mt-0.5">{t('weight')}</p>
                         </div>
                       )}
                       {visit.haemoglobin && (
-                        <div className="bg-[#F5F5F7] rounded-[12px] p-2 text-center">
+                        <div className="bg-[#F7F5F0] rounded-[12px] p-2 text-center">
                           <p className="text-[11px] font-extrabold text-[#0A0A0A]">{visit.haemoglobin} g/dl</p>
                           <p className="text-[9px] text-[#A0A0A0] mt-0.5">Hb</p>
                         </div>

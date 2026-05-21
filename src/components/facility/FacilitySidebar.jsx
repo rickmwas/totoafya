@@ -25,7 +25,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[#E5E5E5] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-[12px] bg-[#0047FF] flex items-center justify-center shadow-blue-glow-sm">
+          <div className="w-9 h-9 rounded-[12px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
             <Heart size={16} className="text-white" fill="white" />
           </div>
           <div>
@@ -49,7 +49,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
               onClick={() => setActiveTab(key)}
               className={cn(
                 'flex items-center gap-3 px-3 py-3 rounded-[12px] w-full text-left transition-all duration-150 min-h-[44px]',
-                active ? 'bg-[#0047FF] text-white shadow-blue-glow-sm' : 'text-[#666666] hover:bg-[#F5F5F7]'
+                active ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F5F5F7]'
               )}
             >
               <Icon size={17} strokeWidth={active ? 2.5 : 1.8} />

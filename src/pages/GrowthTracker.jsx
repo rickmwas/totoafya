@@ -80,9 +80,9 @@ export default function GrowthTracker() {
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 h-14 px-4 bg-white border border-[#E5E5E5] rounded-l-[16px] text-[15px] font-medium outline-none focus:border-[#0047FF]"
+          className="flex-1 h-14 px-4 bg-white border border-[#E5E5E5] rounded-l-[16px] text-[15px] font-medium outline-none focus:border-[#1B6B5A]"
         />
-        <div className="h-14 px-4 bg-[#F5F5F7] border border-l-0 border-[#E5E5E5] rounded-r-[16px] flex items-center">
+        <div className="h-14 px-4 bg-[#F7F5F0] border border-l-0 border-[#E5E5E5] rounded-r-[16px] flex items-center">
           <span className="text-[13px] text-[#666666] font-medium">{unit}</span>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function GrowthTracker() {
                 className={cn(
                   'flex-shrink-0 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 active:scale-[0.96]',
                   selectedChild?.id === child.id
-                    ? 'bg-[#0047FF] text-white shadow-blue-glow-sm'
+                    ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm'
                     : 'bg-white border border-[#E5E5E5] text-[#666666]'
                 )}
               >
@@ -134,7 +134,7 @@ export default function GrowthTracker() {
             {latest && (
               <div className="px-4 mb-4 grid grid-cols-3 gap-2">
                 {[
-                  { label: t('weight'), value: latest.weight_kg, unit: 'kg', icon: Scale, color: '#0047FF' },
+                  { label: t('weight'), value: latest.weight_kg, unit: 'kg', icon: Scale, color: '#1B6B5A' },
                   { label: t('height'), value: latest.height_cm, unit: 'cm', icon: Ruler, color: '#2E7A5D' },
                   { label: t('muac'), value: latest.muac_cm, unit: 'cm', icon: TrendingUp, color: '#F9A825' },
                 ].map(({ label, value, unit, icon: Icon, color }) => (
@@ -196,13 +196,13 @@ export default function GrowthTracker() {
                 </p>
                 <ResponsiveContainer width="100%" height={180}>
                   <LineChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F7" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F7F5F0" />
                     <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#A0A0A0' }} />
                     <YAxis tick={{ fontSize: 10, fill: '#A0A0A0' }} />
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: '1px solid #E5E5E5', fontSize: '12px' }}
                     />
-                    <Line type="monotone" dataKey={activeTab} stroke="#0047FF" strokeWidth={2.5} dot={{ fill: '#0047FF', r: 4 }} />
+                    <Line type="monotone" dataKey={activeTab} stroke="#1B6B5A" strokeWidth={2.5} dot={{ fill: '#1B6B5A', r: 4 }} />
                     {activeTab === 'weight' && (
                       <Line type="monotone" dataKey="who" stroke="#2E7A5D" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="WHO Median" />
                     )}
@@ -210,7 +210,7 @@ export default function GrowthTracker() {
                 </ResponsiveContainer>
                 {activeTab === 'weight' && (
                   <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-1"><div className="w-4 h-0.5 bg-[#0047FF] rounded" /><span className="text-[10px] text-[#666666]">{lang === 'sw' ? 'Mtoto' : 'Child'}</span></div>
+                    <div className="flex items-center gap-1"><div className="w-4 h-0.5 bg-[#1B6B5A] rounded" /><span className="text-[10px] text-[#666666]">{lang === 'sw' ? 'Mtoto' : 'Child'}</span></div>
                     <div className="flex items-center gap-1"><div className="w-4 border-t border-dashed border-[#2E7A5D]" /><span className="text-[10px] text-[#666666]">WHO</span></div>
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default function GrowthTracker() {
                       type="date"
                       value={form.recorded_date}
                       onChange={e => setForm(f => ({ ...f, recorded_date: e.target.value }))}
-                      className="h-14 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[16px] text-[15px] outline-none focus:border-[#0047FF]"
+                      className="h-14 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[16px] text-[15px] outline-none focus:border-[#1B6B5A]"
                     />
                   </div>
                   <InputField label={t('weight')} value={form.weight_kg} onChange={v => setForm(f => ({...f, weight_kg: v}))} unit="kg" placeholder="e.g. 7.5" />
@@ -251,7 +251,7 @@ export default function GrowthTracker() {
                     <button
                       onClick={saveRecord}
                       disabled={saving || (!form.weight_kg && !form.height_cm)}
-                      className="flex-1 h-12 rounded-full bg-[#0047FF] text-white text-[13px] font-bold shadow-blue-glow active:scale-[0.97] transition-all disabled:opacity-40"
+                      className="flex-1 h-12 rounded-full bg-[#1B6B5A] text-white text-[13px] font-bold shadow-teal-glow active:scale-[0.97] transition-all disabled:opacity-40"
                     >
                       {saving ? '...' : t('save')}
                     </button>
@@ -262,7 +262,7 @@ export default function GrowthTracker() {
               <div className="px-4 mb-4">
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full h-14 rounded-full bg-[#0047FF] text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-blue-glow active:scale-[0.97] transition-all"
+                  className="w-full h-14 rounded-full bg-[#1B6B5A] text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all"
                 >
                   <Plus size={18} /> {t('add_measurement')}
                 </button>
@@ -287,7 +287,7 @@ export default function GrowthTracker() {
                         </p>
                       </div>
                       <div className="flex gap-3">
-                        {record.weight_kg && <div className="text-right"><p className="text-[14px] font-bold text-[#0047FF]">{record.weight_kg}kg</p><p className="text-[9px] text-[#A0A0A0]">WEIGHT</p></div>}
+                        {record.weight_kg && <div className="text-right"><p className="text-[14px] font-bold text-[#1B6B5A]">{record.weight_kg}kg</p><p className="text-[9px] text-[#A0A0A0]">WEIGHT</p></div>}
                         {record.height_cm && <div className="text-right"><p className="text-[14px] font-bold text-[#2E7A5D]">{record.height_cm}cm</p><p className="text-[9px] text-[#A0A0A0]">HEIGHT</p></div>}
                       </div>
                     </div>

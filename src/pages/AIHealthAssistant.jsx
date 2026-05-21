@@ -186,14 +186,14 @@ Patient data: ${JSON.stringify(contextData, null, 2)}`,
           <button
             onClick={() => setActiveTab('analysis')}
             className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'analysis' ? 'bg-[#0047FF] text-white shadow-blue-glow-sm' : 'text-[#666666]')}
+              activeTab === 'analysis' ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
           >
             <Sparkles size={13} /> {lang === 'sw' ? 'Uchambuzi' : 'Analysis'}
           </button>
           <button
             onClick={() => setActiveTab('chat')}
             className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'chat' ? 'bg-[#0047FF] text-white shadow-blue-glow-sm' : 'text-[#666666]')}
+              activeTab === 'chat' ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
           >
             <MessageCircle size={13} /> {lang === 'sw' ? 'Mazungumzo' : 'Chat'}
           </button>

@@ -93,7 +93,7 @@ export default function FacilityDashboard() {
             {loading ? (
               <div className="flex items-center justify-center h-64 mt-16">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-[16px] bg-[#0047FF] flex items-center justify-center shadow-blue-glow">
+                  <div className="w-12 h-12 rounded-[16px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow">
                     <span className="text-white text-[18px] font-extrabold">T</span>
                   </div>
                   <div className="w-7 h-7 border-2 border-[#0047FF] border-t-transparent rounded-full animate-spin" />

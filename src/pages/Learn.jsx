@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils';
 const CATEGORY_CONFIG = {
   breastfeeding: { icon: '🤱', color: '#E91E8C', bg: '#FFF0F6', en: 'Breastfeeding', sw: 'Kunyonyesha' },
   nutrition:     { icon: '🥗', color: '#2E7A5D', bg: '#F0FBF6', en: 'Nutrition', sw: 'Lishe' },
-  immunization:  { icon: '💉', color: '#0047FF', bg: '#EFF4FF', en: 'Immunization', sw: 'Chanjo' },
+  immunization:  { icon: '💉', color: '#1B6B5A', bg: '#E6F4F1', en: 'Immunization', sw: 'Chanjo' },
   hygiene:       { icon: '🧼', color: '#0099CC', bg: '#EEF9FF', en: 'Hygiene', sw: 'Usafi' },
   development:   { icon: '🌱', color: '#7C3AED', bg: '#F5F0FF', en: 'Development', sw: 'Maendeleo' },
   pregnancy:     { icon: '🤰', color: '#F9A825', bg: '#FFF8E1', en: 'Pregnancy', sw: 'Ujauzito' },
   danger_signs:  { icon: '⚠️', color: '#E51010', bg: '#FFF0F0', en: 'Danger Signs', sw: 'Dalili za Hatari' },
-  family_planning: { icon: '👨👩👧', color: '#666666', bg: '#F5F5F7', en: 'Family Planning', sw: 'Uzazi wa Mpango' },
+  family_planning: { icon: '👨👩👧', color: '#666666', bg: '#F7F5F0', en: 'Family Planning', sw: 'Uzazi wa Mpango' },
 };
 
 const SAMPLE_CONTENT = [

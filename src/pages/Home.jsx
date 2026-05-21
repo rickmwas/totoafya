@@ -111,10 +111,10 @@ export default function Home() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 rounded-[16px] bg-[#0047FF] flex items-center justify-center shadow-blue-glow-sm">
+          <div className="w-12 h-12 rounded-[16px] bg-[#1B6B5A] flex items-center justify-center shadow-teal-glow-sm">
             <span className="text-white text-[18px] font-extrabold">T</span>
           </div>
-          <div className="w-7 h-7 border-2 border-[#0047FF] border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-[#1B6B5A] border-t-transparent rounded-full animate-spin" />
         </div>
       </AppShell>
     );
@@ -131,7 +131,7 @@ export default function Home() {
             {lang === 'sw' ? 'Hakikisha una mtandao kisha jaribu tena' : 'Check your connection and try again'}
           </p>
           <button onClick={loadData}
-            className="h-12 px-8 rounded-full bg-[#0047FF] text-white text-[14px] font-bold shadow-blue-glow-sm active:scale-[0.97] transition-transform">
+            className="h-12 px-8 rounded-full bg-[#1B6B5A] text-white text-[14px] font-bold shadow-teal-glow-sm active:scale-[0.97] transition-transform">
             {lang === 'sw' ? 'Jaribu Tena' : 'Retry'}
           </button>
         </div>
@@ -149,13 +149,13 @@ export default function Home() {
             <p className="text-[11px] tracking-[0.12em] font-semibold text-[#A0A0A0] mb-1.5">
               {getGreeting(lang)}
             </p>
-            <h1 className="text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#0A0A0A]">
+            <h1 className="text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
               {mother?.full_name?.split(' ')[0] || caregiverLabel}
             </h1>
           </div>
           <div className="flex items-center gap-2 mt-1">
             <Link to="/ai-health">
-              <div className="w-11 h-11 bg-[#0047FF] rounded-full flex items-center justify-center active:scale-[0.92] transition-transform shadow-blue-glow-sm">
+              <div className="w-11 h-11 bg-[#1B6B5A] rounded-full flex items-center justify-center active:scale-[0.92] transition-transform shadow-teal-glow-sm">
                 <Sparkles size={17} className="text-white" />
               </div>
             </Link>
@@ -183,10 +183,10 @@ export default function Home() {
             <div className="mx-4 mb-5 grid grid-cols-3 gap-2">
               <Link to="/anc" className="active:scale-[0.97] transition-transform">
                 <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                  <div className="w-9 h-9 rounded-[12px] bg-[#EFF4FF] flex items-center justify-center mx-auto mb-2">
-                    <HeartHandshake size={17} className="text-[#0047FF]" />
+                  <div className="w-9 h-9 rounded-[12px] bg-[#E6F4F1] flex items-center justify-center mx-auto mb-2">
+                    <HeartHandshake size={17} className="text-[#1B6B5A]" />
                   </div>
-                  <p className="text-[18px] font-extrabold text-[#0047FF] leading-none">{mother.gravida || '—'}</p>
+                  <p className="text-[18px] font-extrabold text-[#1B6B5A] leading-none">{mother.gravida || '—'}</p>
                   <p className="text-[10px] text-[#A0A0A0] mt-1">{lang === 'sw' ? 'Ziara' : 'ANC Visits'}</p>
                 </div>
               </Link>
@@ -223,8 +223,8 @@ export default function Home() {
           <div className="mx-4 mb-5 grid grid-cols-3 gap-2">
             <Link to="/vaccines" className="active:scale-[0.97] transition-transform">
               <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                <div className="w-9 h-9 rounded-[12px] bg-[#EFF4FF] flex items-center justify-center mx-auto mb-2">
-                  <Shield size={17} className="text-[#0047FF]" />
+                <div className="w-9 h-9 rounded-[12px] bg-[#E6F4F1] flex items-center justify-center mx-auto mb-2">
+                  <Shield size={17} className="text-[#1B6B5A]" />
                 </div>
                 <p className="text-[13px] font-bold text-[#0A0A0A]">{lang === 'sw' ? 'Chanjo' : 'Vaccines'}</p>
                 <p className="text-[10px] text-[#A0A0A0] mt-0.5">{lang === 'sw' ? 'Hali' : 'Status'}</p>
@@ -254,13 +254,13 @@ export default function Home() {
         {/* ── Children Section ── */}
         <div className="px-4 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[18px] font-bold tracking-[-0.01em] text-[#0A0A0A]">
+            <h2 className="text-[18px] font-bold tracking-[-0.01em] text-[#1B6B5A]">
               {isPregnant && !hasChildren
                 ? (lang === 'sw' ? 'Watoto Wako' : 'Your Children')
                 : t('my_children')}
             </h2>
             <Link to="/add-child">
-              <button className="flex items-center gap-1.5 bg-[#0047FF] text-white pl-3 pr-4 py-2 rounded-full text-[12px] font-semibold active:scale-[0.95] transition-transform shadow-blue-glow-sm">
+              <button className="flex items-center gap-1.5 bg-[#1B6B5A] text-white pl-3 pr-4 py-2 rounded-full text-[12px] font-semibold active:scale-[0.95] transition-transform shadow-teal-glow-sm">
                 <Plus size={14} /> {t('add_child')}
               </button>
             </Link>
@@ -269,8 +269,8 @@ export default function Home() {
           {children.length === 0 ? (
             <Link to="/add-child" className="block active:scale-[0.98] transition-transform">
               <div className="bg-white rounded-[24px] border border-dashed border-[#E5E5E5] p-8 flex flex-col items-center gap-3">
-                <div className="w-14 h-14 rounded-[18px] bg-[#0047FF]/8 flex items-center justify-center">
-                  <Plus size={24} className="text-[#0047FF]" />
+                <div className="w-14 h-14 rounded-[18px] bg-[#1B6B5A]/10 flex items-center justify-center">
+                  <Plus size={24} className="text-[#1B6B5A]" />
                 </div>
                 <div className="text-center">
                   <p className="text-[15px] font-bold text-[#0A0A0A] mb-1">

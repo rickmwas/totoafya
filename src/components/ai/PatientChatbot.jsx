@@ -82,7 +82,7 @@ AI:`;
     <div className="flex flex-col h-[520px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 bg-gradient-to-r from-[#0047FF]/5 to-transparent flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-[#0047FF] flex items-center justify-center shadow-blue-glow-sm">
+        <div className="w-8 h-8 rounded-full bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
           <Bot size={15} className="text-white" />
         </div>
         <div>
@@ -100,7 +100,7 @@ AI:`;
         {messages.map((msg, i) => (
           <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
             {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-blue-glow-sm">
+              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-glow-sm">
                 <Bot size={11} className="text-white" />
               </div>
             )}
@@ -128,7 +128,7 @@ AI:`;
 
         {loading && (
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-blue-glow-sm">
+            <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
               <Bot size={11} className="text-white" />
             </div>
             <div className="bg-[#F5F5F7] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
@@ -169,7 +169,7 @@ AI:`;
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-blue-glow-sm active:scale-[0.92] transition-all disabled:opacity-30 self-end"
+          className="w-10 h-10 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm active:scale-[0.92] transition-all disabled:opacity-30 self-end"
         >
           <Send size={15} className="text-white" />
         </button>

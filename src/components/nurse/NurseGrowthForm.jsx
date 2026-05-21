@@ -131,7 +131,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
         disabled={saving || !form.recorded_date}
         className={cn(
           'h-14 rounded-full text-[15px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.97]',
-          'bg-[#0047FF] text-white shadow-blue-glow disabled:opacity-50'
+          'bg-[#0047FF] text-white shadow-teal-glow disabled:opacity-50'
         )}
       >
         {saved ? <><Check size={18} /> Saved!</> : saving ? 'Saving...' : 'Save Growth Record'}
