@@ -1,0 +1,96 @@
+{
+  "name": "Milestone",
+  "type": "object",
+  "properties": {
+    "child_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "motor",
+        "language",
+        "social",
+        "cognitive",
+        "feeding"
+      ]
+    },
+    "milestone_name": {
+      "type": "string"
+    },
+    "milestone_name_sw": {
+      "type": "string",
+      "description": "Swahili translation"
+    },
+    "expected_age_weeks": {
+      "type": "number"
+    },
+    "expected_age_months": {
+      "type": "number"
+    },
+    "achieved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "due",
+        "achieved",
+        "delayed"
+      ],
+      "default": "upcoming"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "child_id",
+    "milestone_name"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

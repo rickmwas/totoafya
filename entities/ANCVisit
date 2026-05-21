@@ -1,0 +1,134 @@
+{
+  "name": "ANCVisit",
+  "type": "object",
+  "properties": {
+    "mother_id": {
+      "type": "string"
+    },
+    "visit_number": {
+      "type": "number"
+    },
+    "visit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "gestational_age_weeks": {
+      "type": "number"
+    },
+    "facility": {
+      "type": "string"
+    },
+    "clinician_name": {
+      "type": "string"
+    },
+    "blood_pressure_systolic": {
+      "type": "number"
+    },
+    "blood_pressure_diastolic": {
+      "type": "number"
+    },
+    "weight_kg": {
+      "type": "number"
+    },
+    "fundal_height_cm": {
+      "type": "number"
+    },
+    "fetal_heart_rate": {
+      "type": "number"
+    },
+    "haemoglobin": {
+      "type": "number"
+    },
+    "urine_protein": {
+      "type": "string",
+      "enum": [
+        "negative",
+        "trace",
+        "1+",
+        "2+",
+        "3+"
+      ]
+    },
+    "hiv_status": {
+      "type": "string",
+      "enum": [
+        "negative",
+        "positive",
+        "not_tested",
+        "declined"
+      ]
+    },
+    "ttv_given": {
+      "type": "boolean",
+      "default": false
+    },
+    "ifas_given": {
+      "type": "boolean",
+      "default": false
+    },
+    "llin_given": {
+      "type": "boolean",
+      "default": false
+    },
+    "next_visit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "danger_signs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "mother_id",
+    "visit_date"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

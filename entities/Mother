@@ -1,0 +1,166 @@
+{
+  "name": "Mother",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Linked auth user id"
+    },
+    "national_id": {
+      "type": "string",
+      "description": "National ID number"
+    },
+    "anc_number": {
+      "type": "string",
+      "description": "ANC booklet number"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "county": {
+      "type": "string"
+    },
+    "sub_county": {
+      "type": "string"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "blood_group": {
+      "type": "string",
+      "enum": [
+        "A+",
+        "A-",
+        "B+",
+        "B-",
+        "AB+",
+        "AB-",
+        "O+",
+        "O-",
+        "Unknown"
+      ]
+    },
+    "caregiver_type": {
+      "type": "string",
+      "enum": [
+        "mother",
+        "father",
+        "guardian"
+      ],
+      "default": "mother",
+      "description": "Role of the registered caregiver"
+    },
+    "pregnancy_status": {
+      "type": "string",
+      "enum": [
+        "pregnant",
+        "postpartum",
+        "not_pregnant"
+      ],
+      "default": "pregnant"
+    },
+    "lmp": {
+      "type": "string",
+      "format": "date",
+      "description": "Last menstrual period"
+    },
+    "edd": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected delivery date"
+    },
+    "gravida": {
+      "type": "number",
+      "description": "Number of pregnancies"
+    },
+    "parity": {
+      "type": "number",
+      "description": "Number of deliveries"
+    },
+    "risk_score": {
+      "type": "number",
+      "description": "AI-calculated risk 0-100"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low"
+    },
+    "chv_alerted": {
+      "type": "boolean",
+      "default": false
+    },
+    "facility_name": {
+      "type": "string"
+    },
+    "facility_phone": {
+      "type": "string",
+      "description": "General inquiry phone number for the health facility"
+    },
+    "facility_emergency_phone": {
+      "type": "string",
+      "description": "Emergency / maternity line for the health facility"
+    },
+    "language_preference": {
+      "type": "string",
+      "enum": [
+        "en",
+        "sw"
+      ],
+      "default": "en"
+    },
+    "profile_complete": {
+      "type": "boolean",
+      "default": false
+    },
+    "avatar_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

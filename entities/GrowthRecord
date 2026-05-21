@@ -1,0 +1,108 @@
+{
+  "name": "GrowthRecord",
+  "type": "object",
+  "properties": {
+    "child_id": {
+      "type": "string"
+    },
+    "recorded_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "age_weeks": {
+      "type": "number"
+    },
+    "age_months": {
+      "type": "number"
+    },
+    "weight_kg": {
+      "type": "number"
+    },
+    "height_cm": {
+      "type": "number"
+    },
+    "muac_cm": {
+      "type": "number",
+      "description": "Mid-upper arm circumference"
+    },
+    "head_circumference_cm": {
+      "type": "number"
+    },
+    "weight_for_age_zscore": {
+      "type": "number"
+    },
+    "height_for_age_zscore": {
+      "type": "number"
+    },
+    "weight_for_height_zscore": {
+      "type": "number"
+    },
+    "nutrition_status": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "mam",
+        "sam",
+        "overweight"
+      ],
+      "default": "normal",
+      "description": "Nutrition status: normal, moderate acute malnutrition, severe acute malnutrition"
+    },
+    "recorded_by": {
+      "type": "string"
+    },
+    "facility": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "child_id",
+    "recorded_date"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

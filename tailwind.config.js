@@ -1,0 +1,98 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  safelist: [
+    "bg-[#2E7A5D]", "bg-[#E51010]", "bg-[#F9A825]", "bg-[#0047FF]", "bg-[#7C3AED]",
+    "text-[#2E7A5D]", "text-[#E51010]", "text-[#F9A825]", "text-[#0047FF]", "text-[#7C3AED]",
+    "border-[#2E7A5D]", "border-[#E51010]", "border-[#F9A825]", "border-[#0047FF]",
+    "bg-[#2E7A5D]/10", "bg-[#E51010]/10", "bg-[#F9A825]/10", "bg-[#0047FF]/10", "bg-[#7C3AED]/10",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'sans-serif'],
+      },
+      colors: {
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
+        popover: { DEFAULT: 'hsl(var(--popover))', foreground: 'hsl(var(--popover-foreground))' },
+        primary: { DEFAULT: 'hsl(var(--primary))', foreground: 'hsl(var(--primary-foreground))' },
+        secondary: { DEFAULT: 'hsl(var(--secondary))', foreground: 'hsl(var(--secondary-foreground))' },
+        muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },
+        accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
+        destructive: { DEFAULT: 'hsl(var(--destructive))', foreground: 'hsl(var(--destructive-foreground))' },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        // TotoAfya Design Tokens
+        'toto-blue': '#0047FF',
+        'toto-green': '#2E7A5D',
+        'toto-red': '#E51010',
+        'toto-amber': '#F9A825',
+        'toto-purple': '#7C3AED',
+        'toto-black': '#0A0A0A',
+        'toto-gray': '#666666',
+        'toto-light': '#A0A0A0',
+        'toto-surface': '#F5F5F7',
+        'toto-white': '#FFFFFF',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 4px)',
+        sm: 'calc(var(--radius) - 8px)',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
+        '4xl': '2.5rem',
+      },
+      fontSize: {
+        'display': ['clamp(40px,10vw,64px)', { lineHeight: '1', letterSpacing: '-0.03em', fontWeight: '800' }],
+        'h1': ['clamp(28px,7vw,40px)', { lineHeight: '1.05', letterSpacing: '-0.025em', fontWeight: '700' }],
+        'h2': ['clamp(22px,5vw,28px)', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'h3': ['18px', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '600' }],
+        'label': ['10px', { lineHeight: '1', letterSpacing: '0.2em', fontWeight: '700', textTransform: 'uppercase' }],
+        'meta': ['11px', { lineHeight: '1.4', letterSpacing: '0.05em' }],
+      },
+      boxShadow: {
+        'blue-glow': '0 8px 30px rgba(0,71,255,0.25)',
+        'blue-glow-sm': '0 4px 16px rgba(0,71,255,0.18)',
+        'green-glow': '0 8px 30px rgba(46,122,93,0.2)',
+        'red-glow': '0 8px 30px rgba(229,16,16,0.2)',
+        'card': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.04)',
+        'card-hover': '0 4px 16px rgba(0,0,0,0.08)',
+        'float': '0 20px 60px rgba(0,0,0,0.08)',
+      },
+      keyframes: {
+        'accordion-down': { from: { height: '0' }, to: { height: 'var(--radix-accordion-content-height)' } },
+        'accordion-up': { from: { height: 'var(--radix-accordion-content-height)' }, to: { height: '0' } },
+        'pulse-dot': {
+          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+          '50%': { opacity: 0.5, transform: 'scale(0.85)' },
+        },
+        'slide-up': {
+          from: { opacity: '0', transform: 'translateY(16px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        'bounce-in': {
+          '0%': { transform: 'scale(0.8)', opacity: '0' },
+          '70%': { transform: 'scale(1.05)' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        'pulse-dot': 'pulse-dot 2s ease-in-out infinite',
+        'slide-up': 'slide-up 0.4s ease-out',
+        'fade-in': 'fade-in 0.3s ease-out',
+        'bounce-in': 'bounce-in 0.5s cubic-bezier(0.34,1.56,0.64,1)',
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};

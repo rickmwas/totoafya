@@ -1,0 +1,117 @@
+{
+  "name": "AIAlert",
+  "type": "object",
+  "properties": {
+    "mother_id": {
+      "type": "string"
+    },
+    "child_id": {
+      "type": "string"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "growth_anomaly",
+        "missed_vaccine",
+        "missed_anc",
+        "risk_flag",
+        "chv_visit",
+        "danger_sign",
+        "reminder",
+        "achievement"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ],
+      "default": "info"
+    },
+    "title": {
+      "type": "string"
+    },
+    "title_sw": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "message_sw": {
+      "type": "string"
+    },
+    "action_label": {
+      "type": "string"
+    },
+    "action_url": {
+      "type": "string"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_resolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ai_confidence": {
+      "type": "number",
+      "description": "AI confidence score 0-1"
+    }
+  },
+  "required": [
+    "alert_type",
+    "severity",
+    "title",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

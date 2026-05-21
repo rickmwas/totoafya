@@ -1,0 +1,19 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": ["admin", "user", "nurse"],
+      "default": "user"
+    },
+    "facility_name": {
+      "type": "string",
+      "description": "For nurses — which facility they belong to"
+    },
+    "staff_id": {
+      "type": "string",
+      "description": "Nurse/CHW staff ID number"
+    }
+  }
+}

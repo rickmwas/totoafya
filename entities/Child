@@ -1,0 +1,114 @@
+{
+  "name": "Child",
+  "type": "object",
+  "properties": {
+    "mother_id": {
+      "type": "string"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "date_of_birth": {
+      "type": "string",
+      "format": "date"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "male",
+        "female"
+      ]
+    },
+    "birth_weight_kg": {
+      "type": "number"
+    },
+    "birth_height_cm": {
+      "type": "number"
+    },
+    "birth_facility": {
+      "type": "string"
+    },
+    "birth_type": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "caesarean",
+        "assisted"
+      ],
+      "default": "normal"
+    },
+    "gestational_age_weeks": {
+      "type": "number"
+    },
+    "health_status": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "monitor",
+        "at_risk",
+        "critical"
+      ],
+      "default": "healthy"
+    },
+    "last_visit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "next_visit_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name",
+    "date_of_birth",
+    "gender"
+  ],
+  "rls": {
+    "create": {
+      "created_by": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

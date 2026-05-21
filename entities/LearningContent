@@ -1,0 +1,89 @@
+{
+  "name": "LearningContent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "title_sw": {
+      "type": "string",
+      "description": "Swahili title"
+    },
+    "description": {
+      "type": "string"
+    },
+    "description_sw": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "breastfeeding",
+        "nutrition",
+        "immunization",
+        "hygiene",
+        "development",
+        "pregnancy",
+        "danger_signs",
+        "family_planning"
+      ]
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "video",
+        "audio",
+        "article",
+        "infographic"
+      ],
+      "default": "video"
+    },
+    "video_url": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "duration_seconds": {
+      "type": "number"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "sw",
+        "both"
+      ],
+      "default": "both"
+    },
+    "target_audience": {
+      "type": "string",
+      "enum": [
+        "pregnant",
+        "newborn",
+        "infant",
+        "toddler",
+        "all"
+      ],
+      "default": "all"
+    },
+    "age_min_weeks": {
+      "type": "number"
+    },
+    "age_max_weeks": {
+      "type": "number"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "view_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "category"
+  ]
+}

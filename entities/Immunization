@@ -1,0 +1,101 @@
+{
+  "name": "Immunization",
+  "type": "object",
+  "properties": {
+    "child_id": {
+      "type": "string"
+    },
+    "vaccine_name": {
+      "type": "string"
+    },
+    "vaccine_code": {
+      "type": "string"
+    },
+    "scheduled_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "given_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "due",
+        "overdue",
+        "given",
+        "missed"
+      ],
+      "default": "scheduled"
+    },
+    "dose_number": {
+      "type": "number"
+    },
+    "facility": {
+      "type": "string"
+    },
+    "administered_by": {
+      "type": "string"
+    },
+    "batch_number": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "age_weeks": {
+      "type": "number",
+      "description": "Age in weeks when vaccine is due"
+    }
+  },
+  "required": [
+    "child_id",
+    "vaccine_name",
+    "scheduled_date"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
