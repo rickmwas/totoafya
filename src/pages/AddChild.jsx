@@ -82,7 +82,7 @@ export default function AddChild() {
           <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#A0A0A0] mb-1">
             {lang === 'sw' ? 'MTOTO MPYA' : 'NEW CHILD'}
           </p>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#0A0A0A]">
+          <h1 className="font-bold leading-tight text-[#1a1a1a] text-[34px]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             {lang === 'sw' ? 'Ongeza Mtoto' : 'Add Child'}
           </h1>
         </div>

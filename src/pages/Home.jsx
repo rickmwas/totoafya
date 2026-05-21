@@ -144,12 +144,14 @@ export default function Home() {
       <div className="animate-fade-in">
 
         {/* ── Header ── */}
-        <div className="flex items-start justify-between px-4 pt-14 pb-5">
+        <div className="relative flex items-start justify-between px-4 pt-14 pb-5 overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-36 h-36 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-2xl pointer-events-none" />
+          <div className="absolute top-8 right-16 w-20 h-20 rounded-full bg-[#C8813A] opacity-[0.05] blur-xl pointer-events-none" />
           <div>
             <p className="text-[11px] tracking-[0.12em] font-semibold text-[#A0A0A0] mb-1.5">
               {getGreeting(lang)}
             </p>
-            <h1 className="text-[34px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
+            <h1 className="text-[34px] font-bold leading-none text-[#1B6B5A]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
               {mother?.full_name?.split(' ')[0] || caregiverLabel}
             </h1>
           </div>

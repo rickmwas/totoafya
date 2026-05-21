@@ -169,14 +169,16 @@ Patient data: ${JSON.stringify(contextData, null, 2)}`,
     <AppShell>
       <div className="animate-fade-in">
         {/* Header */}
-        <div className="px-4 pt-14 pb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Sparkles size={14} className="text-[#0047FF]" />
-            <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#A0A0A0]">
+        <div className="relative px-4 pt-14 pb-6 overflow-hidden">
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-[#C8813A] opacity-[0.06] blur-2xl pointer-events-none" />
+          <div className="absolute top-6 right-14 w-20 h-20 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-xl pointer-events-none" />
+          <div className="flex items-center gap-2 mb-1.5">
+            <Sparkles size={13} className="text-[#C8813A]" />
+            <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#C8813A]/70">
               {lang === 'sw' ? 'AKILI BANDIA' : 'AI POWERED'}
             </p>
           </div>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#0A0A0A]">
+          <h1 className="font-bold leading-tight text-[#1a1a1a] text-[34px]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             {lang === 'sw' ? 'Afya ya AI' : 'AI Health'}
           </h1>
         </div>
@@ -186,14 +188,14 @@ Patient data: ${JSON.stringify(contextData, null, 2)}`,
           <button
             onClick={() => setActiveTab('analysis')}
             className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'analysis' ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
+              activeTab === 'analysis' ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
           >
             <Sparkles size={13} /> {lang === 'sw' ? 'Uchambuzi' : 'Analysis'}
           </button>
           <button
             onClick={() => setActiveTab('chat')}
             className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'chat' ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
+              activeTab === 'chat' ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
           >
             <MessageCircle size={13} /> {lang === 'sw' ? 'Mazungumzo' : 'Chat'}
           </button>

@@ -8,7 +8,6 @@ export default function ModeHeader({ mother, childCount, lang }) {
   const caregiverType = mother.caregiver_type || 'mother';
   const isCaregiverOnly = caregiverType === 'father' || caregiverType === 'guardian';
 
-  // Father / Guardian badge
   if (isCaregiverOnly) {
     const isFather = caregiverType === 'father';
     return (
@@ -33,13 +32,12 @@ export default function ModeHeader({ mother, childCount, lang }) {
     );
   }
 
-  // Pregnant + children
   if (isPregnant && childCount > 0) {
     return (
       <div className="mx-4 mb-4 flex gap-2">
-        <div className="flex items-center gap-1.5 bg-[#0047FF]/8 border border-[#0047FF]/15 rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-[#1B6B5A]/8 border border-[#1B6B5A]/15 rounded-full px-3 py-1.5">
           <span className="text-[13px]">🤰</span>
-          <span className="text-[10px] font-bold text-[#0047FF] tracking-wide uppercase">
+          <span className="text-[10px] font-bold text-[#1B6B5A] tracking-wide uppercase">
             {lang === 'sw' ? 'Mjamzito' : 'Pregnant'}
           </span>
         </div>
@@ -56,9 +54,9 @@ export default function ModeHeader({ mother, childCount, lang }) {
   if (isPregnant) {
     return (
       <div className="mx-4 mb-4">
-        <div className="flex items-center gap-2 bg-[#0047FF]/6 border border-[#0047FF]/15 rounded-full px-4 py-2 w-fit">
+        <div className="flex items-center gap-2 bg-[#1B6B5A]/6 border border-[#1B6B5A]/15 rounded-full px-4 py-2 w-fit">
           <span className="text-[15px]">🤰</span>
-          <span className="text-[11px] font-bold text-[#0047FF] tracking-wide uppercase">
+          <span className="text-[11px] font-bold text-[#1B6B5A] tracking-wide uppercase">
             {lang === 'sw' ? 'Hali ya Ujauzito' : 'Maternal Mode'}
           </span>
         </div>

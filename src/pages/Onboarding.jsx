@@ -149,16 +149,16 @@ export default function Onboarding() {
 
   // ── STEP 0: Welcome ──────────────────────────────────────────────────────────
   if (step === 0) return (
-    <div className="min-h-screen bg-white flex flex-col max-w-[430px] mx-auto">
-      {/* Hero image area */}
-      <div className="relative h-[45vh] overflow-hidden flex-shrink-0">
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col max-w-[430px] mx-auto overflow-hidden">
+      {/* Hero image area — rounded bottom */}
+      <div className="relative h-[46vh] overflow-hidden flex-shrink-0 rounded-b-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.15)]">
         <img
           src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=800&q=85"
           alt="Mother and baby"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(255,255,255,0.0) 40%, rgba(255,255,255,1) 100%)' }} />
-        {/* Brand mark over image */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, transparent 35%, rgba(27,107,90,0.45) 100%)' }} />
+        {/* Brand pill */}
         <div className="absolute top-12 left-6">
           <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md rounded-full px-3 py-1.5 shadow-card">
             <div className="w-6 h-6 rounded-[7px] bg-[#1B6B5A] flex items-center justify-center">
@@ -167,22 +167,41 @@ export default function Onboarding() {
             <span className="text-[13px] font-extrabold text-[#0A0A0A]">TotoAfya</span>
           </div>
         </div>
+        {/* Bottom label over image */}
+        <div className="absolute bottom-5 left-6">
+          <span className="text-white/80 text-[11px] font-semibold tracking-[0.15em] uppercase">Kenya MCH Digital</span>
+        </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1 px-6 -mt-4">
-        <div className="mb-8">
-          <p className="text-[11px] tracking-[0.2em] font-bold uppercase text-[#1B6B5A] mb-2">KENYA MCH DIGITAL</p>
-          <h1 className="text-[38px] font-extrabold leading-[1.05] tracking-[-0.03em] text-[#0A0A0A] mb-3">
-            {lang === 'sw' ? 'Karibu kwa\nAfya Bora' : 'Better Health\nStarts Here'}
-          </h1>
-          <p className="text-[15px] text-[#666666] leading-relaxed">
-            {t('welcome_sub')}
-          </p>
+      <div className="flex flex-col flex-1 px-6 pt-7">
+        <h1 className="text-[40px] font-bold leading-tight text-[#1a1a1a] mb-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          {lang === 'sw' ? 'Afya Bora\nInaanza Hapa' : 'Better Health\nStarts Here'}
+        </h1>
+        <p className="text-[14px] text-[#7a7a6e] leading-relaxed mb-7">
+          {t('welcome_sub')}
+        </p>
+
+        {/* Feature highlights row */}
+        <div className="flex gap-3 mb-7">
+          {[
+            { icon: '🤰', color: '#E91E8C', bg: '#FFF0F6', en: 'Prenatal\nCare', sw: 'Huduma ya\nUjauzito' },
+            { icon: '💉', color: '#1B6B5A', bg: '#E6F4F1', en: 'Vaccine\nTracker', sw: 'Ratiba ya\nChanjo' },
+            { icon: '📈', color: '#C8813A', bg: '#FDF3E7', en: 'Growth\nMonitor', sw: 'Ukuaji wa\nMtoto' },
+          ].map(({ icon, color, bg, en, sw: swLabel }) => (
+            <div key={en} className="flex-1 bg-white rounded-[20px] p-3.5 shadow-card border border-[#f0ede5] flex flex-col items-center gap-2 text-center">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-[18px]" style={{ backgroundColor: bg }}>
+                {icon}
+              </div>
+              <span className="text-[10px] font-bold leading-tight" style={{ color }}>
+                {lang === 'sw' ? swLabel : en}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Language picker */}
-        <div className="flex gap-2 mb-8">
+        <div className="flex gap-2 mb-6">
           {[{ code: 'en', flag: '🇬🇧', label: 'English' }, { code: 'sw', flag: '🇰🇪', label: 'Kiswahili' }].map(({ code, flag, label }) => (
             <button
               key={code}
@@ -191,7 +210,7 @@ export default function Onboarding() {
                 'flex-1 flex items-center justify-center gap-2 h-12 rounded-[14px] text-[14px] font-semibold transition-all active:scale-[0.97] border',
                 lang === code
                   ? 'bg-[#1B6B5A] border-[#1B6B5A] text-white shadow-[0_4px_16px_rgba(27,107,90,0.25)]'
-                  : 'bg-[#F7F5F0] border-[#F7F5F0] text-[#666666]'
+                  : 'bg-white border-[#e8e4da] text-[#666666]'
               )}
             >
               <span>{flag}</span> {label}

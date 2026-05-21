@@ -83,11 +83,13 @@ export default function VaccinationSchedule() {
     <AppShell>
       <div className="animate-fade-in">
         {/* Header */}
-        <div className="px-4 pt-14 pb-5">
-          <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#A0A0A0] mb-1">
+        <div className="relative px-4 pt-14 pb-6 overflow-hidden">
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-2xl pointer-events-none" />
+          <div className="absolute top-6 right-12 w-20 h-20 rounded-full bg-[#2E7A5D] opacity-[0.05] blur-xl pointer-events-none" />
+          <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#1B6B5A]/60 mb-1.5">
             {lang === 'sw' ? 'RATIBA' : 'SCHEDULE'}
           </p>
-          <h1 className="text-[32px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
+          <h1 className="font-bold leading-tight text-[#1B6B5A] text-[34px]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
             {t('vaccination_schedule')}
           </h1>
         </div>
