@@ -1,6 +1,6 @@
 import db from '@/api/totoafyaClient';
-
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 
 import FacilitySidebar from '@/components/facility/FacilitySidebar';
 import FacilityOverview from '@/components/facility/FacilityOverview';
@@ -11,24 +11,47 @@ import FacilityAnalytics from '@/components/facility/FacilityAnalytics';
 import FacilityAlerts from '@/components/facility/FacilityAlerts';
 
 export default function FacilityDashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [data, setData] = useState({ mothers: [], children: [], immunizations: [], alerts: [], growthRecords: [] });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => { loadAll(); }, []);
+  useEffect(() => { loadAll(); }, [user]);
 
   const loadAll = async () => {
+    if (!user?.facility_id) return;
     setLoading(true);
-    const [mothers, children, immunizations, alerts, growthRecords] = await Promise.all([
-      db.entities.Mother.list('-created_date', 100),
-      db.entities.Child.list('-created_date', 100),
-      db.entities.Immunization.list('-created_date', 200),
-      db.entities.AIAlert.filter({ is_resolved: false }, '-created_date', 50),
-      db.entities.GrowthRecord.list('-recorded_date', 200),
-    ]);
-    setData({ mothers, children, immunizations, alerts, growthRecords });
-    setLoading(false);
+    try {
+      const facilityId = user.facility_id;
+
+      // 1. Fetch mothers for this facility
+      const mothers = await db.entities.Mother.filter({ facility_id: facilityId }, '-created_date', 100);
+      const motherIds = mothers.map(m => m.id);
+
+      if (motherIds.length === 0) {
+        setData({ mothers: [], children: [], immunizations: [], alerts: [], growthRecords: [] });
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch children belonging to these mothers
+      const children = await db.entities.Child.filter({ mother_id: motherIds }, '-created_date', 100);
+      const childIds = children.map(c => c.id);
+
+      // 3. Fetch immunizations, growth records and alerts matching these kids/mothers
+      const [immunizations, growthRecords, alerts] = await Promise.all([
+        childIds.length > 0 ? db.entities.Immunization.filter({ child_id: childIds }, '-created_date', 200) : Promise.resolve([]),
+        childIds.length > 0 ? db.entities.GrowthRecord.filter({ child_id: childIds }, '-recorded_date', 200) : Promise.resolve([]),
+        db.entities.AIAlert.filter({ mother_id: motherIds, is_resolved: false }, '-created_date', 50),
+      ]);
+
+      setData({ mothers, children, immunizations, alerts, growthRecords });
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTabChange = (tab) => {

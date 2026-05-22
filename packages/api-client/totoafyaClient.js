@@ -34,7 +34,11 @@ function sortRecords(records, sortKey) {
 
 function matchesFilter(record, conditions) {
   for (const [key, val] of Object.entries(conditions)) {
-    if (record[key] !== val) return false;
+    if (Array.isArray(val)) {
+      if (!val.includes(record[key])) return false;
+    } else {
+      if (record[key] !== val) return false;
+    }
   }
   return true;
 }
@@ -88,23 +92,66 @@ function makeEntityStore(name) {
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
   'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
-  'ChildImmunization',
+  'ChildImmunization', 'Facility', 'Nurse',
 ];
 
 const entities = Object.fromEntries(
   ENTITY_NAMES.map(name => [name, makeEntityStore(name)])
 );
 
-// Default local user
-const LOCAL_USER = {
-  id: 'local-user-1',
-  email: 'user@local.app',
-  full_name: 'Local User',
-  role: 'user',
+const MOCK_USERS = {
+  super_admin: {
+    id: 'mock-super-admin',
+    email: 'super@totoafya.org',
+    full_name: 'Super Admin',
+    role: 'super_admin',
+  },
+  facility_admin: {
+    id: 'mock-facility-admin',
+    email: 'admin-a@facility.org',
+    full_name: 'Facility A Admin',
+    role: 'admin',
+    facility_id: 'fac-a-id',
+  },
+  nurse: {
+    id: 'mock-nurse',
+    email: 'nurse-a@facility.org',
+    full_name: 'Nurse Joy',
+    role: 'nurse',
+    facility_id: 'fac-a-id',
+  },
+  user: {
+    id: 'mock-user',
+    email: 'mother-a@local.app',
+    full_name: 'Mother A',
+    role: 'user',
+    facility_id: 'fac-a-id',
+  }
+};
+
+const getActiveMockUser = () => {
+  try {
+    const customUser = localStorage.getItem('custom_mock_user');
+    if (customUser) {
+      return JSON.parse(customUser);
+    }
+  } catch (e) {
+    console.error("Failed to parse custom_mock_user", e);
+  }
+  const savedRole = localStorage.getItem('active_mock_role');
+  if (savedRole && MOCK_USERS[savedRole]) {
+    return MOCK_USERS[savedRole];
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.port === '5003') return MOCK_USERS.super_admin;
+    if (window.location.port === '5002') return MOCK_USERS.facility_admin;
+    if (window.location.port === '5001') return MOCK_USERS.nurse;
+  }
+  return MOCK_USERS.user;
 };
 
 const auth = {
-  me: async () => LOCAL_USER,
+  me: async () => getActiveMockUser(),
   isAuthenticated: async () => true,
   logout: () => {
     localStorage.clear();
@@ -113,6 +160,12 @@ const auth = {
   redirectToLogin: () => {
     window.location.href = '/onboarding';
   },
+  switchMockRole: (role) => {
+    if (MOCK_USERS[role]) {
+      localStorage.setItem('active_mock_role', role);
+      window.location.reload();
+    }
+  }
 };
 
 function generateMockResponse(prompt, response_json_schema) {

@@ -14,8 +14,15 @@ export default function NursePatientSearch({ onSelect }) {
     setLoading(true);
     setSearched(true);
     try {
-      // Search by ANC number, national ID, or name (fetch all and filter client-side)
-      const all = await db.entities.Mother.list('-created_date', 100);
+      const currentUser = await db.auth.me();
+      let all;
+      if (currentUser && currentUser.role === 'super_admin') {
+        all = await db.entities.Mother.list('-created_date', 100);
+      } else if (currentUser && currentUser.facility_id) {
+        all = await db.entities.Mother.filter({ facility_id: currentUser.facility_id }, '-created_date', 100);
+      } else {
+        all = [];
+      }
       const q = query.toLowerCase();
       const filtered = all.filter(m =>
         m.full_name?.toLowerCase().includes(q) ||

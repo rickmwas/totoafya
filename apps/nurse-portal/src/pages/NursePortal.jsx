@@ -14,12 +14,24 @@ export default function NursePortal() {
   const [recentPatients, setRecentPatients] = useState([]);
 
   useEffect(() => {
-    db.auth.me().then(setUser);
-    loadRecentPatients();
+    db.auth.me().then(u => {
+      setUser(u);
+      loadRecentPatients(u);
+    });
   }, []);
 
-  const loadRecentPatients = async () => {
-    const list = await db.entities.Mother.list('-updated_date', 5);
+  const loadRecentPatients = async (currentUser) => {
+    const activeUser = currentUser || user;
+    if (!activeUser) return;
+    
+    let list;
+    if (activeUser.role === 'super_admin') {
+      list = await db.entities.Mother.list('-updated_date', 5);
+    } else if (activeUser.facility_id) {
+      list = await db.entities.Mother.filter({ facility_id: activeUser.facility_id }, '-updated_date', 5);
+    } else {
+      list = [];
+    }
     setRecentPatients(list);
   };
 
@@ -31,7 +43,7 @@ export default function NursePortal() {
   const handleBack = () => {
     setView('search');
     setSelectedPatient(null);
-    loadRecentPatients(); // refresh after data entry
+    loadRecentPatients(user); // refresh after data entry
   };
 
   return (

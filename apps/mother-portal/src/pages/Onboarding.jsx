@@ -86,7 +86,7 @@ export default function Onboarding() {
 
   const [form, setForm] = useState({
     full_name: '', national_id: '', anc_number: '', phone: '',
-    county: '', facility_name: '', facility_phone: '', facility_emergency_phone: '',
+    county: '', facility_id: '', facility_name: '', facility_phone: '', facility_emergency_phone: '',
   });
   const [pregForm, setPregForm] = useState({ lmp: '', gravida: 1, parity: 0, trimester: null, is_first: null, risk_factors: [] });
   const [childForm, setChildForm] = useState({ full_name: '', date_of_birth: '', gender: '', birth_weight_kg: '' });
@@ -427,7 +427,14 @@ export default function Onboarding() {
             </select>
           </div>
 
-          <HospitalPicker value={form.facility_name} onChange={v => setF('facility_name', v)} lang={lang} />
+          <HospitalPicker
+            value={form.facility_name}
+            onChange={f => {
+              setF('facility_id', f?.id || '');
+              setF('facility_name', f?.name || '');
+            }}
+            lang={lang}
+          />
 
           {/* Facility phones - collapsible feel */}
           <div className="bg-white rounded-[18px] border border-[#F0F0F0] overflow-hidden">

@@ -2,16 +2,16 @@ import React from 'react';
 import { LayoutDashboard, Users, Baby, Shield, BarChart2, Bell, Heart, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { key: 'overview',   icon: LayoutDashboard, label: 'Overview' },
-  { key: 'mothers',    icon: Users,           label: 'Mothers' },
-  { key: 'children',   icon: Baby,            label: 'Children' },
-  { key: 'vaccines',   icon: Shield,          label: 'Vaccines' },
-  { key: 'analytics',  icon: BarChart2,       label: 'Analytics' },
-  { key: 'alerts',     icon: Bell,            label: 'Alerts' },
-];
-
 export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, isOpen, onClose }) {
+  const navItems = [
+    { key: 'overview',   icon: LayoutDashboard, label: 'Overview' },
+    { key: 'mothers',    icon: Users,           label: 'Mothers' },
+    { key: 'children',   icon: Baby,            label: 'Children' },
+    { key: 'vaccines',   icon: Shield,          label: 'Vaccines' },
+    { key: 'analytics',  icon: BarChart2,       label: 'Analytics' },
+    { key: 'alerts',     icon: Bell,            label: 'Alerts' },
+  ];
+
   return (
     <aside className={cn(
       'bg-white border-r border-[#E5E5E5] flex flex-col h-screen',
