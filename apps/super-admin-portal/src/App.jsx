@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Building, Users, Baby, Heart, Shield, Sparkles, 
-  Search, ArrowRight, Grid, AlertCircle, RefreshCw, Layers
+  Search, ArrowRight, Grid, AlertCircle, RefreshCw, Layers, LogOut
 } from 'lucide-react';
 import db from '@/api/totoafyaClient';
 import FacilityFacilities from './components/FacilityFacilities';
 import FacilityNurses from './components/FacilityNurses';
+import Login from './components/Login';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -29,6 +30,11 @@ export default function App() {
     try {
       const activeUser = await db.auth.me();
       setUser(activeUser);
+
+      if (!activeUser || activeUser.role !== 'super_admin') {
+        setLoading(false);
+        return;
+      }
 
       // Load all entities globally
       const [facs, ns, moms, kids] = await Promise.all([
@@ -89,6 +95,22 @@ export default function App() {
   const totalMothersCount = filteredMothers.length;
   const totalChildrenCount = filteredChildren.length;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-[#0A0B10] flex flex-col justify-center items-center p-4 relative overflow-hidden text-slate-200">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_80%,transparent_100%)] opacity-30 pointer-events-none" />
+        <div className="w-12 h-12 rounded-[16px] bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_8px_30px_rgba(59,130,246,0.25)] animate-bounce mb-4">
+          <Heart size={20} className="text-white" fill="white" />
+        </div>
+        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'super_admin') {
+    return <Login onLoginSuccess={loadAllData} />;
+  }
+
   return (
     <div className="flex min-h-screen bg-[#F5F5F7] font-inter text-[#0A0A0A]">
       {/* Sidebar */}
@@ -148,28 +170,41 @@ export default function App() {
         </nav>
 
         {/* Mock Switches (Demo Mode Only) */}
-        <div className="p-4 border-t border-[#E5E5E5] bg-[#F5F5F7]/50">
-          <p className="text-[10px] font-bold text-[#A0A0A0] uppercase tracking-wider mb-2 px-1">Active Sandbox</p>
-          <div className="flex flex-col gap-1">
-            <button
-              onClick={() => handleSwitchRole('super_admin')}
-              className="text-left text-[11px] font-bold text-[#0047FF] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
-            >
-              👑 Super Admin Mode
-            </button>
-            <button
-              onClick={() => handleSwitchRole('facility_admin')}
-              className="text-left text-[11px] font-medium text-[#666666] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
-            >
-              🏥 Facility Admin (Port 5002)
-            </button>
-            <button
-              onClick={() => handleSwitchRole('nurse')}
-              className="text-left text-[11px] font-medium text-[#666666] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
-            >
-              👩‍⚕️ Nurse Portal (Port 5001)
-            </button>
+        {import.meta.env.VITE_DATABASE_PROVIDER !== 'supabase' && (
+          <div className="p-4 border-t border-[#E5E5E5] bg-[#F5F5F7]/50">
+            <p className="text-[10px] font-bold text-[#A0A0A0] uppercase tracking-wider mb-2 px-1">Active Sandbox</p>
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={() => handleSwitchRole('super_admin')}
+                className="text-left text-[11px] font-bold text-[#0047FF] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
+              >
+                👑 Super Admin Mode
+              </button>
+              <button
+                onClick={() => handleSwitchRole('facility_admin')}
+                className="text-left text-[11px] font-medium text-[#666666] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
+              >
+                🏥 Facility Admin (Port 5002)
+              </button>
+              <button
+                onClick={() => handleSwitchRole('nurse')}
+                className="text-left text-[11px] font-medium text-[#666666] px-2 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-[#E5E5E5] transition-all"
+              >
+                👩‍⚕️ Nurse Portal (Port 5001)
+              </button>
+            </div>
           </div>
+        )}
+
+        {/* Sign Out Button */}
+        <div className="px-4 py-3 border-t border-[#E5E5E5]">
+          <button
+            onClick={() => db.auth.logout()}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-[12px] w-full text-left text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-bold transition-all duration-150 text-[13px]"
+          >
+            <LogOut size={18} />
+            <span>Sign Out</span>
+          </button>
         </div>
 
         {/* Footer info */}
@@ -209,24 +244,18 @@ export default function App() {
             </button>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[#0047FF]/10 flex items-center justify-center">
-                <span className="text-[12px] font-extrabold text-[#0047FF]">SA</span>
+                <span className="text-[12px] font-extrabold text-[#0047FF]">
+                  {user?.full_name ? user.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'SA'}
+                </span>
               </div>
-              <p className="text-[12px] font-bold text-[#0A0A0A]">super@totoafya.org</p>
+              <p className="text-[12px] font-bold text-[#0A0A0A]">{user?.email || 'super@totoafya.org'}</p>
             </div>
           </div>
         </header>
 
         {/* View Content */}
         <div className="flex-1 p-8 overflow-y-auto">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-96 gap-4">
-              <div className="w-12 h-12 rounded-[16px] bg-[#0047FF] flex items-center justify-center shadow-[0_8px_30px_rgba(0,71,255,0.25)] animate-bounce">
-                <Heart size={20} className="text-white" fill="white" />
-              </div>
-              <div className="w-6 h-6 border-2 border-[#0047FF] border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <div className="max-w-6xl mx-auto animate-fade-in">
+          <div className="max-w-6xl mx-auto animate-fade-in">
               
               {/* Tabs Router */}
               {activeTab === 'overview' && (
@@ -407,8 +436,7 @@ export default function App() {
                 </div>
               )}
 
-            </div>
-          )}
+          </div>
         </div>
       </main>
     </div>

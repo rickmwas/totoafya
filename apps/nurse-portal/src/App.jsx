@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -9,12 +9,14 @@ import { LanguageProvider } from '@/context/LanguageContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { useState, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
+import Login from '@/pages/Login';
 
 // Page imports
 import NursePortal from '@/pages/NursePortal';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const currentPath = window.location.pathname;
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -34,11 +36,22 @@ const AuthenticatedApp = () => {
 
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
-    if (authError.type === 'auth_required') { navigateToLogin(); return null; }
+    if (authError.type === 'auth_required') {
+      if (currentPath !== '/login') {
+        navigateToLogin();
+        return null;
+      }
+    }
+  }
+
+  // Redirect authenticated user with nurse role away from login
+  if (user && user.role === 'nurse' && currentPath === '/login') {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<NursePortal />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

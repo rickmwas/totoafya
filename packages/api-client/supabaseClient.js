@@ -207,31 +207,92 @@ const getActiveMockUser = () => {
 
 const auth = {
   me: async () => {
-    if (supabase) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          return {
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || user.email,
-            role: user.user_metadata?.role || 'user',
-          };
-        }
-      } catch (err) {
-        console.error("Supabase auth getUser failed, falling back to mock:", err);
+    if (!supabase) return null;
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return null;
+
+      const email = user.email || '';
+      
+      // 1. Super Admin check
+      if (email.toLowerCase() === 'super@totoafya.org') {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Super Admin',
+          role: 'super_admin'
+        };
       }
+
+      // 2. Nurse / Facility Admin check
+      const { data: nurse } = await supabase
+        .from('nurses')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (nurse) {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: nurse.full_name,
+          role: nurse.role || 'nurse', // 'nurse' or 'admin'
+          facility_id: nurse.facility_id,
+          nurse_id: nurse.id
+        };
+      }
+
+      // 3. Mother check (using user_id or email)
+      const { data: mother } = await supabase
+        .from('mothers')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (mother) {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: mother.full_name,
+          role: 'user',
+          facility_id: mother.facility_id,
+          mother_id: mother.id,
+          profile_complete: mother.profile_complete
+        };
+      }
+
+      // If authenticated but no record exists, they are a new mother
+      return {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.email,
+        role: 'user',
+        profile_complete: false
+      };
+    } catch (err) {
+      console.error("Error in auth.me()", err);
+      return null;
     }
-    return getActiveMockUser();
   },
   isAuthenticated: async () => {
-    if (!supabase) return true;
+    if (!supabase) return false;
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      return !!session || true;
+      return !!session;
     } catch {
-      return true;
+      return false;
     }
+  },
+  signInWithGoogle: async () => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) throw error;
+    return data;
   },
   logout: async () => {
     if (supabase) {
@@ -242,14 +303,15 @@ const auth = {
       }
     }
     localStorage.clear();
-    window.location.href = '/';
+    window.location.href = '/login';
   },
   redirectToLogin: () => {
-    window.location.href = '/onboarding';
+    window.location.href = '/login';
   },
   switchMockRole: (role) => {
     if (MOCK_USERS[role]) {
       localStorage.setItem('active_mock_role', role);
+      localStorage.setItem('is_logged_in', 'true');
       window.location.reload();
     }
   }

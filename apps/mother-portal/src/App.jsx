@@ -23,9 +23,11 @@ import AddChild from '@/pages/AddChild';
 import ChildProfile from '@/pages/ChildProfile';
 import PatentDocument from '@/pages/PatentDocument';
 import PitchDeck from '@/pages/PitchDeck';
+import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const currentPath = window.location.pathname;
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -45,11 +47,27 @@ const AuthenticatedApp = () => {
 
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
-    if (authError.type === 'auth_required') { navigateToLogin(); return null; }
+    if (authError.type === 'auth_required') {
+      if (currentPath !== '/login') {
+        navigateToLogin();
+        return null;
+      }
+    }
+  }
+
+  // Redirect authenticated user with incomplete profile to onboarding
+  if (user && !user.profile_complete && currentPath !== '/onboarding' && currentPath !== '/login') {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // Redirect authenticated user with complete profile away from login/onboarding
+  if (user && user.profile_complete && (currentPath === '/login' || currentPath === '/onboarding')) {
+    return <Navigate to="/" replace />;
   }
 
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route path="/" element={<Home />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/vaccines" element={<VaccinationSchedule />} />

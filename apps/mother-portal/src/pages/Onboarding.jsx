@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, MapPin, Heart } from 'lucide-react';
 
 import { useLang } from '@/context/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
 import { cn } from '@/lib/utils';
 import HospitalPicker from '@/components/onboarding/HospitalPicker';
 
@@ -79,6 +80,7 @@ function ContinueBtn({ onClick, disabled, loading, children }) {
 export default function Onboarding() {
   const navigate = useNavigate();
   const { t, lang, setLanguage } = useLang();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState(null);
   const [caregiverType, setCaregiverType] = useState(null);
@@ -120,6 +122,7 @@ export default function Onboarding() {
 
       const mother = await db.entities.Mother.create({
         ...form,
+        user_id: user?.id || null,
         facility_phone: form.facility_phone || null,
         facility_emergency_phone: form.facility_emergency_phone || null,
         caregiver_type: caregiverType || 'mother',

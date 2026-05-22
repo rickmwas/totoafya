@@ -151,18 +151,52 @@ const getActiveMockUser = () => {
 };
 
 const auth = {
-  me: async () => getActiveMockUser(),
-  isAuthenticated: async () => true,
+  me: async () => {
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+    if (!isLoggedIn) return null;
+    return getActiveMockUser();
+  },
+  isAuthenticated: async () => {
+    return localStorage.getItem('is_logged_in') === 'true';
+  },
+  signInWithGoogle: async (role = 'user') => {
+    localStorage.setItem('active_mock_role', role);
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS[role] || MOCK_USERS.user;
+  },
+  login: async (email, password) => {
+    const foundRole = Object.keys(MOCK_USERS).find(r => MOCK_USERS[r].email.toLowerCase() === email.toLowerCase());
+    if (foundRole) {
+      localStorage.setItem('active_mock_role', foundRole);
+      localStorage.setItem('is_logged_in', 'true');
+      return MOCK_USERS[foundRole];
+    }
+    throw new Error('User not found. Try one of: ' + Object.values(MOCK_USERS).map(u => u.email).join(', '));
+  },
+  signUp: async (email, password, metadata = {}) => {
+    const newUser = {
+      id: 'mock-' + Math.random().toString(36).slice(2),
+      email,
+      full_name: metadata.full_name || email.split('@')[0],
+      role: metadata.role || 'user',
+      facility_id: metadata.facility_id || 'fac-a-id',
+    };
+    localStorage.setItem('custom_mock_user', JSON.stringify(newUser));
+    localStorage.setItem('active_mock_role', newUser.role);
+    localStorage.setItem('is_logged_in', 'true');
+    return newUser;
+  },
   logout: () => {
     localStorage.clear();
-    window.location.href = '/';
+    window.location.href = '/login';
   },
   redirectToLogin: () => {
-    window.location.href = '/onboarding';
+    window.location.href = '/login';
   },
   switchMockRole: (role) => {
     if (MOCK_USERS[role]) {
       localStorage.setItem('active_mock_role', role);
+      localStorage.setItem('is_logged_in', 'true');
       window.location.reload();
     }
   }

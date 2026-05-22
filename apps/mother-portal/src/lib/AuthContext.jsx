@@ -14,10 +14,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     db.auth.me().then((u) => {
-      setUser(u);
-      setIsAuthenticated(true);
-    }).catch(() => {
+      if (u) {
+        setUser(u);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthError({ type: 'auth_required', message: 'Authentication required' });
+      }
+    }).catch((err) => {
+      setUser(null);
       setIsAuthenticated(false);
+      setAuthError({ type: 'auth_required', message: err?.message || 'Authentication failed' });
     }).finally(() => {
       setIsLoadingAuth(false);
     });
@@ -32,9 +41,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAppState = async () => {
-    const u = await db.auth.me();
-    setUser(u);
-    setIsAuthenticated(true);
+    try {
+      const u = await db.auth.me();
+      if (u) {
+        setUser(u);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthError({ type: 'auth_required' });
+      }
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError({ type: 'auth_required' });
+    }
   };
 
   return (
