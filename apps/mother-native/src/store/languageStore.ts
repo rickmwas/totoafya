@@ -2,10 +2,25 @@ import { create } from 'zustand';
 import { Platform } from 'react-native';
 import { translations } from '@totoafya/design-system/src/tokens';
 
-// Lazy initialize MMKV only on Native
+// Lazy initialize storage based on platform
 let storage: any = null;
 const getStorage = () => {
-  if (Platform.OS === 'web' || typeof window === 'undefined') return null;
+  if (Platform.OS === 'web' || typeof window === 'undefined') {
+    return {
+      getString: (key: string) => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem(key);
+      },
+      set: (key: string, value: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.setItem(key, value);
+      },
+      delete: (key: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem(key);
+      }
+    };
+  }
   if (!storage) {
     try {
       const { MMKV } = require('react-native-mmkv');

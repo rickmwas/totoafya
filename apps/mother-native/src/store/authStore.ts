@@ -6,7 +6,22 @@ import { UserProfile } from '@totoafya/auth';
 // Lazy initialize MMKV only on Native
 let storage: any = null;
 const getStorage = () => {
-  if (Platform.OS === 'web') return null;
+  if (Platform.OS === 'web') {
+    return {
+      getString: (key: string) => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem(key);
+      },
+      set: (key: string, value: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.setItem(key, value);
+      },
+      delete: (key: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem(key);
+      }
+    };
+  }
   if (!storage) {
     try {
       const { MMKV } = require('react-native-mmkv');
@@ -17,6 +32,27 @@ const getStorage = () => {
   }
   return storage;
 };
+
+const getSecureStore = () => {
+  if (Platform.OS === 'web') {
+    return {
+      getItemAsync: async (key: string) => {
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem(key);
+      },
+      setItemAsync: async (key: string, value: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.setItem(key, value);
+      },
+      deleteItemAsync: async (key: string) => {
+        if (typeof window === 'undefined') return;
+        localStorage.removeItem(key);
+      }
+    };
+  }
+  return SecureStore;
+};
+
 
 const ACTIVE_CHILD_KEY = 'active_child_id';
 const USER_SESSION_KEY = 'user_session';
@@ -45,9 +81,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (userProfile, pin) => {
     try {
-      await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(userProfile));
+      await getSecureStore().setItemAsync(USER_SESSION_KEY, JSON.stringify(userProfile));
       if (pin) {
-        await SecureStore.setItemAsync(PIN_STORE_KEY, pin);
+        await getSecureStore().setItemAsync(PIN_STORE_KEY, pin);
       }
       set({ user: userProfile, isLocked: false });
       getStorage()?.set(LOCK_STATE_KEY, 'false');
@@ -58,8 +94,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
-      await SecureStore.deleteItemAsync(USER_SESSION_KEY);
-      await SecureStore.deleteItemAsync(PIN_STORE_KEY);
+      await getSecureStore().deleteItemAsync(USER_SESSION_KEY);
+      await getSecureStore().deleteItemAsync(PIN_STORE_KEY);
       getStorage()?.delete(ACTIVE_CHILD_KEY);
       getStorage()?.delete(LOCK_STATE_KEY);
       set({ user: null, activeChildId: null, isLocked: false });
@@ -75,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   unlockSession: async (pin) => {
     try {
-      const storedPin = await SecureStore.getItemAsync(PIN_STORE_KEY);
+      const storedPin = await getSecureStore().getItemAsync(PIN_STORE_KEY);
       if (storedPin && storedPin.trim() === pin.trim()) {
         set({ isLocked: false });
         getStorage()?.set(LOCK_STATE_KEY, 'false');
@@ -102,7 +138,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!currentUser) return;
     const updatedUser = { ...currentUser, ...profile };
     try {
-      await SecureStore.setItemAsync(USER_SESSION_KEY, JSON.stringify(updatedUser));
+      await getSecureStore().setItemAsync(USER_SESSION_KEY, JSON.stringify(updatedUser));
       set({ user: updatedUser });
     } catch (e) {
       console.error('Failed to update user profile:', e);
@@ -115,7 +151,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ isLoading: true });
     try {
-      const rawSession = await SecureStore.getItemAsync(USER_SESSION_KEY);
+      const rawSession = await getSecureStore().getItemAsync(USER_SESSION_KEY);
       const activeChild = getStorage()?.getString(ACTIVE_CHILD_KEY) || null;
       const wasLocked = getStorage()?.getString(LOCK_STATE_KEY) === 'true';
 
