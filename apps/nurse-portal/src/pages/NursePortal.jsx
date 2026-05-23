@@ -1,13 +1,15 @@
 import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, LogOut, User, Stethoscope, TrendingUp, Shield, ChevronRight, X, Check } from 'lucide-react';
+import { Search, Plus, LogOut, Lock, User, Stethoscope, TrendingUp, Shield, ChevronRight, X, Check } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import NursePatientSearch from '@/components/nurse/NursePatientSearch';
 import NursePatientView from '@/components/nurse/NursePatientView';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function NursePortal() {
+  const { lockSession } = useAuth();
   const [user, setUser] = useState(null);
   const [view, setView] = useState('search'); // 'search' | 'patient'
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -59,12 +61,20 @@ export default function NursePortal() {
             <p className="text-[10px] text-[#A0A0A0] mt-0.5">{user?.full_name || 'Nurse Portal'}</p>
           </div>
         </div>
-        <button
-          onClick={() => db.auth.logout()}
-          className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F5F5F7] transition-colors"
-        >
-          <LogOut size={14} /> Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={lockSession}
+            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F5F5F7] transition-colors border border-[#E5E5E5] bg-white shadow-sm"
+          >
+            <Lock size={13} /> Lock Station
+          </button>
+          <button
+            onClick={() => db.auth.logout()}
+            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F5F5F7] transition-colors"
+          >
+            <LogOut size={14} /> Sign out
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 py-6">

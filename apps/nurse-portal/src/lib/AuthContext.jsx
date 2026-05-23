@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
@@ -19,6 +20,8 @@ export const AuthProvider = ({ children }) => {
           setUser(u);
           setIsAuthenticated(true);
           setAuthError(null);
+          // Check if session was locked previously in local storage
+          setIsLocked(localStorage.getItem('nurse_session_locked') === 'true');
         } else {
           setUser(u);
           setIsAuthenticated(false);
@@ -38,7 +41,46 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
+  const loginWithBadge = async (badgeToken) => {
+    setIsLoadingAuth(true);
+    try {
+      const u = await db.auth.loginNurseWithBadge(badgeToken);
+      setUser(u);
+      setIsAuthenticated(true);
+      setIsLocked(false);
+      localStorage.setItem('nurse_session_locked', 'false');
+      setAuthError(null);
+    } catch (err) {
+      setAuthError({ type: 'auth_failed', message: err.message || 'Badge login failed' });
+      throw err;
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
+  const lockSession = () => {
+    setIsLocked(true);
+    localStorage.setItem('nurse_session_locked', 'true');
+  };
+
+  const unlockWithPin = async (pin) => {
+    if (!user) throw new Error('No active nurse session found');
+    setIsLoadingAuth(true);
+    try {
+      const u = await db.auth.verifyNursePin(user.email, pin);
+      setUser(u);
+      setIsLocked(false);
+      localStorage.setItem('nurse_session_locked', 'false');
+      setAuthError(null);
+    } catch (err) {
+      throw err;
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
   const logout = () => {
+    localStorage.removeItem('nurse_session_locked');
     db.auth.logout();
   };
 
@@ -75,10 +117,14 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isLocked,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,
       appPublicSettings,
+      loginWithBadge,
+      lockSession,
+      unlockWithPin,
       logout,
       navigateToLogin,
       checkAppState
@@ -95,3 +141,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

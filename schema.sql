@@ -36,10 +36,13 @@ ON CONFLICT (facility_code) DO NOTHING;
 -- 2. NURSES Table (Clinic Staff)
 CREATE TABLE IF NOT EXISTS nurses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE SET NULL,
     facility_id UUID REFERENCES facilities(id) ON DELETE SET NULL,
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     role TEXT DEFAULT 'nurse',
+    pin_code TEXT, -- 4-6 digit clinical access PIN
+    badge_token TEXT UNIQUE, -- Badge tag identifier (NFC/RFID)
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -53,10 +56,11 @@ CREATE TRIGGER update_nurses_updated_at
 CREATE TABLE IF NOT EXISTS mothers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     facility_id UUID REFERENCES facilities(id) ON DELETE SET NULL,
-    user_id TEXT, -- Linked external login user id
-    national_id TEXT,
-    anc_number TEXT,
+    user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE SET NULL,
+    national_id TEXT UNIQUE,
+    anc_number TEXT UNIQUE,
     full_name TEXT NOT NULL,
+    pin_code TEXT, -- 4-digit security PIN for device unlock/auth
     phone TEXT,
     county TEXT,
     sub_county TEXT,
@@ -278,3 +282,179 @@ CREATE INDEX IF NOT EXISTS idx_growth_records_child ON growth_records(child_id);
 CREATE INDEX IF NOT EXISTS idx_immunizations_child ON immunizations(child_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_child ON milestones(child_id);
 CREATE INDEX IF NOT EXISTS idx_ai_alerts_mother ON ai_alerts(mother_id);
+
+-- =========================================================================
+-- 11. ROW LEVEL SECURITY (RLS) POLICIES
+-- =========================================================================
+
+-- Helper function to securely resolve current authenticated user's role
+CREATE OR REPLACE FUNCTION get_user_role()
+RETURNS TEXT AS $$
+DECLARE
+    v_role TEXT;
+    v_email TEXT;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Get email from auth.users
+    SELECT email INTO v_email FROM auth.users WHERE id = auth.uid();
+    
+    -- Super Admin check
+    IF v_email = 'super@totoafya.org' THEN
+        RETURN 'super_admin';
+    END IF;
+
+    -- Nurse or Facility Admin check
+    SELECT role INTO v_role FROM nurses WHERE user_id = auth.uid();
+    IF v_role IS NOT NULL THEN
+        RETURN v_role;
+    END IF;
+
+    -- Mother check
+    SELECT 'user' INTO v_role FROM mothers WHERE user_id = auth.uid();
+    IF v_role IS NOT NULL THEN
+        RETURN v_role;
+    END IF;
+
+    RETURN 'user';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Helper function to resolve current user's facility_id
+CREATE OR REPLACE FUNCTION get_user_facility_id()
+RETURNS UUID AS $$
+DECLARE
+    v_facility_id UUID;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Check nurse/admin
+    SELECT facility_id INTO v_facility_id FROM nurses WHERE user_id = auth.uid();
+    IF v_facility_id IS NOT NULL THEN
+        RETURN v_facility_id;
+    END IF;
+
+    -- Check mother
+    SELECT facility_id INTO v_facility_id FROM mothers WHERE user_id = auth.uid();
+    IF v_facility_id IS NOT NULL THEN
+        RETURN v_facility_id;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Enable RLS on all tables
+ALTER TABLE facilities ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nurses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE mothers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE children ENABLE ROW LEVEL SECURITY;
+ALTER TABLE anc_visits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE growth_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE immunizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE learning_contents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_alerts ENABLE ROW LEVEL SECURITY;
+
+-- A. FACILITIES policies
+CREATE POLICY "Allow read access to authenticated users" 
+    ON facilities FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Super admin facilities write access" 
+    ON facilities FOR ALL TO authenticated 
+    USING (get_user_role() = 'super_admin');
+
+-- B. NURSES policies
+CREATE POLICY "Allow super admins full access to nurses"
+    ON nurses FOR ALL TO authenticated
+    USING (get_user_role() = 'super_admin');
+
+CREATE POLICY "Allow facility admins to manage facility nurses"
+    ON nurses FOR ALL TO authenticated
+    USING (get_user_role() = 'admin' AND facility_id = get_user_facility_id());
+
+CREATE POLICY "Allow nurses to view other nurses at same facility"
+    ON nurses FOR SELECT TO authenticated
+    USING (facility_id = get_user_facility_id());
+
+-- C. MOTHERS policies
+CREATE POLICY "Super admins full access to mothers"
+    ON mothers FOR ALL TO authenticated USING (get_user_role() = 'super_admin');
+
+CREATE POLICY "Facility staff manage facility mothers"
+    ON mothers FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND facility_id = get_user_facility_id());
+
+CREATE POLICY "Mothers select and update own profile"
+    ON mothers FOR ALL TO authenticated
+    USING (user_id = auth.uid());
+
+-- D. CHILDREN policies
+CREATE POLICY "Super admins full access to children"
+    ON children FOR ALL TO authenticated USING (get_user_role() = 'super_admin');
+
+CREATE POLICY "Facility staff manage facility children"
+    ON children FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+CREATE POLICY "Mothers full access to own children"
+    ON children FOR ALL TO authenticated
+    USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
+
+-- E. ANC VISITS policies
+CREATE POLICY "Facility staff manage visits"
+    ON anc_visits FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+CREATE POLICY "Mothers view own visits"
+    ON anc_visits FOR SELECT TO authenticated
+    USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
+
+-- F. GROWTH RECORDS policies
+CREATE POLICY "Facility staff manage growth records"
+    ON growth_records FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "Mothers view own child growth records"
+    ON growth_records FOR SELECT TO authenticated
+    USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
+
+-- G. IMMUNIZATIONS policies
+CREATE POLICY "Facility staff manage immunizations"
+    ON immunizations FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "Mothers view child immunizations"
+    ON immunizations FOR SELECT TO authenticated
+    USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
+
+-- H. MILESTONES policies
+CREATE POLICY "Facility staff manage milestones"
+    ON milestones FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "Mothers manage child milestones"
+    ON milestones FOR ALL TO authenticated
+    USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
+
+-- I. AI ALERTS policies
+CREATE POLICY "Facility staff manage alerts"
+    ON ai_alerts FOR ALL TO authenticated
+    USING (get_user_role() IN ('admin', 'nurse') AND facility_id = get_user_facility_id());
+
+CREATE POLICY "Mothers view own alerts"
+    ON ai_alerts FOR SELECT TO authenticated
+    USING (mother_id = (SELECT id FROM mothers WHERE user_id = auth.uid()));
+
+-- J. LEARNING CONTENTS policies
+CREATE POLICY "Allow all authenticated users to read learning content"
+    ON learning_contents FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Allow super admins and content admins to manage content"
+    ON learning_contents FOR ALL TO authenticated
+    USING (get_user_role() IN ('super_admin', 'admin'));
+

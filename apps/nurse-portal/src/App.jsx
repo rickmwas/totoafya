@@ -10,13 +10,18 @@ import { ProfileProvider } from '@/context/ProfileContext';
 import { useState, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
 import Login from '@/pages/Login';
+import LockScreen from '@/components/LockScreen';
 
 // Page imports
 import NursePortal from '@/pages/NursePortal';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isLocked } = useAuth();
   const currentPath = window.location.pathname;
+
+  if (isLocked && currentPath !== '/login') {
+    return <LockScreen />;
+  }
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (

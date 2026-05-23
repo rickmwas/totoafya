@@ -7,12 +7,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:mother\" \"npm run dev:nurse\" \"npm run dev:facility\" \"npm run dev:superadmin\"",
+    "dev": "concurrently \"npm run dev:mother\" \"npm run dev:nurse\" \"npm run dev:facility\" \"npm run dev:superadmin\" \"npm run dev:mother-native\"",
     "build": "concurrently \"npm run build:mother\" \"npm run build:nurse\" \"npm run build:facility\" \"npm run build:superadmin\"",
     "dev:mother": "npm run dev --workspace=apps/mother-portal",
     "dev:nurse": "npm run dev --workspace=apps/nurse-portal",
     "dev:facility": "npm run dev --workspace=apps/facility-pc",
     "dev:superadmin": "npm run dev --workspace=apps/super-admin-portal",
+    "dev:mother-native": "npm run start --workspace=apps/mother-native -- --go",
+    "android:mother-native": "npm run android --workspace=apps/mother-native",
+    "ios:mother-native": "npm run ios --workspace=apps/mother-native",
     "build:mother": "npm run build --workspace=apps/mother-portal",
     "build:nurse": "npm run build --workspace=apps/nurse-portal",
     "build:facility": "npm run build --workspace=apps/facility-pc",

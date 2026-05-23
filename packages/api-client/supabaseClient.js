@@ -1,7 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const getEnv = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[`EXPO_PUBLIC_${key}`]) {
+    return process.env[`EXPO_PUBLIC_${key}`];
+  }
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+  return null;
+};
+
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
 
 // Only initialize if the URL and Key are provided
 export const supabase = (supabaseUrl && supabaseAnonKey)
@@ -206,6 +221,229 @@ const getActiveMockUser = () => {
 };
 
 const auth = {
+  signInWithNationalIdOrAnc: async (identifier, pin) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const cleanId = identifier.trim().toLowerCase();
+    const syntheticEmail = `mother-${cleanId}@totoafya.org`;
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: syntheticEmail,
+      password: pin,
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Authentication failed');
+
+    // Fetch the mother profile linked to this user
+    const { data: mother } = await supabase
+      .from('mothers')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    if (mother) {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: mother.full_name,
+        role: 'user',
+        facility_id: mother.facility_id,
+        mother_id: mother.id,
+        profile_complete: mother.profile_complete
+      };
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: data.user.user_metadata?.full_name || data.user.email,
+      role: 'user',
+      profile_complete: false
+    };
+  },
+  signUpMother: async (identifier, pin, metadata = {}) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const cleanId = identifier.trim().toLowerCase();
+    const syntheticEmail = `mother-${cleanId}@totoafya.org`;
+
+    // 1. Sign up the user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: syntheticEmail,
+      password: pin,
+      options: {
+        data: {
+          full_name: metadata.full_name,
+          role: 'user',
+        }
+      }
+    });
+    if (authError) throw authError;
+    if (!authData.user) throw new Error('Sign up failed');
+
+    // 2. Create the Mother profile in the custom table
+    const isAnc = cleanId.startsWith('anc') || cleanId.includes('-');
+    const newMotherData = {
+      user_id: authData.user.id,
+      full_name: metadata.full_name || `Mother (${identifier})`,
+      facility_id: metadata.facility_id || null,
+      pin_code: pin,
+      profile_complete: false
+    };
+
+    if (isAnc) {
+      newMotherData.anc_number = identifier;
+    } else {
+      newMotherData.national_id = identifier;
+    }
+
+    const { data: mother, error: dbError } = await supabase
+      .from('mothers')
+      .insert([newMotherData])
+      .select()
+      .single();
+
+    if (dbError) {
+      // Cleanup auth user on profile creation failure
+      console.error('Error creating mother profile, cleaning up auth:', dbError);
+      throw dbError;
+    }
+
+    return {
+      id: authData.user.id,
+      email: authData.user.email,
+      full_name: mother.full_name,
+      role: 'user',
+      facility_id: mother.facility_id,
+      mother_id: mother.id,
+      profile_complete: false
+    };
+  },
+  loginNurseWithBadge: async (badgeToken) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data: nurse, error } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('badge_token', badgeToken)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!nurse) throw new Error('Badge not recognized');
+
+    return {
+      id: nurse.user_id || nurse.id,
+      email: nurse.email,
+      full_name: nurse.full_name,
+      role: nurse.role || 'nurse',
+      facility_id: nurse.facility_id,
+      nurse_id: nurse.id
+    };
+  },
+  verifyNursePin: async (email, pin) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data: nurse, error } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('email', email)
+      .eq('pin_code', pin)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!nurse) throw new Error('Invalid PIN code');
+
+    return {
+      id: nurse.user_id || nurse.id,
+      email: nurse.email,
+      full_name: nurse.full_name,
+      role: nurse.role || 'nurse',
+      facility_id: nurse.facility_id,
+      nurse_id: nurse.id
+    };
+  },
+  login: async (email, password) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Authentication failed');
+    
+    const emailStr = data.user.email || '';
+    
+    if (emailStr.toLowerCase() === 'super@totoafya.org') {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.user_metadata?.full_name || 'Super Admin',
+        role: 'super_admin'
+      };
+    }
+
+    const { data: nurse } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('email', emailStr)
+      .maybeSingle();
+
+    if (nurse) {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: nurse.full_name,
+        role: nurse.role || 'nurse',
+        facility_id: nurse.facility_id,
+        nurse_id: nurse.id
+      };
+    }
+
+    const { data: mother } = await supabase
+      .from('mothers')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    if (mother) {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: mother.full_name,
+        role: 'user',
+        facility_id: mother.facility_id,
+        mother_id: mother.id,
+        profile_complete: mother.profile_complete
+      };
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: data.user.user_metadata?.full_name || data.user.email,
+      role: 'user',
+      profile_complete: false
+    };
+  },
+  signUp: async (email, password, metadata = {}) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: metadata.full_name,
+          role: metadata.role || 'user',
+        }
+      }
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Sign up failed');
+    
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: metadata.full_name || data.user.email,
+      role: metadata.role || 'user',
+      profile_complete: false
+    };
+  },
   me: async () => {
     if (!supabase) return null;
     try {
@@ -464,8 +702,8 @@ const integrations = {
         
       return { file_url: publicUrl };
     },
-    InvokeLLM: async ({ prompt, response_json_schema }) => {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    InvokeLLM: async ({ prompt, response_json_schema = null }) => {
+      const apiKey = getEnv('VITE_GEMINI_API_KEY') || getEnv('GEMINI_API_KEY');
 
       if (apiKey) {
         try {

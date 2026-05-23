@@ -1,6 +1,21 @@
 import { supabaseDb } from './supabaseClient';
 
-const isSupabase = import.meta.env.VITE_DATABASE_PROVIDER === 'supabase';
+const getEnv = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[`EXPO_PUBLIC_${key}`]) {
+    return process.env[`EXPO_PUBLIC_${key}`];
+  }
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+  return null;
+};
+
+const isSupabase = getEnv('VITE_DATABASE_PROVIDER') === 'supabase' || getEnv('DATABASE_PROVIDER') === 'supabase';
 
 // Local localStorage-backed database — no totoafya dependencies
 
@@ -151,6 +166,46 @@ const getActiveMockUser = () => {
 };
 
 const auth = {
+  signInWithNationalIdOrAnc: async (identifier, pin) => {
+    localStorage.setItem('active_mock_role', 'user');
+    localStorage.setItem('is_logged_in', 'true');
+    const customUser = {
+      id: 'mock-user-' + identifier,
+      email: `mother-${identifier.toLowerCase()}@totoafya.org`,
+      full_name: `Mother (${identifier})`,
+      role: 'user',
+      facility_id: 'fac-a-id',
+      mother_id: 'mock-mother-id',
+      profile_complete: false
+    };
+    localStorage.setItem('custom_mock_user', JSON.stringify(customUser));
+    return customUser;
+  },
+  signUpMother: async (identifier, pin, metadata = {}) => {
+    localStorage.setItem('active_mock_role', 'user');
+    localStorage.setItem('is_logged_in', 'true');
+    const customUser = {
+      id: 'mock-user-' + identifier,
+      email: `mother-${identifier.toLowerCase()}@totoafya.org`,
+      full_name: metadata.full_name || `Mother (${identifier})`,
+      role: 'user',
+      facility_id: metadata.facility_id || 'fac-a-id',
+      mother_id: 'mock-mother-id',
+      profile_complete: false
+    };
+    localStorage.setItem('custom_mock_user', JSON.stringify(customUser));
+    return customUser;
+  },
+  loginNurseWithBadge: async (badgeToken) => {
+    localStorage.setItem('active_mock_role', 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS.nurse;
+  },
+  verifyNursePin: async (email, pin) => {
+    localStorage.setItem('active_mock_role', 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS.nurse;
+  },
   me: async () => {
     const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
     if (!isLoggedIn) return null;
@@ -331,8 +386,8 @@ const integrations = {
         reader.readAsDataURL(file);
       });
     },
-    InvokeLLM: async ({ prompt, response_json_schema }) => {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    InvokeLLM: async ({ prompt, response_json_schema = null }) => {
+      const apiKey = getEnv('VITE_GEMINI_API_KEY') || getEnv('GEMINI_API_KEY');
 
       if (apiKey) {
         try {
