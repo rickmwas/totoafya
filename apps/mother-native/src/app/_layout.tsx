@@ -3,20 +3,26 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { setupOfflinePersistence } from '../utils/offlineManager';
+import { Platform } from 'react-native';
 import '../global.css';
 
 // Shim localStorage using MMKV for @totoafya/api-client before it gets loaded
-import { MMKV } from 'react-native-mmkv';
-const storage = new MMKV();
-if (typeof localStorage === 'undefined') {
-  (globalThis as any).localStorage = {
-    getItem: (key: string) => storage.getString(key) || null,
-    setItem: (key: string, value: string) => storage.set(key, value),
-    removeItem: (key: string) => storage.delete(key),
-    clear: () => storage.clearAll(),
-    key: (index: number) => null,
-    length: 0,
-  } as any;
+// This is only needed for Native environments where localStorage doesn't exist
+if (Platform.OS !== 'web' && typeof localStorage === 'undefined') {
+  try {
+    const { MMKV } = require('react-native-mmkv');
+    const storage = new MMKV();
+    (globalThis as any).localStorage = {
+      getItem: (key: string) => storage.getString(key) || null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
+      clear: () => storage.clearAll(),
+      key: (index: number) => null,
+      length: 0,
+    } as any;
+  } catch (e) {
+    console.warn('Failed to shim localStorage:', e);
+  }
 }
 
 const queryClient = new QueryClient({
@@ -28,7 +34,10 @@ const queryClient = new QueryClient({
   },
 });
 
-setupOfflinePersistence(queryClient);
+// Only run persistence on client-side
+if (typeof window !== 'undefined') {
+  setupOfflinePersistence(queryClient);
+}
 
 import { AppState } from 'react-native';
 import LockScreen from '../components/LockScreen';

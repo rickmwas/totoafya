@@ -1,11 +1,27 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import { MMKV } from 'react-native-mmkv';
+import { Platform } from 'react-native';
 import { UserProfile } from '@totoafya/auth';
 
-const storage = new MMKV();
+// Lazy initialize MMKV only on Native
+let storage: any = null;
+const getStorage = () => {
+  if (Platform.OS === 'web') return null;
+  if (!storage) {
+    try {
+      const { MMKV } = require('react-native-mmkv');
+      storage = new MMKV();
+    } catch (e) {
+      return null;
+    }
+  }
+  return storage;
+};
+
 const ACTIVE_CHILD_KEY = 'active_child_id';
 const USER_SESSION_KEY = 'user_session';
+const PIN_STORE_KEY = 'mother_auth_pin';
+const LOCK_STATE_KEY = 'app_session_locked';
 
 interface AuthState {
   user: UserProfile | null;
@@ -21,9 +37,6 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
-const PIN_STORE_KEY = 'mother_auth_pin';
-const LOCK_STATE_KEY = 'app_session_locked';
-
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   activeChildId: null,
@@ -37,7 +50,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await SecureStore.setItemAsync(PIN_STORE_KEY, pin);
       }
       set({ user: userProfile, isLocked: false });
-      storage.set(LOCK_STATE_KEY, 'false');
+      getStorage()?.set(LOCK_STATE_KEY, 'false');
     } catch (e) {
       console.error('Failed to save session:', e);
     }
@@ -47,8 +60,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await SecureStore.deleteItemAsync(USER_SESSION_KEY);
       await SecureStore.deleteItemAsync(PIN_STORE_KEY);
-      storage.delete(ACTIVE_CHILD_KEY);
-      storage.delete(LOCK_STATE_KEY);
+      getStorage()?.delete(ACTIVE_CHILD_KEY);
+      getStorage()?.delete(LOCK_STATE_KEY);
       set({ user: null, activeChildId: null, isLocked: false });
     } catch (e) {
       console.error('Failed to delete session:', e);
@@ -57,7 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   lockSession: () => {
     set({ isLocked: true });
-    storage.set(LOCK_STATE_KEY, 'true');
+    getStorage()?.set(LOCK_STATE_KEY, 'true');
   },
 
   unlockSession: async (pin) => {
@@ -65,7 +78,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const storedPin = await SecureStore.getItemAsync(PIN_STORE_KEY);
       if (storedPin && storedPin.trim() === pin.trim()) {
         set({ isLocked: false });
-        storage.set(LOCK_STATE_KEY, 'false');
+        getStorage()?.set(LOCK_STATE_KEY, 'false');
         return true;
       }
       return false;
@@ -77,9 +90,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   setActiveChildId: (childId) => {
     if (childId) {
-      storage.set(ACTIVE_CHILD_KEY, childId);
+      getStorage()?.set(ACTIVE_CHILD_KEY, childId);
     } else {
-      storage.delete(ACTIVE_CHILD_KEY);
+      getStorage()?.delete(ACTIVE_CHILD_KEY);
     }
     set({ activeChildId: childId });
   },
@@ -97,11 +110,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
+    // Skip during SSR
+    if (typeof window === 'undefined') return;
+
     set({ isLoading: true });
     try {
       const rawSession = await SecureStore.getItemAsync(USER_SESSION_KEY);
-      const activeChild = storage.getString(ACTIVE_CHILD_KEY) || null;
-      const wasLocked = storage.getString(LOCK_STATE_KEY) === 'true';
+      const activeChild = getStorage()?.getString(ACTIVE_CHILD_KEY) || null;
+      const wasLocked = getStorage()?.getString(LOCK_STATE_KEY) === 'true';
 
       if (rawSession) {
         const parsedUser = JSON.parse(rawSession) as UserProfile;
