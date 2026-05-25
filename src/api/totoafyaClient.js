@@ -238,7 +238,69 @@ const auth = {
     window.location.href = '/';
   },
   redirectToLogin: () => {
-    window.location.href = '/onboarding';
+    window.location.href = '/login';
+  },
+  signInWithNationalIdOrAnc: async (identifier, pin) => {
+    const mothers = getStore('Mother');
+    const mother = mothers.find(m => 
+      (m.national_id === identifier || m.anc_number === identifier) && 
+      m.pin_code === pin
+    );
+    
+    if (!mother) {
+      throw new Error('Invalid identifier or PIN');
+    }
+
+    const mockUser = {
+      id: mother.user_id || 'mock-user-' + mother.id,
+      email: `${identifier}@local.app`,
+      full_name: mother.full_name,
+      role: 'user',
+      facility_id: mother.facility_id || null,
+      mother_id: mother.id,
+      profile_complete: mother.profile_complete ?? true,
+    };
+    
+    localStorage.setItem('custom_mock_user', JSON.stringify(mockUser));
+    localStorage.setItem('is_logged_in', 'true');
+    return mockUser;
+  },
+  signUpMother: async (identifier, pin, metadata) => {
+    const mothers = getStore('Mother');
+    const existing = mothers.find(m => m.national_id === identifier || m.anc_number === identifier);
+    if (existing) {
+      throw new Error('Mother already registered');
+    }
+
+    const userId = 'mock-user-' + generateId();
+    const newMother = {
+      id: generateId(),
+      user_id: userId,
+      full_name: metadata.full_name,
+      pin_code: pin,
+      facility_id: metadata.facility_id || null,
+      national_id: identifier.includes('ANC') ? null : identifier,
+      anc_number: identifier.includes('ANC') ? identifier : null,
+      profile_complete: metadata.profile_complete ?? false,
+      created_date: new Date().toISOString(),
+      updated_date: new Date().toISOString(),
+    };
+    mothers.push(newMother);
+    saveStore('Mother', mothers);
+
+    const mockUser = {
+      id: userId,
+      email: `${identifier}@local.app`,
+      full_name: metadata.full_name,
+      role: 'user',
+      facility_id: metadata.facility_id || null,
+      mother_id: newMother.id,
+      profile_complete: newMother.profile_complete,
+    };
+    
+    localStorage.setItem('custom_mock_user', JSON.stringify(mockUser));
+    localStorage.setItem('is_logged_in', 'true');
+    return mockUser;
   },
 };
 

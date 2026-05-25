@@ -164,11 +164,24 @@ const auth = {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return LOCAL_USER;
+
+      // Fetch mother profile to get facility_id, mother_id, and profile_complete
+      const { data: mother, error: mError } = await supabase
+        .from('mothers')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
       return {
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || user.email,
         role: user.user_metadata?.role || 'user',
+        facility_id: mother?.facility_id || null,
+        mother_id: mother?.id || null,
+        profile_complete: mother?.profile_complete ?? false,
+        subscription_status: mother?.subscription_status || 'trial',
+        trial_end_date: mother?.trial_end_date || null,
       };
     } catch {
       return LOCAL_USER;
@@ -195,7 +208,81 @@ const auth = {
     window.location.href = '/';
   },
   redirectToLogin: () => {
-    window.location.href = '/onboarding';
+    window.location.href = '/login';
+  },
+  signInWithNationalIdOrAnc: async (identifier, pin) => {
+    if (!supabase) throw new Error('Supabase client not initialized.');
+    const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pin,
+    });
+    if (error) throw error;
+
+    // Fetch mother profile to get facility_id and other info
+    const { data: mother, error: mError } = await supabase
+      .from('mothers')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: data.user.user_metadata?.full_name || data.user.email,
+      role: 'user',
+      facility_id: mother?.facility_id || null,
+      mother_id: mother?.id || null,
+      profile_complete: mother?.profile_complete ?? false,
+      subscription_status: mother?.subscription_status || 'trial',
+      trial_end_date: mother?.trial_end_date || null,
+    };
+  },
+  signUpMother: async (identifier, pin, metadata) => {
+    if (!supabase) throw new Error('Supabase client not initialized.');
+    const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password: pin,
+      options: {
+        data: {
+          role: 'user',
+          full_name: metadata.full_name,
+        }
+      }
+    });
+    if (authError) throw authError;
+
+    // Insert mother profile into 'mothers' table
+    const { data: motherData, error: motherError } = await supabase
+      .from('mothers')
+      .insert([{
+        user_id: authData.user.id,
+        facility_id: metadata.facility_id || null,
+        full_name: metadata.full_name,
+        pin_code: pin,
+        phone: metadata.phone || null,
+        county: metadata.county || null,
+        national_id: identifier.includes('ANC') ? null : identifier,
+        anc_number: identifier.includes('ANC') ? identifier : null,
+        profile_complete: metadata.profile_complete ?? false,
+      }])
+      .select()
+      .single();
+
+    if (motherError) throw motherError;
+
+    return {
+      id: authData.user.id,
+      email: authData.user.email,
+      full_name: metadata.full_name,
+      role: 'user',
+      facility_id: metadata.facility_id || null,
+      mother_id: motherData.id,
+      profile_complete: motherData.profile_complete,
+      subscription_status: motherData.subscription_status || 'trial',
+      trial_end_date: motherData.trial_end_date || null,
+    };
   },
 };
 

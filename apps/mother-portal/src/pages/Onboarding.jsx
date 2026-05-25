@@ -143,19 +143,44 @@ export default function Onboarding() {
       const edd = lmp ? new Date(new Date(lmp).getTime() + 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null;
       const effectiveMode = isCaregiverOnly ? 'child' : mode;
 
-      const mother = await db.entities.Mother.create({
-        ...form,
-        user_id: user?.id || null,
-        facility_phone: form.facility_phone || null,
-        facility_emergency_phone: form.facility_emergency_phone || null,
-        caregiver_type: caregiverType || 'mother',
-        pregnancy_status: effectiveMode === 'pregnant' ? 'pregnant' : 'postpartum',
-        lmp: isCaregiverOnly ? null : lmp,
-        edd: isCaregiverOnly ? null : edd,
-        gravida: isCaregiverOnly ? 0 : (Number(pregForm.gravida) || (effectiveMode === 'pregnant' ? 1 : 0)),
-        parity: isCaregiverOnly ? 0 : (Number(pregForm.parity) || (effectiveMode === 'child' ? 1 : 0)),
-        risk_score: 0, risk_level: 'low', profile_complete: true, language_preference: lang,
-      });
+      let mother;
+      let existingMothers = [];
+      if (user?.id) {
+        existingMothers = await db.entities.Mother.filter({ user_id: user.id });
+      }
+
+      if (existingMothers && existingMothers.length > 0) {
+        mother = await db.entities.Mother.update(existingMothers[0].id, {
+          ...form,
+          caregiver_type: caregiverType || 'mother',
+          pregnancy_status: effectiveMode === 'pregnant' ? 'pregnant' : 'postpartum',
+          lmp: isCaregiverOnly ? null : lmp,
+          edd: isCaregiverOnly ? null : edd,
+          gravida: isCaregiverOnly ? 0 : (Number(pregForm.gravida) || (effectiveMode === 'pregnant' ? 1 : 0)),
+          parity: isCaregiverOnly ? 0 : (Number(pregForm.parity) || (effectiveMode === 'child' ? 1 : 0)),
+          profile_complete: true,
+          language_preference: lang,
+          facility_phone: form.facility_phone || null,
+          facility_emergency_phone: form.facility_emergency_phone || null,
+        });
+      } else {
+        mother = await db.entities.Mother.create({
+          ...form,
+          user_id: user?.id || null,
+          facility_phone: form.facility_phone || null,
+          facility_emergency_phone: form.facility_emergency_phone || null,
+          caregiver_type: caregiverType || 'mother',
+          pregnancy_status: effectiveMode === 'pregnant' ? 'pregnant' : 'postpartum',
+          lmp: isCaregiverOnly ? null : lmp,
+          edd: isCaregiverOnly ? null : edd,
+          gravida: isCaregiverOnly ? 0 : (Number(pregForm.gravida) || (effectiveMode === 'pregnant' ? 1 : 0)),
+          parity: isCaregiverOnly ? 0 : (Number(pregForm.parity) || (effectiveMode === 'child' ? 1 : 0)),
+          risk_score: 0,
+          risk_level: 'low',
+          profile_complete: true,
+          language_preference: lang,
+        });
+      }
 
       if (mode === 'child' && childForm.full_name && childForm.date_of_birth && childForm.gender) {
         await db.entities.Child.create({
