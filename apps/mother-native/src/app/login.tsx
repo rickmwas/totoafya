@@ -118,7 +118,14 @@ export default function LoginScreen() {
         });
       }
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Mock login failed');
+      if (err.message && (err.message.includes('SUB_LIMIT_REACHED') || err.message.includes('SUB_EXPIRED'))) {
+        Alert.alert(
+          'Facility Capacity Reached',
+          'Your assigned facility has reached its maximum patient limit. Please contact the facility administration.'
+        );
+      } else {
+        Alert.alert('Error', err.message || 'Mock login failed');
+      }
     } finally {
       setLoading(false);
     }

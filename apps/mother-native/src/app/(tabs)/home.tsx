@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, ScrollView, Pressable, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Pressable, Image, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useHealthSummary } from '../../hooks/useHealthSummary';
 import { useLanguageStore } from '../../store/languageStore';
@@ -11,6 +11,61 @@ export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { t } = useLanguageStore();
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [phone, setPhone] = useState('');
+  const [paywallStep, setPaywallStep] = useState<'select' | 'sending' | 'pin_sent' | 'success'>('select');
+  const [paywallError, setPaywallError] = useState<string | null>(null);
+
+  const price = selectedPlan === 'monthly' ? 150 : 1000;
+  const isExpired = mother?.subscription_status === 'expired' || user?.subscription_status === 'expired';
+
+  const handlePaywallSubmit = () => {
+    if (!phone.match(/^(?:\+254|0)?(7|1)\d{8}$/)) {
+      setPaywallError('Please enter a valid Safaricom M-Pesa number');
+      return;
+    }
+    setPaywallError(null);
+    setPaywallStep('sending');
+    setTimeout(() => {
+      setPaywallStep('pin_sent');
+    }, 1500);
+  };
+
+  const handlePaywallSuccess = async () => {
+    setPaywallStep('sending');
+    try {
+      const raw = localStorage.getItem('db_Mother') || '[]';
+      const mothersStore = JSON.parse(raw);
+      const motherId = mother?.id || user?.mother_id;
+      const motherIdx = mothersStore.findIndex((m: any) => m.id === motherId || m.user_id === user?.id);
+      
+      if (motherIdx !== -1) {
+        mothersStore[motherIdx].subscription_status = 'active';
+        const expDate = new Date();
+        if (selectedPlan === 'monthly') {
+          expDate.setMonth(expDate.getMonth() + 1);
+        } else {
+          expDate.setFullYear(expDate.getFullYear() + 1);
+        }
+        mothersStore[motherIdx].subscription_expires_at = expDate.toISOString();
+        localStorage.setItem('db_Mother', JSON.stringify(mothersStore));
+      }
+
+      setPaywallStep('success');
+      setTimeout(() => {
+        if (user) {
+          useAuthStore.getState().updateUserProfile({
+            subscription_status: 'active',
+          });
+        }
+        setPaywallStep('select');
+      }, 1500);
+    } catch (err: any) {
+      setPaywallError(err.message || 'Payment simulation failed');
+      setPaywallStep('select');
+    }
+  };
+
   const { 
     mother, 
     children, 
@@ -192,6 +247,130 @@ export default function HomeScreen() {
           )}
         </View>
       )}
+
+      {/* M-Pesa Paywall Modal */}
+      <Modal
+        visible={isExpired}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <View style={{ width: '100%', maxWidth: 340, backgroundColor: '#FFFFFF', borderRadius: 28, padding: 24 }}>
+            {paywallStep === 'select' && (
+              <View>
+                <View className="bg-amber-50 border border-amber-100 rounded-full py-1.5 px-3 self-center mb-4">
+                  <Text className="text-amber-800 text-center font-bold text-[10px] uppercase tracking-wider">
+                    ⚠️ Trial Period Expired
+                  </Text>
+                </View>
+                
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0F172A', textAlign: 'center', marginBottom: 8 }}>
+                  Keep Your Child Protected
+                </Text>
+                <Text style={{ fontSize: 12, color: '#64748B', textAlign: 'center', lineHeight: 18, marginBottom: 20 }}>
+                  Your 30-day grace trial has expired. Subscribe to continue receiving custom health alerts, vaccine schedules, and AI consultations.
+                </Text>
+
+                {/* Benefits */}
+                <View className="bg-slate-50 border border-slate-100 rounded-2xl p-3 mb-5">
+                  <Text className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">PREMIUM FEATURES</Text>
+                  <Text className="text-xs text-slate-700 font-semibold mb-1.5">✓ 24/7 Maternal AI Health Assistant</Text>
+                  <Text className="text-xs text-slate-700 font-semibold mb-1.5">✓ WHO Smart Growth Tracking</Text>
+                  <Text className="text-xs text-slate-700 font-semibold">✓ Vaccine Reminders via SMS & Push</Text>
+                </View>
+
+                {/* Plan Selector */}
+                <View className="flex-row mb-5" style={{ gap: 12 }}>
+                  <Pressable
+                    onPress={() => setSelectedPlan('monthly')}
+                    className={`flex-1 p-3 rounded-xl border ${selectedPlan === 'monthly' ? 'border-emerald-700 bg-emerald-50/10' : 'border-slate-200'}`}
+                  >
+                    <Text className="text-[9px] font-bold text-slate-400 uppercase">Monthly</Text>
+                    <Text className="text-sm font-bold text-slate-900 mt-0.5">KES 150</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setSelectedPlan('yearly')}
+                    className={`flex-1 p-3 rounded-xl border ${selectedPlan === 'yearly' ? 'border-emerald-700 bg-emerald-50/10' : 'border-slate-200'}`}
+                  >
+                    <Text className="text-[9px] font-bold text-slate-400 uppercase">Yearly</Text>
+                    <Text className="text-sm font-bold text-slate-900 mt-0.5">KES 1,000</Text>
+                  </Pressable>
+                </View>
+
+                <Text className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 px-1">M-Pesa Mobile Number</Text>
+                <TextInput
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="e.g. 0712345678"
+                  keyboardType="phone-pad"
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 font-semibold text-sm mb-4"
+                />
+
+                {paywallError && (
+                  <Text className="text-red-600 text-[11px] font-semibold mb-3 px-1">{paywallError}</Text>
+                )}
+
+                <Pressable
+                  onPress={handlePaywallSubmit}
+                  className="bg-emerald-700 rounded-xl py-3.5 items-center justify-center active:bg-emerald-800"
+                >
+                  <Text className="text-white font-bold text-sm">Pay KES {price} with M-Pesa</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {paywallStep === 'sending' && (
+              <View className="py-8 items-center justify-center">
+                <ActivityIndicator size="large" color="#047857" className="mb-4" />
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#0F172A', textAlign: 'center' }}>
+                  Initiating M-Pesa STK Push...
+                </Text>
+                <Text style={{ fontSize: 12, color: '#64748B', textAlign: 'center', marginTop: 8 }}>
+                  Sending payment request of KES {price} to {phone}.
+                </Text>
+              </View>
+            )}
+
+            {paywallStep === 'pin_sent' && (
+              <View className="py-4 items-center justify-center">
+                <Text style={{ fontSize: 32, marginBottom: 12 }}>📱</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#0F172A', textAlign: 'center', marginBottom: 8 }}>
+                  Enter M-Pesa PIN
+                </Text>
+                <Text style={{ fontSize: 12, color: '#64748B', textAlign: 'center', lineHeight: 18, marginBottom: 20 }}>
+                  A push prompt has been sent to {phone}. Please enter your M-Pesa PIN on your phone to approve the KES {price} subscription.
+                </Text>
+
+                <Pressable
+                  onPress={handlePaywallSuccess}
+                  className="bg-emerald-700 rounded-xl py-3.5 w-full items-center justify-center mb-3"
+                >
+                  <Text className="text-white font-bold text-sm">I Have Completed Payment</Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={() => setPaywallStep('select')}
+                  className="bg-slate-100 rounded-xl py-3 w-full items-center justify-center"
+                >
+                  <Text className="text-slate-600 font-bold text-xs">Go Back</Text>
+                </Pressable>
+              </View>
+            )}
+
+            {paywallStep === 'success' && (
+              <View className="py-8 items-center justify-center">
+                <Text style={{ fontSize: 44, color: '#047857', marginBottom: 16 }}>✓</Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#0F172A', textAlign: 'center' }}>
+                  Payment Received!
+                </Text>
+                <Text style={{ fontSize: 12, color: '#64748B', textAlign: 'center', marginTop: 8 }}>
+                  Your subscription is active. Unlocking TotoAfya services...
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }

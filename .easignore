@@ -1,0 +1,30 @@
+# Ignore build folders and caches
+.expo/
+dist/
+dist-ssr/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ignore other portals in the monorepo
+apps/mother-portal/
+apps/nurse-portal/
+apps/facility-pc/
+apps/super-admin-portal/
+
+# Ignore non-code and system directories
+supabase/
+output_logos/
+artifacts/
+.agents/
+.vscode/
+.idea/
+.DS_Store
+*.pem
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

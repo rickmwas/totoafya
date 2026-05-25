@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, Baby, Shield, BarChart2, Bell, Heart, X } from 'lucide-react';
+import { LayoutDashboard, Users, Baby, Shield, BarChart2, Bell, Heart, X, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, isOpen, onClose }) {
@@ -10,6 +10,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
     { key: 'vaccines',   icon: Shield,          label: 'Vaccines' },
     { key: 'analytics',  icon: BarChart2,       label: 'Analytics' },
     { key: 'alerts',     icon: Bell,            label: 'Alerts' },
+    { key: 'billing',    icon: CreditCard,      label: 'Billing & Quota' },
   ];
 
   return (

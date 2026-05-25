@@ -9,6 +9,7 @@ import FacilityChildren from '@/components/facility/FacilityChildren';
 import FacilityVaccines from '@/components/facility/FacilityVaccines';
 import FacilityAnalytics from '@/components/facility/FacilityAnalytics';
 import FacilityAlerts from '@/components/facility/FacilityAlerts';
+import FacilityBilling from '@/components/facility/FacilityBilling';
 
 export default function FacilityDashboard() {
   const { user } = useAuth();
@@ -66,6 +67,7 @@ export default function FacilityDashboard() {
     vaccines: <FacilityVaccines immunizations={data.immunizations} children={data.children} />,
     analytics: <FacilityAnalytics data={data} />,
     alerts: <FacilityAlerts alerts={data.alerts} onRefresh={loadAll} />,
+    billing: <FacilityBilling data={data} />,
   };
 
   return (

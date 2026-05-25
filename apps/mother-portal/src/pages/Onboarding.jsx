@@ -76,6 +76,27 @@ function ContinueBtn({ onClick, disabled, loading, children }) {
   );
 }
 
+function PaywallAlert({ error, lang, facilityName }) {
+  if (!error) return null;
+  return (
+    <div className="bg-rose-50 border border-rose-200 rounded-[20px] p-4 mb-4 text-left animate-in fade-in duration-200">
+      <div className="flex gap-2.5">
+        <span className="text-lg leading-none">⚠️</span>
+        <div>
+          <p className="text-[13px] font-bold text-rose-900 leading-tight">
+            {lang === 'sw' ? 'Kituo cha Afya Kimejaa' : 'Facility Capacity Reached'}
+          </p>
+          <p className="text-[11.5px] text-rose-700 leading-relaxed mt-1">
+            {lang === 'sw'
+              ? `Hospitali ya ${facilityName || 'Demo Referral Hospital'} imefikia kikomo cha usajili. Tafadhali wasiliana na utawala wa kituo au uchague hospitali nyingine.`
+              : `Your selected hospital (${facilityName || 'Demo Referral Hospital'}) has reached its registered patient limit. Please notify the hospital administration to upgrade their account, or choose a different facility.`}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ──────────────────────────────────────────────────────────────
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -85,6 +106,7 @@ export default function Onboarding() {
   const [mode, setMode] = useState(null);
   const [caregiverType, setCaregiverType] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [paywallError, setPaywallError] = useState(null);
 
   const [form, setForm] = useState({
     full_name: '', national_id: '', anc_number: '', phone: '',
@@ -114,6 +136,7 @@ export default function Onboarding() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setPaywallError(null);
     const isCaregiverOnly = caregiverType === 'father' || caregiverType === 'guardian';
     try {
       const lmp = pregForm.lmp || (pregForm.trimester ? lmpFromTrimester(pregForm.trimester) : null);
@@ -145,6 +168,13 @@ export default function Onboarding() {
         });
       }
       navigate('/');
+    } catch (err) {
+      console.error(err);
+      if (err.message && (err.message.includes('SUB_LIMIT_REACHED') || err.message.includes('SUB_EXPIRED'))) {
+        setPaywallError(err.message);
+      } else {
+        alert(err.message || 'An error occurred during onboarding');
+      }
     } finally {
       setLoading(false);
     }
@@ -435,6 +465,7 @@ export default function Onboarding() {
             onChange={f => {
               setF('facility_id', f?.id || '');
               setF('facility_name', f?.name || '');
+              setPaywallError(null);
             }}
             lang={lang}
           />
@@ -537,6 +568,7 @@ export default function Onboarding() {
       </div>
 
       <div className="mt-6">
+        <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
         <ContinueBtn loading={loading} onClick={handleSubmit}>
           <Check size={18} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>
@@ -636,6 +668,7 @@ export default function Onboarding() {
       </div>
 
       <div className="mt-6">
+        <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
         <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!pregForm.trimester && !pregForm.lmp}>
           <Check size={18} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>
@@ -704,6 +737,7 @@ export default function Onboarding() {
       </div>
 
       <div className="mt-6">
+        <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
         <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!childForm.full_name || !childForm.date_of_birth || !childForm.gender}>
           <Check size={18} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>

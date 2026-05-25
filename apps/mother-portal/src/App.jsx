@@ -5,10 +5,11 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { LanguageProvider } from '@/context/LanguageContext';
+import { LanguageProvider, useLang } from '@/context/LanguageContext';
 import { ProfileProvider } from '@/context/ProfileContext';
 import { useState, useCallback } from 'react';
 import SplashScreen from '@/components/SplashScreen';
+import B2CPaywall from '@/components/B2CPaywall';
 
 // Page imports
 import Home from '@/pages/Home';
@@ -26,7 +27,7 @@ import PitchDeck from '@/pages/PitchDeck';
 import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkAppState } = useAuth();
   const currentPath = window.location.pathname;
 
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -55,9 +56,16 @@ const AuthenticatedApp = () => {
     }
   }
 
+  const { lang } = useLang();
+
   // Redirect authenticated user with incomplete profile to onboarding
   if (user && !user.profile_complete && currentPath !== '/onboarding' && currentPath !== '/login') {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  // Redirect B2C user with expired subscription to paywall
+  if (user && user.role === 'user' && user.subscription_status === 'expired' && currentPath !== '/login' && currentPath !== '/onboarding') {
+    return <B2CPaywall user={user} onPaid={checkAppState} lang={lang} />;
   }
 
   // Redirect authenticated user with complete profile away from login/onboarding

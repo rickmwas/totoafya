@@ -39,24 +39,102 @@ function matchesFilter(record, conditions) {
   return true;
 }
 
+function enrichMotherRecord(mother, recordsStore) {
+  if (!mother) return mother;
+  let status = mother.subscription_status || 'trial';
+  let trialEndDate = mother.trial_end_date;
+  if (!trialEndDate && !mother.facility_id) {
+    const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
+    trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    mother.trial_end_date = trialEndDate;
+    saveStore('Mother', recordsStore);
+  }
+  
+  const isB2C = !mother.facility_id;
+  if (isB2C) {
+    if (status === 'trial' && new Date() > new Date(trialEndDate)) {
+      status = 'expired';
+      mother.subscription_status = 'expired';
+      saveStore('Mother', recordsStore);
+    }
+  } else {
+    status = 'sponsored';
+    if (mother.subscription_status !== 'sponsored') {
+      mother.subscription_status = 'sponsored';
+      saveStore('Mother', recordsStore);
+    }
+  }
+  return mother;
+}
+
 function makeEntityStore(name) {
   return {
     list: async (sortKey = '-created_date', limit = 100) => {
       const records = getStore(name);
+      if (name === 'Mother') records.forEach(r => enrichMotherRecord(r, records));
       const sorted = sortRecords(records, sortKey);
       return limit ? sorted.slice(0, limit) : sorted;
     },
     filter: async (conditions = {}, sortKey = '-created_date', limit = 100) => {
       const records = getStore(name);
+      if (name === 'Mother') records.forEach(r => enrichMotherRecord(r, records));
       const filtered = records.filter(r => matchesFilter(r, conditions));
       const sorted = sortRecords(filtered, sortKey);
       return limit ? sorted.slice(0, limit) : sorted;
     },
     get: async (id) => {
       const records = getStore(name);
-      return records.find(r => r.id === id) || null;
+      const record = records.find(r => r.id === id) || null;
+      if (name === 'Mother' && record) {
+        enrichMotherRecord(record, records);
+      }
+      return record;
     },
     create: async (data) => {
+      if (name === 'Mother') {
+        if (data.facility_id) {
+          const SUBSCRIPTION_LIMITS = {
+            bronze: 50,
+            silver: 250,
+            gold: Infinity
+          };
+
+          const facilitiesStore = getStore('Facility');
+          let facility = facilitiesStore.find(f => f.id === data.facility_id);
+          if (!facility) {
+            facility = {
+              id: data.facility_id,
+              name: data.facility_name || "Demo Referral Hospital",
+              facility_code: "REF-001",
+              subscription_tier: "bronze",
+              subscription_status: "active",
+              subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            };
+            facilitiesStore.push(facility);
+            saveStore('Facility', facilitiesStore);
+          }
+
+          const mothers = getStore('Mother');
+          const facilityMothersCount = mothers.filter(m => m.facility_id === data.facility_id).length;
+
+          const tier = facility.subscription_tier || 'bronze';
+          const limit = SUBSCRIPTION_LIMITS[tier] || 50;
+
+          if (facility.subscription_status === 'expired') {
+            throw new Error('SUB_EXPIRED: Facility subscription has expired. Please renew the subscription.');
+          }
+          if (facilityMothersCount >= limit) {
+            throw new Error(`SUB_LIMIT_REACHED: Facility registration limit reached (${facilityMothersCount}/${limit} mothers). Please upgrade your subscription plan.`);
+          }
+
+          data.subscription_status = 'sponsored';
+          data.trial_end_date = null;
+        } else {
+          data.subscription_status = 'trial';
+          data.trial_end_date = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        }
+      }
+
       const records = getStore(name);
       const newRecord = {
         ...data,
@@ -104,7 +182,56 @@ const LOCAL_USER = {
 };
 
 const auth = {
-  me: async () => LOCAL_USER,
+  me: async () => {
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+    if (!isLoggedIn) return LOCAL_USER;
+
+    try {
+      const customUser = localStorage.getItem('custom_mock_user');
+      const user = customUser ? JSON.parse(customUser) : LOCAL_USER;
+      if (user && user.role === 'user') {
+        const mothersStore = getStore('Mother');
+        const mother = mothersStore.find(m => m.user_id === user.id || m.id === user.mother_id) || mothersStore[0];
+        if (mother) {
+          let status = mother.subscription_status || 'trial';
+          let trialEndDate = mother.trial_end_date;
+          if (!trialEndDate && !mother.facility_id) {
+            const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
+            trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            mother.trial_end_date = trialEndDate;
+            saveStore('Mother', mothersStore);
+          }
+
+          const isB2C = !mother.facility_id;
+          if (isB2C) {
+            if (status === 'trial' && new Date() > new Date(trialEndDate)) {
+              status = 'expired';
+              mother.subscription_status = 'expired';
+              saveStore('Mother', mothersStore);
+            }
+          } else {
+            status = 'sponsored';
+            if (mother.subscription_status !== 'sponsored') {
+              mother.subscription_status = 'sponsored';
+              saveStore('Mother', mothersStore);
+            }
+          }
+
+          return {
+            ...user,
+            subscription_status: status,
+            trial_end_date: trialEndDate,
+            facility_id: mother.facility_id || null,
+            profile_complete: mother.profile_complete || false,
+            mother_id: mother.id,
+          };
+        }
+      }
+      return user;
+    } catch {
+      return LOCAL_USER;
+    }
+  },
   isAuthenticated: async () => true,
   logout: () => {
     localStorage.clear();
