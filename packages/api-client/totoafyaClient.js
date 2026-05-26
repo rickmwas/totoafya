@@ -107,7 +107,7 @@ function makeEntityStore(name) {
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
   'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
-  'ChildImmunization', 'Facility', 'Nurse',
+  'ChildImmunization', 'Facility', 'Nurse', 'DeveloperConcern',
 ];
 
 const entities = Object.fromEntries(

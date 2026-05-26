@@ -458,3 +458,34 @@ CREATE POLICY "Allow super admins and content admins to manage content"
     ON learning_contents FOR ALL TO authenticated
     USING (get_user_role() IN ('super_admin', 'admin'));
 
+-- K. DEVELOPER CONCERNS Table
+CREATE TABLE IF NOT EXISTS developer_concerns (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    facility_id UUID REFERENCES facilities(id) ON DELETE SET NULL,
+    nurse_id UUID REFERENCES nurses(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    severity TEXT DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    status TEXT DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TRIGGER update_developer_concerns_updated_at
+    BEFORE UPDATE ON developer_concerns
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE INDEX IF NOT EXISTS idx_developer_concerns_facility ON developer_concerns(facility_id);
+
+ALTER TABLE developer_concerns ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow facility staff to manage facility concerns"
+    ON developer_concerns FOR ALL TO authenticated
+    USING (facility_id = get_user_facility_id());
+
+CREATE POLICY "Allow super admins full access to concerns"
+    ON developer_concerns FOR ALL TO authenticated
+    USING (get_user_role() = 'super_admin');
+
+

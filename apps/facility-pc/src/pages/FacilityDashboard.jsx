@@ -10,11 +10,22 @@ import FacilityVaccines from '@/components/facility/FacilityVaccines';
 import FacilityAnalytics from '@/components/facility/FacilityAnalytics';
 import FacilityAlerts from '@/components/facility/FacilityAlerts';
 import FacilityBilling from '@/components/facility/FacilityBilling';
+import FacilityNurses from '@/components/facility/FacilityNurses';
+import FacilityDeveloperDesk from '@/components/facility/FacilityDeveloperDesk';
 
 export default function FacilityDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
-  const [data, setData] = useState({ mothers: [], children: [], immunizations: [], alerts: [], growthRecords: [] });
+  const [facility, setFacility] = useState(null);
+  const [data, setData] = useState({
+    mothers: [],
+    children: [],
+    immunizations: [],
+    alerts: [],
+    growthRecords: [],
+    nurses: [],
+    concerns: [],
+  });
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -26,28 +37,88 @@ export default function FacilityDashboard() {
     try {
       const facilityId = user.facility_id;
 
-      // 1. Fetch mothers for this facility
-      const mothers = await db.entities.Mother.filter({ facility_id: facilityId }, '-created_date', 100);
-      const motherIds = mothers.map(m => m.id);
-
-      if (motherIds.length === 0) {
-        setData({ mothers: [], children: [], immunizations: [], alerts: [], growthRecords: [] });
-        setLoading(false);
-        return;
+      // 1. Fetch or create facility details
+      let fac = null;
+      try {
+        fac = await db.entities.Facility.get(facilityId);
+        if (!fac) {
+          fac = await db.entities.Facility.create({
+            id: facilityId,
+            name: 'Demo Referral Hospital',
+            location: 'Central Region',
+            facility_code: 'REF-001',
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching facility:', err);
+        fac = { id: facilityId, name: 'Demo Referral Hospital' };
       }
+      setFacility(fac);
 
-      // 2. Fetch children belonging to these mothers
-      const children = await db.entities.Child.filter({ mother_id: motherIds }, '-created_date', 100);
-      const childIds = children.map(c => c.id);
-
-      // 3. Fetch immunizations, growth records and alerts matching these kids/mothers
-      const [immunizations, growthRecords, alerts] = await Promise.all([
-        childIds.length > 0 ? db.entities.Immunization.filter({ child_id: childIds }, '-created_date', 200) : Promise.resolve([]),
-        childIds.length > 0 ? db.entities.GrowthRecord.filter({ child_id: childIds }, '-recorded_date', 200) : Promise.resolve([]),
-        db.entities.AIAlert.filter({ mother_id: motherIds, is_resolved: false }, '-created_date', 50),
+      // 2. Fetch mothers, nurses, and developer concerns in parallel
+      const [mothers, nursesFetched, concernsFetched] = await Promise.all([
+        db.entities.Mother.filter({ facility_id: facilityId }, '-created_date', 100),
+        db.entities.Nurse.filter({ facility_id: facilityId }, '-created_date', 100),
+        db.entities.DeveloperConcern.filter({ facility_id: facilityId }, '-created_date', 100).catch(() => []),
       ]);
 
-      setData({ mothers, children, immunizations, alerts, growthRecords });
+      // Seed mock nurses if none exist
+      let nurses = nursesFetched;
+      if (nurses.length === 0) {
+        try {
+          const mockNursesData = [
+            { name: 'Nurse Joy', email: 'joy@totoafya.org', role: 'charge_nurse', badge: 'BADGE-001' },
+            { name: 'Nurse Grace', email: 'grace@totoafya.org', role: 'nurse', badge: 'BADGE-002' },
+            { name: 'Nurse Florence', email: 'florence@totoafya.org', role: 'nurse', badge: 'BADGE-003' },
+          ];
+          const createdNurses = [];
+          for (const mn of mockNursesData) {
+            const n = await db.entities.Nurse.create({
+              facility_id: facilityId,
+              full_name: mn.name,
+              email: mn.email,
+              role: mn.role,
+              badge_token: mn.badge,
+              pin_code: '1234',
+            });
+            createdNurses.push(n);
+          }
+          nurses = createdNurses;
+        } catch (e) {
+          console.error('Failed to seed default nurses:', e);
+        }
+      }
+
+      const motherIds = mothers.map(m => m.id);
+      let children = [];
+      let immunizations = [];
+      let growthRecords = [];
+      let alerts = [];
+
+      if (motherIds.length > 0) {
+        children = await db.entities.Child.filter({ mother_id: motherIds }, '-created_date', 100);
+        const childIds = children.map(c => c.id);
+
+        const [immResult, growthResult, alertResult] = await Promise.all([
+          childIds.length > 0 ? db.entities.Immunization.filter({ child_id: childIds }, '-created_date', 200) : Promise.resolve([]),
+          childIds.length > 0 ? db.entities.GrowthRecord.filter({ child_id: childIds }, '-recorded_date', 200) : Promise.resolve([]),
+          db.entities.AIAlert.filter({ mother_id: motherIds, is_resolved: false }, '-created_date', 50),
+        ]);
+
+        immunizations = immResult;
+        growthRecords = growthResult;
+        alerts = alertResult;
+      }
+
+      setData({
+        mothers,
+        children,
+        immunizations,
+        alerts,
+        growthRecords,
+        nurses,
+        concerns: concernsFetched,
+      });
     } catch (err) {
       console.error('Error loading dashboard data:', err);
     } finally {
@@ -65,9 +136,11 @@ export default function FacilityDashboard() {
     mothers: <FacilityMothers mothers={data.mothers} onRefresh={loadAll} />,
     children: <FacilityChildren children={data.children} growthRecords={data.growthRecords} />,
     vaccines: <FacilityVaccines immunizations={data.immunizations} children={data.children} />,
+    nurses: <FacilityNurses nurses={data.nurses} facilityId={user?.facility_id} onRefresh={loadAll} />,
     analytics: <FacilityAnalytics data={data} />,
     alerts: <FacilityAlerts alerts={data.alerts} onRefresh={loadAll} />,
     billing: <FacilityBilling data={data} />,
+    concerns: <FacilityDeveloperDesk concerns={data.concerns} facilityId={user?.facility_id} onRefresh={loadAll} />,
   };
 
   return (
@@ -85,6 +158,7 @@ export default function FacilityDashboard() {
           alertCount={data.alerts.filter(a => !a.is_read).length}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          facilityName={facility?.name}
         />
 
         {/* Main content */}
@@ -101,11 +175,13 @@ export default function FacilityDashboard() {
                 <span className="w-3 h-0.5 bg-[#0A0A0A] rounded" />
               </span>
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-[9px] bg-[#0047FF] flex items-center justify-center">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-7 h-7 rounded-[9px] bg-[#0047FF] flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-[12px] font-extrabold">T</span>
               </div>
-              <p className="text-[14px] font-extrabold text-[#0A0A0A]">TotoAfya Facility</p>
+              <p className="text-[14px] font-extrabold text-[#0A0A0A] truncate">
+                {facility?.name || 'TotoAfya Facility'}
+              </p>
             </div>
             {data.alerts.filter(a => !a.is_read).length > 0 && (
               <span className="ml-auto w-5 h-5 bg-[#E51010] rounded-full text-white text-[10px] font-bold flex items-center justify-center">

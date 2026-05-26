@@ -1,16 +1,18 @@
 import React from 'react';
-import { LayoutDashboard, Users, Baby, Shield, BarChart2, Bell, Heart, X, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Users, Baby, Shield, BarChart2, Bell, Heart, X, CreditCard, Stethoscope, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, isOpen, onClose }) {
+export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, isOpen, onClose, facilityName }) {
   const navItems = [
     { key: 'overview',   icon: LayoutDashboard, label: 'Overview' },
     { key: 'mothers',    icon: Users,           label: 'Mothers' },
     { key: 'children',   icon: Baby,            label: 'Children' },
     { key: 'vaccines',   icon: Shield,          label: 'Vaccines' },
+    { key: 'nurses',     icon: Stethoscope,     label: 'Nurses' },
     { key: 'analytics',  icon: BarChart2,       label: 'Analytics' },
     { key: 'alerts',     icon: Bell,            label: 'Alerts' },
     { key: 'billing',    icon: CreditCard,      label: 'Billing & Quota' },
+    { key: 'concerns',   icon: Wrench,          label: 'Developer Desk' },
   ];
 
   return (
@@ -25,13 +27,13 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
     )}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[#E5E5E5] flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-[12px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-9 h-9 rounded-[12px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm flex-shrink-0">
             <Heart size={16} className="text-white" fill="white" />
           </div>
-          <div>
-            <p className="text-[15px] font-extrabold text-[#0A0A0A] leading-none">TotoAfya</p>
-            <p className="text-[10px] text-[#A0A0A0] font-medium mt-0.5">Facility Portal</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-extrabold text-[#0A0A0A] leading-none truncate">TotoAfya</p>
+            <p className="text-[10px] text-[#0047FF] font-bold mt-0.5 truncate uppercase tracking-wider">{facilityName || 'Facility Portal'}</p>
           </div>
         </div>
         {/* Close button on mobile */}

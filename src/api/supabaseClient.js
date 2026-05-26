@@ -16,7 +16,10 @@ const TABLE_MAP = {
   'GrowthRecord': 'growth_records',
   'Milestone': 'milestones',
   'Immunization': 'immunizations',
-  'LearningContent': 'learning_contents'
+  'LearningContent': 'learning_contents',
+  'Facility': 'facilities',
+  'Nurse': 'nurses',
+  'DeveloperConcern': 'developer_concerns'
 };
 
 function dbToClient(record) {
@@ -144,7 +147,8 @@ export const makeSupabaseStore = (entityName) => {
 
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
-  'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent'
+  'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
+  'Facility', 'Nurse', 'DeveloperConcern'
 ];
 
 const entities = Object.fromEntries(
