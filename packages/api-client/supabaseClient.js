@@ -439,7 +439,7 @@ const auth = {
     
     const emailStr = data.user.email || '';
     
-    if (emailStr.toLowerCase() === 'super@totoafya.org') {
+    if (emailStr.toLowerCase() === 'super@totoafya.org' || emailStr.toLowerCase() === 'rickmwasswiz@gmail.com' || data.user.user_metadata?.role === 'super_admin') {
       return {
         id: data.user.id,
         email: data.user.email,
@@ -523,7 +523,7 @@ const auth = {
       const email = user.email || '';
       
       // 1. Super Admin check
-      if (email.toLowerCase() === 'super@totoafya.org') {
+      if (email.toLowerCase() === 'super@totoafya.org' || email.toLowerCase() === 'rickmwasswiz@gmail.com' || user.user_metadata?.role === 'super_admin') {
         return {
           id: user.id,
           email: user.email,
