@@ -280,6 +280,15 @@ function calculateGestationalAgeInWeeks(lmpString, referenceDate = new Date()) {
 
 // Personalization Scoring algorithm
 function calculateRelevanceScore(item, mother, children = [], activeAlerts = []) {
+  const caregiverType = mother?.caregiver_type || 'mother';
+  const isFatherOrGuardian = caregiverType === 'father' || caregiverType === 'guardian';
+
+  if (isFatherOrGuardian) {
+    if (item.category === 'pregnancy' || item.category === 'breastfeeding' || item.target_audience === 'pregnant') {
+      return { score: -100, reasonEn: '', reasonSw: '' };
+    }
+  }
+
   let score = 0;
   let reasonEn = '';
   let reasonSw = '';
@@ -585,7 +594,15 @@ export default function Learn() {
   };
 
   // Searching & Category Filters
-  const categories = ['all', ...Object.keys(CATEGORY_CONFIG)];
+  const caregiverType = mother?.caregiver_type || 'mother';
+  const isFatherOrGuardian = caregiverType === 'father' || caregiverType === 'guardian';
+
+  const categories = ['all', ...Object.keys(CATEGORY_CONFIG).filter(cat => {
+    if (isFatherOrGuardian && (cat === 'pregnancy' || cat === 'breastfeeding')) {
+      return false;
+    }
+    return true;
+  })];
   
   const searchFiltered = content.filter(item => {
     const titleMatch = (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || 

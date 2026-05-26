@@ -35,9 +35,9 @@ export default function FacilityOverview({ data }) {
 
       {/* Stat grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-8">
-        <StatCard icon={Users} label="Registered Mothers" value={mothers.length} sub={`${pregnant} pregnant`} color="#0047FF" bg="bg-[#0047FF]/10" />
+        <StatCard icon={Users} label="Registered Caregivers" value={mothers.length} sub={`${pregnant} pregnant`} color="#0047FF" bg="bg-[#0047FF]/10" />
         <StatCard icon={Baby} label="Registered Children" value={children.length} sub="active profiles" color="#2E7A5D" bg="bg-[#2E7A5D]/10" />
-        <StatCard icon={AlertTriangle} label="High Risk Mothers" value={highRisk} sub="need attention" color="#E51010" bg="bg-[#E51010]/10" />
+        <StatCard icon={AlertTriangle} label="High Risk Caregivers" value={highRisk} sub="need attention" color="#E51010" bg="bg-[#E51010]/10" />
         <StatCard icon={Shield} label="Overdue Vaccines" value={overdueVax} sub={`${dueVax} due soon`} color="#F9A825" bg="bg-[#F9A825]/10" />
         <StatCard icon={Heart} label="SAM Cases" value={samChildren} sub="severe malnutrition" color="#E51010" bg="bg-[#E51010]/10" />
         <StatCard icon={TrendingUp} label="Active Alerts" value={alerts.length} sub={`${criticalAlerts} critical`} color="#7C3AED" bg="bg-[#7C3AED]/10" />

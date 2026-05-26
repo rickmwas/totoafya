@@ -131,7 +131,7 @@ export default function Onboarding() {
         risk_score: 0, risk_level: 'low', profile_complete: true, language_preference: lang,
       });
 
-      if (mode === 'child' && childForm.full_name && childForm.date_of_birth && childForm.gender) {
+      if (effectiveMode === 'child' && childForm.full_name && childForm.date_of_birth && childForm.gender) {
         await db.entities.Child.create({
           mother_id: mother.id,
           full_name: childForm.full_name,

@@ -12,20 +12,22 @@ export default function FacilityMothers({ mothers }) {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterRisk, setFilterRisk] = useState('all');
+  const [filterRole, setFilterRole] = useState('all');
 
   const filtered = mothers.filter(m => {
     const matchSearch = m.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       m.national_id?.includes(search) || m.phone?.includes(search);
     const matchStatus = filterStatus === 'all' || m.pregnancy_status === filterStatus;
     const matchRisk = filterRisk === 'all' || m.risk_level === filterRisk;
-    return matchSearch && matchStatus && matchRisk;
+    const matchRole = filterRole === 'all' || (m.caregiver_type || 'mother') === filterRole;
+    return matchSearch && matchStatus && matchRisk && matchRole;
   });
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-[28px] font-extrabold text-[#0A0A0A] tracking-[-0.02em]">Mothers</h1>
-        <p className="text-[14px] text-[#A0A0A0] mt-1">{mothers.length} registered mothers</p>
+        <h1 className="text-[28px] font-extrabold text-[#0A0A0A] tracking-[-0.02em]">Mothers & Caregivers</h1>
+        <p className="text-[14px] text-[#A0A0A0] mt-1">{mothers.length} registered caregivers</p>
       </div>
 
       {/* Filters */}
@@ -39,6 +41,13 @@ export default function FacilityMothers({ mothers }) {
             className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF]"
           />
         </div>
+        <select value={filterRole} onChange={e => setFilterRole(e.target.value)}
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF]">
+          <option value="all">All Roles</option>
+          <option value="mother">Mother</option>
+          <option value="father">Father</option>
+          <option value="guardian">Guardian</option>
+        </select>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF]">
           <option value="all">All Status</option>
@@ -61,7 +70,7 @@ export default function FacilityMothers({ mothers }) {
         <table className="w-full min-w-[700px]">
           <thead className="bg-[#F5F5F7]">
             <tr>
-              {['Name', 'National ID', 'Phone', 'Status', 'Risk', 'EDD', 'County', 'Facility', 'Registered'].map(h => (
+              {['Name', 'Role', 'National ID', 'Phone', 'Status', 'Risk', 'EDD', 'County', 'Facility', 'Registered'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-4 py-3">{h}</th>
               ))}
             </tr>
@@ -70,6 +79,7 @@ export default function FacilityMothers({ mothers }) {
             {filtered.map(m => (
               <tr key={m.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
                 <td className="px-4 py-3 text-[13px] font-semibold text-[#0A0A0A] whitespace-nowrap">{m.full_name}</td>
+                <td className="px-4 py-3 text-[12px] capitalize font-medium text-[#666666]">{m.caregiver_type || 'mother'}</td>
                 <td className="px-4 py-3 text-[12px] text-[#666666]">{m.national_id || '—'}</td>
                 <td className="px-4 py-3 text-[12px] text-[#666666]">{m.phone || '—'}</td>
                 <td className="px-4 py-3">
@@ -90,7 +100,7 @@ export default function FacilityMothers({ mothers }) {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className="px-4 py-12 text-center text-[13px] text-[#A0A0A0]">No mothers found</td></tr>
+              <tr><td colSpan={10} className="px-4 py-12 text-center text-[13px] text-[#A0A0A0]">No caregivers found</td></tr>
             )}
           </tbody>
         </table>

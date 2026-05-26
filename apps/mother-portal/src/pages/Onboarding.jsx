@@ -182,7 +182,7 @@ export default function Onboarding() {
         });
       }
 
-      if (mode === 'child' && childForm.full_name && childForm.date_of_birth && childForm.gender) {
+      if (effectiveMode === 'child' && childForm.full_name && childForm.date_of_birth && childForm.gender) {
         await db.entities.Child.create({
           mother_id: mother.id,
           full_name: childForm.full_name,

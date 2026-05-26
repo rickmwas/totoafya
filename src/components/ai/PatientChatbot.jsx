@@ -8,9 +8,15 @@ import ReactMarkdown from 'react-markdown';
 import { differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
 
 export default function PatientChatbot({ mother, children, lang }) {
+  const caregiverType = mother?.caregiver_type || 'mother';
+  const roleLabel = caregiverType === 'father' ? (lang === 'sw' ? 'baba' : 'Dad') 
+                  : caregiverType === 'guardian' ? (lang === 'sw' ? 'mlezi' : 'Guardian')
+                  : (lang === 'sw' ? 'mama' : 'Mum');
+
+
   const greeting = lang === 'sw'
-    ? `Habari! Mimi ni msaidizi wako wa afya wa AI. Nina taarifa zako zote za afya na ninaweza kukusaidia na maswali yoyote kuhusu ujauzito, watoto wako, au afya kwa ujumla. Unaweza kuniuliza nini?`
-    : `Hi${mother?.full_name ? ` ${mother.full_name.split(' ')[0]}` : ''}! I'm your personal health AI assistant. I have your full health profile and can answer questions about your pregnancy, children's health, upcoming vaccines, danger signs, and more. What would you like to know?`;
+    ? `Habari! Mimi ni msaidizi wako wa afya wa AI. Nina taarifa zenu zote za afya na ninaweza kukusaidia na maswali yoyote kuhusu afya ya ${caregiverType === 'mother' ? 'ujauzito wako, ' : ''}watoto wako, au afya kwa ujumla kama ${roleLabel}. Unaweza kuniuliza nini?`
+    : `Hi${mother?.full_name ? ` ${mother.full_name.split(' ')[0]}` : ''}! I'm your personal health AI assistant. I have your full health profile and can answer questions about ${caregiverType === 'mother' ? 'your pregnancy, ' : ''}your children's health, upcoming vaccines, danger signs, and more as their ${roleLabel}. What would you like to know?`;
 
   const [messages, setMessages] = useState([{ role: 'assistant', content: greeting }]);
   const [input, setInput] = useState('');
@@ -26,6 +32,7 @@ export default function PatientChatbot({ mother, children, lang }) {
     return `
 PATIENT CONTEXT:
 - Name: ${mother?.full_name || '—'}
+- Caregiver Type: ${caregiverType}
 - Pregnancy status: ${mother?.pregnancy_status || '—'}
 - Weeks pregnant: ${weeksPregnant ?? '—'}
 - EDD: ${mother?.edd || '—'}
@@ -41,6 +48,10 @@ ${children.map(c => {
 }).join('\n') || 'None'}
 
 You are a warm, supportive maternal and child health AI assistant for TotoAfya Digital in Kenya. Use WHO/Kenya MoH guidelines. Respond in ${lang === 'sw' ? 'Swahili' : 'English'}. Be clear, empathetic, and practical. Always recommend seeking professional care for serious concerns. Keep responses concise.
+
+CRITICAL INSTRUCTIONS regarding Caregiver Type:
+- The caregiver is a "${caregiverType}". 
+- If caregiver_type is "father" or "guardian", they CANNOT be pregnant/postpartum. Do NOT mention their own pregnancy status, antenatal care visits for themselves, or postpartum status (such as "your postpartum recovery" or "since you gave birth"). Talk to them as a father or guardian who is caring for and supporting the children listed, and answer questions from the perspective of how they can ensure the health of their children or support the mother.
 `.trim();
   };
 
@@ -74,9 +85,13 @@ AI:`;
     }
   };
 
-  const QUICK_QUESTIONS = lang === 'sw'
-    ? ['Dalili za hatari ni zipi?', 'Lini niende ANC?', 'Chanjo gani inakuja?']
-    : ['What are danger signs?', 'When is my next ANC visit?', 'What vaccine is due next?'];
+  const QUICK_QUESTIONS = caregiverType === 'mother'
+    ? (lang === 'sw'
+        ? ['Dalili za hatari ni zipi?', 'Lini niende ANC?', 'Chanjo gani inakuja?']
+        : ['What are danger signs?', 'When is my next ANC visit?', 'What vaccine is due next?'])
+    : (lang === 'sw'
+        ? ['Dalili za hatari ni zipi?', 'Chanjo gani inakuja?', 'Mlo kamili wa mtoto ni upi?']
+        : ['What are danger signs?', 'What vaccine is due next?', 'What is a balanced diet for a child?']);
 
   return (
     <div className="flex flex-col h-[520px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">

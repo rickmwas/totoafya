@@ -48,6 +48,7 @@ export default function AIHealthAssistant() {
 
       const contextData = {
         mother: mother ? {
+          caregiver_type: mother.caregiver_type || 'mother',
           pregnancy_status: mother.pregnancy_status,
           weeks_pregnant: mother.lmp ? differenceInWeeks(new Date(), parseISO(mother.lmp)) : null,
           gravida: mother.gravida,
@@ -84,6 +85,12 @@ Analyze the following patient data and provide:
 3. Up to 5 specific health alerts or observations (severity: "info", "warning", or "critical")
 4. Up to 4 personalized recommendations
 5. A brief health summary (2-3 sentences, warm and reassuring tone)
+
+CRITICAL INSTRUCTIONS regarding Caregiver Type:
+- The caregiver_type is explicitly specified in the patient data. It can be "mother", "father", or "guardian".
+- If the caregiver_type is "father" or "guardian", they CANNOT be pregnant or postpartum themselves. Do NOT generate pregnancy-specific warnings, antenatal care (ANC) visit warnings, or postpartum flags (e.g. Gravida/Parity mismatch, missing postpartum checkups, or "We understand you are postpartum") for them.
+- Instead, address them as the supporting parent/caregiver (e.g. "We understand you are caring for the child as a father/guardian...") and focus exclusively on the child's health, immunization schedule, growth, and how they can support the child and mother (if applicable).
+- Only if the caregiver_type is "mother" should you evaluate maternal health, pregnancy status, weeks pregnant, ANC visits, and postpartum status.
 
 Be clinically accurate, use WHO/Kenya MCH guidelines. For language preference "${lang}", provide responses in both English and Swahili.
 
