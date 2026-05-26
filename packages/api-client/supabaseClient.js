@@ -1,7 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const getEnv = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[`EXPO_PUBLIC_${key}`]) {
+    return process.env[`EXPO_PUBLIC_${key}`];
+  }
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+  return null;
+};
+
+const supabaseUrl = getEnv('VITE_SUPABASE_URL') || getEnv('SUPABASE_URL');
+const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('SUPABASE_ANON_KEY');
 
 // Only initialize if the URL and Key are provided
 export const supabase = (supabaseUrl && supabaseAnonKey)
@@ -16,7 +31,9 @@ const TABLE_MAP = {
   'GrowthRecord': 'growth_records',
   'Milestone': 'milestones',
   'Immunization': 'immunizations',
-  'LearningContent': 'learning_contents'
+  'LearningContent': 'learning_contents',
+  'Facility': 'facilities',
+  'Nurse': 'nurses'
 };
 
 function dbToClient(record) {
@@ -144,72 +161,66 @@ export const makeSupabaseStore = (entityName) => {
 
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
-  'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent'
+  'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
+  'Facility', 'Nurse'
 ];
 
 const entities = Object.fromEntries(
   ENTITY_NAMES.map(name => [name, makeSupabaseStore(name)])
 );
 
-const LOCAL_USER = {
-  id: 'local-user-1',
-  email: 'user@local.app',
-  full_name: 'Local User',
-  role: 'user',
+const MOCK_USERS = {
+  super_admin: {
+    id: 'mock-super-admin',
+    email: 'super@totoafya.org',
+    full_name: 'Super Admin',
+    role: 'super_admin',
+  },
+  facility_admin: {
+    id: 'mock-facility-admin',
+    email: 'admin-a@facility.org',
+    full_name: 'Facility A Admin',
+    role: 'admin',
+    facility_id: 'fac-a-id',
+  },
+  nurse: {
+    id: 'mock-nurse',
+    email: 'nurse-a@facility.org',
+    full_name: 'Nurse Joy',
+    role: 'nurse',
+    facility_id: 'fac-a-id',
+  },
+  user: {
+    id: 'mock-user',
+    email: 'mother-a@local.app',
+    full_name: 'Mother A',
+    role: 'user',
+    facility_id: 'fac-a-id',
+  }
+};
+
+const getActiveMockUser = () => {
+  try {
+    const customUser = localStorage.getItem('custom_mock_user');
+    if (customUser) {
+      return JSON.parse(customUser);
+    }
+  } catch (e) {
+    console.error("Failed to parse custom_mock_user", e);
+  }
+  const savedRole = localStorage.getItem('active_mock_role');
+  if (savedRole && MOCK_USERS[savedRole]) {
+    return MOCK_USERS[savedRole];
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.port === '5003') return MOCK_USERS.super_admin;
+    if (window.location.port === '5002') return MOCK_USERS.facility_admin;
+    if (window.location.port === '5001') return MOCK_USERS.nurse;
+  }
+  return MOCK_USERS.user;
 };
 
 const auth = {
-  me: async () => {
-    if (!supabase) return LOCAL_USER;
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return LOCAL_USER;
-
-      // Fetch mother profile to get facility_id, mother_id, and profile_complete
-      const { data: mother, error: mError } = await supabase
-        .from('mothers')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      return {
-        id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name || user.email,
-        role: user.user_metadata?.role || 'user',
-        facility_id: mother?.facility_id || null,
-        mother_id: mother?.id || null,
-        profile_complete: mother?.profile_complete ?? false,
-        subscription_status: mother?.subscription_status || 'trial',
-        trial_end_date: mother?.trial_end_date || null,
-      };
-    } catch {
-      return LOCAL_USER;
-    }
-  },
-  isAuthenticated: async () => {
-    if (!supabase) return true;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      return !!session;
-    } catch {
-      return true;
-    }
-  },
-  logout: async () => {
-    if (supabase) {
-      try {
-        await supabase.auth.signOut();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    localStorage.clear();
-    window.location.href = '/';
-  },
-  redirectToLogin: () => {
-    window.location.href = '/login';
-  },
   signInWithNationalIdOrAnc: async (identifier, pin) => {
     if (!supabase) throw new Error('Supabase client not initialized.');
     const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
@@ -376,6 +387,242 @@ const auth = {
       trial_end_date: motherData.trial_end_date || null,
     };
   },
+  loginNurseWithBadge: async (badgeToken) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data: nurse, error } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('badge_token', badgeToken)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!nurse) throw new Error('Badge not recognized');
+
+    return {
+      id: nurse.user_id || nurse.id,
+      email: nurse.email,
+      full_name: nurse.full_name,
+      role: nurse.role || 'nurse',
+      facility_id: nurse.facility_id,
+      nurse_id: nurse.id
+    };
+  },
+  verifyNursePin: async (email, pin) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data: nurse, error } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('email', email)
+      .eq('pin_code', pin)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!nurse) throw new Error('Invalid PIN code');
+
+    return {
+      id: nurse.user_id || nurse.id,
+      email: nurse.email,
+      full_name: nurse.full_name,
+      role: nurse.role || 'nurse',
+      facility_id: nurse.facility_id,
+      nurse_id: nurse.id
+    };
+  },
+  login: async (email, password) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Authentication failed');
+    
+    const emailStr = data.user.email || '';
+    
+    if (emailStr.toLowerCase() === 'super@totoafya.org') {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.user_metadata?.full_name || 'Super Admin',
+        role: 'super_admin'
+      };
+    }
+
+    const { data: nurse } = await supabase
+      .from('nurses')
+      .select('*')
+      .eq('email', emailStr)
+      .maybeSingle();
+
+    if (nurse) {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: nurse.full_name,
+        role: nurse.role || 'nurse',
+        facility_id: nurse.facility_id,
+        nurse_id: nurse.id
+      };
+    }
+
+    const { data: mother } = await supabase
+      .from('mothers')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+    if (mother) {
+      return {
+        id: data.user.id,
+        email: data.user.email,
+        full_name: mother.full_name,
+        role: 'user',
+        facility_id: mother.facility_id,
+        mother_id: mother.id,
+        profile_complete: mother.profile_complete
+      };
+    }
+
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: data.user.user_metadata?.full_name || data.user.email,
+      role: 'user',
+      profile_complete: false
+    };
+  },
+  signUp: async (email, password, metadata = {}) => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: metadata.full_name,
+          role: metadata.role || 'user',
+        }
+      }
+    });
+    if (error) throw error;
+    if (!data.user) throw new Error('Sign up failed');
+    
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: metadata.full_name || data.user.email,
+      role: metadata.role || 'user',
+      profile_complete: false
+    };
+  },
+  me: async () => {
+    if (!supabase) return null;
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return null;
+
+      const email = user.email || '';
+      
+      // 1. Super Admin check
+      if (email.toLowerCase() === 'super@totoafya.org') {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || 'Super Admin',
+          role: 'super_admin'
+        };
+      }
+
+      // 2. Nurse / Facility Admin check
+      const { data: nurse } = await supabase
+        .from('nurses')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle();
+
+      if (nurse) {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: nurse.full_name,
+          role: nurse.role || 'nurse', // 'nurse' or 'admin'
+          facility_id: nurse.facility_id,
+          nurse_id: nurse.id
+        };
+      }
+
+      // 3. Mother check (using user_id or email)
+      const { data: mother } = await supabase
+        .from('mothers')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (mother) {
+        return {
+          id: user.id,
+          email: user.email,
+          full_name: mother.full_name,
+          role: 'user',
+          facility_id: mother.facility_id,
+          mother_id: mother.id,
+          profile_complete: mother.profile_complete
+        };
+      }
+
+      // If authenticated but no record exists, they are a new mother
+      return {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.email,
+        role: 'user',
+        profile_complete: false
+      };
+    } catch (err) {
+      console.error("Error in auth.me()", err);
+      return null;
+    }
+  },
+  isAuthenticated: async () => {
+    if (!supabase) return false;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return !!session;
+    } catch {
+      return false;
+    }
+  },
+  signInWithGoogle: async () => {
+    if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
+    if (error) throw error;
+    return data;
+  },
+  logout: async () => {
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    localStorage.clear();
+    window.location.href = '/login';
+  },
+  redirectToLogin: () => {
+    window.location.href = '/login';
+  },
+  switchMockRole: (role) => {
+    if (MOCK_USERS[role]) {
+      localStorage.setItem('active_mock_role', role);
+      localStorage.setItem('is_logged_in', 'true');
+      window.location.reload();
+    }
+  }
 };
 
 function generateMockResponse(prompt, response_json_schema) {
@@ -525,8 +772,8 @@ const integrations = {
         
       return { file_url: publicUrl };
     },
-    InvokeLLM: async ({ prompt, response_json_schema }) => {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    InvokeLLM: async ({ prompt, response_json_schema = null }) => {
+      const apiKey = getEnv('VITE_GEMINI_API_KEY') || getEnv('GEMINI_API_KEY');
 
       if (apiKey) {
         try {

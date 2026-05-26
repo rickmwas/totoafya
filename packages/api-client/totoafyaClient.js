@@ -1,6 +1,21 @@
 import { supabaseDb } from './supabaseClient';
 
-const isSupabase = import.meta.env.VITE_DATABASE_PROVIDER === 'supabase';
+const getEnv = (key) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[`EXPO_PUBLIC_${key}`]) {
+    return process.env[`EXPO_PUBLIC_${key}`];
+  }
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (e) {}
+  return null;
+};
+
+const isSupabase = getEnv('VITE_DATABASE_PROVIDER') === 'supabase' || getEnv('DATABASE_PROVIDER') === 'supabase';
 
 // Local localStorage-backed database — no totoafya dependencies
 
@@ -34,107 +49,33 @@ function sortRecords(records, sortKey) {
 
 function matchesFilter(record, conditions) {
   for (const [key, val] of Object.entries(conditions)) {
-    if (record[key] !== val) return false;
+    if (Array.isArray(val)) {
+      if (!val.includes(record[key])) return false;
+    } else {
+      if (record[key] !== val) return false;
+    }
   }
   return true;
-}
-
-function enrichMotherRecord(mother, recordsStore) {
-  if (!mother) return mother;
-  let status = mother.subscription_status || 'trial';
-  let trialEndDate = mother.trial_end_date;
-  if (!trialEndDate && !mother.facility_id) {
-    const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
-    trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    mother.trial_end_date = trialEndDate;
-    saveStore('Mother', recordsStore);
-  }
-  
-  const isB2C = !mother.facility_id;
-  if (isB2C) {
-    if (status === 'trial' && new Date() > new Date(trialEndDate)) {
-      status = 'expired';
-      mother.subscription_status = 'expired';
-      saveStore('Mother', recordsStore);
-    }
-  } else {
-    status = 'sponsored';
-    if (mother.subscription_status !== 'sponsored') {
-      mother.subscription_status = 'sponsored';
-      saveStore('Mother', recordsStore);
-    }
-  }
-  return mother;
 }
 
 function makeEntityStore(name) {
   return {
     list: async (sortKey = '-created_date', limit = 100) => {
       const records = getStore(name);
-      if (name === 'Mother') records.forEach(r => enrichMotherRecord(r, records));
       const sorted = sortRecords(records, sortKey);
       return limit ? sorted.slice(0, limit) : sorted;
     },
     filter: async (conditions = {}, sortKey = '-created_date', limit = 100) => {
       const records = getStore(name);
-      if (name === 'Mother') records.forEach(r => enrichMotherRecord(r, records));
       const filtered = records.filter(r => matchesFilter(r, conditions));
       const sorted = sortRecords(filtered, sortKey);
       return limit ? sorted.slice(0, limit) : sorted;
     },
     get: async (id) => {
       const records = getStore(name);
-      const record = records.find(r => r.id === id) || null;
-      if (name === 'Mother' && record) {
-        enrichMotherRecord(record, records);
-      }
-      return record;
+      return records.find(r => r.id === id) || null;
     },
     create: async (data) => {
-      if (name === 'Mother') {
-        if (data.facility_id) {
-          const SUBSCRIPTION_LIMITS = {
-            bronze: 50,
-            silver: 250,
-            gold: Infinity
-          };
-
-          const facilitiesStore = getStore('Facility');
-          let facility = facilitiesStore.find(f => f.id === data.facility_id);
-          if (!facility) {
-            facility = {
-              id: data.facility_id,
-              name: data.facility_name || "Demo Referral Hospital",
-              facility_code: "REF-001",
-              subscription_tier: "bronze",
-              subscription_status: "active",
-              subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            };
-            facilitiesStore.push(facility);
-            saveStore('Facility', facilitiesStore);
-          }
-
-          const mothers = getStore('Mother');
-          const facilityMothersCount = mothers.filter(m => m.facility_id === data.facility_id).length;
-
-          const tier = facility.subscription_tier || 'bronze';
-          const limit = SUBSCRIPTION_LIMITS[tier] || 50;
-
-          if (facility.subscription_status === 'expired') {
-            throw new Error('SUB_EXPIRED: Facility subscription has expired. Please renew the subscription.');
-          }
-          if (facilityMothersCount >= limit) {
-            throw new Error(`SUB_LIMIT_REACHED: Facility registration limit reached (${facilityMothersCount}/${limit} mothers). Please upgrade your subscription plan.`);
-          }
-
-          data.subscription_status = 'sponsored';
-          data.trial_end_date = null;
-        } else {
-          data.subscription_status = 'trial';
-          data.trial_end_date = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        }
-      }
-
       const records = getStore(name);
       const newRecord = {
         ...data,
@@ -166,80 +107,65 @@ function makeEntityStore(name) {
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
   'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
-  'ChildImmunization',
+  'ChildImmunization', 'Facility', 'Nurse',
 ];
 
 const entities = Object.fromEntries(
   ENTITY_NAMES.map(name => [name, makeEntityStore(name)])
 );
 
-// Default local user
-const LOCAL_USER = {
-  id: 'local-user-1',
-  email: 'user@local.app',
-  full_name: 'Local User',
-  role: 'user',
+const MOCK_USERS = {
+  super_admin: {
+    id: 'mock-super-admin',
+    email: 'super@totoafya.org',
+    full_name: 'Super Admin',
+    role: 'super_admin',
+  },
+  facility_admin: {
+    id: 'mock-facility-admin',
+    email: 'admin-a@facility.org',
+    full_name: 'Facility A Admin',
+    role: 'admin',
+    facility_id: 'fac-a-id',
+  },
+  nurse: {
+    id: 'mock-nurse',
+    email: 'nurse-a@facility.org',
+    full_name: 'Nurse Joy',
+    role: 'nurse',
+    facility_id: 'fac-a-id',
+  },
+  user: {
+    id: 'mock-user',
+    email: 'mother-a@local.app',
+    full_name: 'Mother A',
+    role: 'user',
+    facility_id: 'fac-a-id',
+  }
+};
+
+const getActiveMockUser = () => {
+  try {
+    const customUser = localStorage.getItem('custom_mock_user');
+    if (customUser) {
+      return JSON.parse(customUser);
+    }
+  } catch (e) {
+    console.error("Failed to parse custom_mock_user", e);
+  }
+  const savedRole = localStorage.getItem('active_mock_role');
+  if (savedRole && MOCK_USERS[savedRole]) {
+    return MOCK_USERS[savedRole];
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.port === '5003') return MOCK_USERS.super_admin;
+    if (window.location.port === '5002') return MOCK_USERS.facility_admin;
+    if (window.location.port === '5001') return MOCK_USERS.nurse;
+  }
+  return MOCK_USERS.user;
 };
 
 const auth = {
-  me: async () => {
-    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
-    if (!isLoggedIn) return LOCAL_USER;
-
-    try {
-      const customUser = localStorage.getItem('custom_mock_user');
-      const user = customUser ? JSON.parse(customUser) : LOCAL_USER;
-      if (user && user.role === 'user') {
-        const mothersStore = getStore('Mother');
-        const mother = mothersStore.find(m => m.user_id === user.id || m.id === user.mother_id) || mothersStore[0];
-        if (mother) {
-          let status = mother.subscription_status || 'trial';
-          let trialEndDate = mother.trial_end_date;
-          if (!trialEndDate && !mother.facility_id) {
-            const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
-            trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            mother.trial_end_date = trialEndDate;
-            saveStore('Mother', mothersStore);
-          }
-
-          const isB2C = !mother.facility_id;
-          if (isB2C) {
-            if (status === 'trial' && new Date() > new Date(trialEndDate)) {
-              status = 'expired';
-              mother.subscription_status = 'expired';
-              saveStore('Mother', mothersStore);
-            }
-          } else {
-            status = 'sponsored';
-            if (mother.subscription_status !== 'sponsored') {
-              mother.subscription_status = 'sponsored';
-              saveStore('Mother', mothersStore);
-            }
-          }
-
-          return {
-            ...user,
-            subscription_status: status,
-            trial_end_date: trialEndDate,
-            facility_id: mother.facility_id || null,
-            profile_complete: mother.profile_complete || false,
-            mother_id: mother.id,
-          };
-        }
-      }
-      return user;
-    } catch {
-      return LOCAL_USER;
-    }
-  },
-  isAuthenticated: async () => true,
-  logout: () => {
-    localStorage.clear();
-    window.location.href = '/';
-  },
-  redirectToLogin: () => {
-    window.location.href = '/login';
-  },
   signInWithNationalIdOrAnc: async (identifier, pin) => {
     const mothers = getStore('Mother');
     const mother = mothers.find(m => 
@@ -302,6 +228,110 @@ const auth = {
     localStorage.setItem('is_logged_in', 'true');
     return mockUser;
   },
+  loginNurseWithBadge: async (badgeToken) => {
+    localStorage.setItem('active_mock_role', 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS.nurse;
+  },
+  verifyNursePin: async (email, pin) => {
+    localStorage.setItem('active_mock_role', 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS.nurse;
+  },
+  me: async () => {
+    const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
+    if (!isLoggedIn) return null;
+
+    try {
+      const customUser = localStorage.getItem('custom_mock_user');
+      const user = customUser ? JSON.parse(customUser) : null;
+      if (user && user.role === 'user') {
+        const mothersStore = getStore('Mother');
+        const mother = mothersStore.find(m => m.user_id === user.id || m.id === user.mother_id) || mothersStore[0];
+        if (mother) {
+          let status = mother.subscription_status || 'trial';
+          let trialEndDate = mother.trial_end_date;
+          if (!trialEndDate && !mother.facility_id) {
+            const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
+            trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            mother.trial_end_date = trialEndDate;
+            saveStore('Mother', mothersStore);
+          }
+
+          const isB2C = !mother.facility_id;
+          if (isB2C) {
+            if (status === 'trial' && new Date() > new Date(trialEndDate)) {
+              status = 'expired';
+              mother.subscription_status = 'expired';
+              saveStore('Mother', mothersStore);
+            }
+          } else {
+            status = 'sponsored';
+            if (mother.subscription_status !== 'sponsored') {
+              mother.subscription_status = 'sponsored';
+              saveStore('Mother', mothersStore);
+            }
+          }
+
+          return {
+            ...user,
+            subscription_status: status,
+            trial_end_date: trialEndDate,
+            facility_id: mother.facility_id || null,
+            profile_complete: mother.profile_complete || false,
+            mother_id: mother.id,
+          };
+        }
+      }
+      return user || getActiveMockUser();
+    } catch {
+      return getActiveMockUser();
+    }
+  },
+  isAuthenticated: async () => {
+    return localStorage.getItem('is_logged_in') === 'true';
+  },
+  signInWithGoogle: async (role = 'user') => {
+    localStorage.setItem('active_mock_role', role);
+    localStorage.setItem('is_logged_in', 'true');
+    return MOCK_USERS[role] || MOCK_USERS.user;
+  },
+  login: async (email, password) => {
+    const foundRole = Object.keys(MOCK_USERS).find(r => MOCK_USERS[r].email.toLowerCase() === email.toLowerCase());
+    if (foundRole) {
+      localStorage.setItem('active_mock_role', foundRole);
+      localStorage.setItem('is_logged_in', 'true');
+      return MOCK_USERS[foundRole];
+    }
+    throw new Error('User not found. Try one of: ' + Object.values(MOCK_USERS).map(u => u.email).join(', '));
+  },
+  signUp: async (email, password, metadata = {}) => {
+    const newUser = {
+      id: 'mock-' + Math.random().toString(36).slice(2),
+      email,
+      full_name: metadata.full_name || email.split('@')[0],
+      role: metadata.role || 'user',
+      facility_id: metadata.facility_id || 'fac-a-id',
+    };
+    localStorage.setItem('custom_mock_user', JSON.stringify(newUser));
+    localStorage.setItem('active_mock_role', newUser.role);
+    localStorage.setItem('is_logged_in', 'true');
+    return newUser;
+  },
+  logout: () => {
+    localStorage.clear();
+    window.location.href = '/login';
+  },
+  redirectToLogin: () => {
+    window.location.href = '/login';
+  },
+  switchMockRole: (role) => {
+    if (MOCK_USERS[role]) {
+      localStorage.setItem('active_mock_role', role);
+      localStorage.setItem('is_logged_in', 'true');
+      window.location.reload();
+    }
+  }
 };
 
 function generateMockResponse(prompt, response_json_schema) {
@@ -433,8 +463,8 @@ const integrations = {
         reader.readAsDataURL(file);
       });
     },
-    InvokeLLM: async ({ prompt, response_json_schema }) => {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    InvokeLLM: async ({ prompt, response_json_schema = null }) => {
+      const apiKey = getEnv('VITE_GEMINI_API_KEY') || getEnv('GEMINI_API_KEY');
 
       if (apiKey) {
         try {
@@ -521,4 +551,3 @@ export default db;
 
 // Make available globally for files using globalThis.__TOTOAFYA_DB__
 globalThis.__TOTOAFYA_DB__ = db;
-
