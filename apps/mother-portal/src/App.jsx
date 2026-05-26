@@ -28,6 +28,7 @@ import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkAppState } = useAuth();
+  const { lang } = useLang();
   const currentPath = window.location.pathname;
 
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -55,8 +56,6 @@ const AuthenticatedApp = () => {
       }
     }
   }
-
-  const { lang } = useLang();
 
   // Redirect authenticated user with incomplete profile to onboarding
   if (user && !user.profile_complete && currentPath !== '/onboarding' && currentPath !== '/login') {

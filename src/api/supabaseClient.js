@@ -213,19 +213,20 @@ const auth = {
   signInWithNationalIdOrAnc: async (identifier, pin) => {
     if (!supabase) throw new Error('Supabase client not initialized.');
     const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
+    const securePin = `toto_${pin}`;
     
     try {
       // 1. Try to sign in first
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: pin,
+        password: securePin,
       });
 
       if (error) {
         // 2. If sign in fails, let's try to register them on the fly
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
-          password: pin,
+          password: securePin,
           options: {
             data: {
               role: 'user',
@@ -333,9 +334,10 @@ const auth = {
   signUpMother: async (identifier, pin, metadata) => {
     if (!supabase) throw new Error('Supabase client not initialized.');
     const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
+    const securePin = `toto_${pin}`;
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
-      password: pin,
+      password: securePin,
       options: {
         data: {
           role: 'user',
