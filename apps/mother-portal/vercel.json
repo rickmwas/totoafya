@@ -12,6 +12,19 @@
           "value": "no-cache, no-store, must-revalidate"
         }
       ]
+    },
+    {
+      "source": "/install-bridge",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://totoafyadigital.terraseptsolutions.com"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOW-FROM https://totoafyadigital.terraseptsolutions.com"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -21,3 +34,4 @@
     }
   ]
 }
+

@@ -13,6 +13,7 @@ import B2CPaywall from '@/components/B2CPaywall';
 
 // Page imports
 import Home from '@/pages/Home';
+import InstallBridge from '@/pages/InstallBridge';
 import Onboarding from '@/pages/Onboarding';
 import VaccinationSchedule from '@/pages/VaccinationSchedule';
 import GrowthTracker from '@/pages/GrowthTracker';
@@ -103,7 +104,12 @@ function App() {
         <ProfileProvider>
         <Router>
           {!splashDone && <SplashScreen onDone={handleSplashDone} />}
-          <AuthenticatedApp />
+          <Routes>
+            {/* ── Public route: install bridge (no auth required) ── */}
+            <Route path="/install-bridge" element={<InstallBridge />} />
+            {/* ── All other routes go through auth guard ─────────── */}
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
         </ProfileProvider>
