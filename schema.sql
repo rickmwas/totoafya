@@ -444,7 +444,7 @@ CREATE POLICY "Mothers manage child milestones"
 -- I. AI ALERTS policies
 CREATE POLICY "Facility staff manage alerts"
     ON ai_alerts FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND facility_id = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 CREATE POLICY "Mothers view own alerts"
     ON ai_alerts FOR SELECT TO authenticated
