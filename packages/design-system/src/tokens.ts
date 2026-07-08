@@ -1,34 +1,35 @@
 export const colors = {
-  primary: '#1B6B5A', // Deep Teal
-  secondary: '#2E7A5D', // Emerald Green
-  accent: '#C8813A', // Soft Amber/Brown
-  background: '#F8F9FA', // Off-white
+  primary: '#006B5F', // TotoAfya Teal
+  secondary: '#E68A00', // Savannah Sunrise
+  accent: '#E68A00', // Savannah Sunrise alias
+  background: '#F7F5F0', // Warm Off-white
   surface: '#FFFFFF', // Pure White
   border: '#E5E5E5', // Light Grey
   text: {
     primary: '#0A0A0A',
     secondary: '#555555',
+    clinical: '#374151',
     muted: '#A0A0A0',
     inverse: '#FFFFFF',
   },
   status: {
-    healthy: '#2E7A5D',
-    given: '#2E7A5D',
-    due: '#D97706',
-    overdue: '#E51010',
+    healthy: '#107C41', // Success Green
+    given: '#107C41',
+    due: '#FFB900', // Warning Amber
+    overdue: '#D13438', // Critical Red
     upcoming: '#A0A0A0',
-    scheduled: '#1B6B5A',
-    missed: '#E51010',
-    monitor: '#D97706',
-    critical: '#E51010',
-    at_risk: '#E51010',
+    scheduled: '#006B5F', // Primary Teal
+    missed: '#D13438',
+    monitor: '#FFB900',
+    critical: '#D13438',
+    at_risk: '#D13438',
   },
   statusBg: {
     healthy: '#F0FAF5',
     given: '#F0FAF5',
     due: '#FFFBEB',
     overdue: '#FFF5F5',
-    upcoming: '#E6F4F1',
+    upcoming: '#F1F3F4',
     scheduled: '#E6F4F1',
     missed: '#FFF5F5',
     monitor: '#FFFBEB',
@@ -48,7 +49,7 @@ export const spacing = {
 
 export const typography = {
   fontFamily: {
-    serif: 'Playfair Display, Georgia, serif',
+    serif: 'Merriweather, Georgia, serif',
     sans: 'Inter, sans-serif',
   },
   fontSize: {

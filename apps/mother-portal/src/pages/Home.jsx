@@ -139,36 +139,57 @@ export default function Home() {
     );
   }
 
+  const todayFormatted = new Intl.DateTimeFormat(lang === 'sw' ? 'sw-KE' : 'en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric'
+  }).format(new Date());
+
   return (
     <AppShell>
       <div className="animate-fade-in">
 
-        {/* ── Header ── */}
-        <div className="relative flex items-start justify-between px-4 pt-14 pb-5 overflow-hidden">
-          <div className="absolute -top-6 -right-6 w-36 h-36 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-2xl pointer-events-none" />
-          <div className="absolute top-8 right-16 w-20 h-20 rounded-full bg-[#C8813A] opacity-[0.05] blur-xl pointer-events-none" />
-          <div>
-            <p className="text-[11px] tracking-[0.12em] font-semibold text-[#A0A0A0] mb-1.5">
-              {getGreeting(lang)}
-            </p>
-            <h1 className="text-[34px] font-bold leading-none text-[#1B6B5A]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {mother?.full_name?.split(' ')[0] || caregiverLabel}
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <Link to="/ai-health">
-              <div className="w-11 h-11 bg-[#1B6B5A] rounded-full flex items-center justify-center active:scale-[0.92] transition-transform shadow-teal-glow-sm">
-                <Sparkles size={17} className="text-white" />
+        {/* ── Premium Top Bar & Greeting ── */}
+        <div className="px-4 pt-8 pb-5 flex flex-col gap-5 relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-toto-teal opacity-[0.04] blur-3xl pointer-events-none" />
+          <div className="absolute top-10 right-24 w-32 h-32 rounded-full bg-toto-ochre opacity-[0.03] blur-2xl pointer-events-none" />
+          
+          {/* Top Row: App Logo & Notification center */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-toto-teal/10 border border-toto-teal/20 flex items-center justify-center text-[18px] shadow-sm flex-shrink-0">
+                {caregiverType === 'mother' ? '🤰' : caregiverType === 'father' ? '👨' : '🧑'}
               </div>
-            </Link>
-            <button className="relative w-11 h-11 bg-white rounded-full border border-[#EBEBEB] flex items-center justify-center active:scale-[0.92] transition-transform shadow-card">
-              <Bell size={17} className="text-[#0A0A0A]" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#E51010] rounded-full text-[9px] text-white font-bold flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+              <div>
+                <p className="text-[13px] font-extrabold text-[#0A0A0A] tracking-tight">TotoAfya</p>
+                <p className="text-[9.5px] text-toto-light font-bold tracking-widest uppercase">{caregiverLabel}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link to="/ai-health">
+                <div className="w-10 h-10 bg-toto-teal rounded-full flex items-center justify-center active:scale-[0.92] transition-transform shadow-teal-glow-sm">
+                  <Sparkles size={16} className="text-white" />
+                </div>
+              </Link>
+              <button className="relative w-10 h-10 bg-white rounded-full border border-[#EBEBEB] flex items-center justify-center active:scale-[0.92] transition-transform shadow-card">
+                <Bell size={16} className="text-toto-black" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-toto-red rounded-full text-[9px] text-white font-bold flex items-center justify-center font-numeric-tabular">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Greeting Row */}
+          <div>
+            <h1 className="text-[32px] font-extrabold leading-[1.1] text-toto-black tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              {getGreeting(lang)}, {mother?.full_name?.split(' ')[0]}
+            </h1>
+            <p className="text-[13px] text-toto-light font-semibold mt-1">
+              {lang === 'sw' ? 'Leo ni' : 'Today is'} {todayFormatted}
+            </p>
           </div>
         </div>
 
@@ -182,38 +203,40 @@ export default function Home() {
         {isPregnant && !isCaregiverOnly && (
           <>
             <FetalDevelopmentCard mother={mother} lang={lang} />
-            <div className="mx-4 mb-5 grid grid-cols-3 gap-2">
+            <div className="mx-4 mb-5 grid grid-cols-3 gap-3 animate-fade-in">
               <Link to="/anc" className="active:scale-[0.97] transition-transform">
-                <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                  <div className="w-9 h-9 rounded-[12px] bg-[#E6F4F1] flex items-center justify-center mx-auto mb-2">
-                    <HeartHandshake size={17} className="text-[#1B6B5A]" />
+                <div className="bg-white rounded-[24px] p-3.5 border border-[#F0F0F0] text-center shadow-card hover:border-toto-teal/15 transition-colors">
+                  <div className="w-9.5 h-9.5 rounded-[14px] bg-toto-teal/10 flex items-center justify-center mx-auto mb-2.5">
+                    <HeartHandshake size={18} className="text-toto-teal" />
                   </div>
-                  <p className="text-[18px] font-extrabold text-[#1B6B5A] leading-none">{mother.gravida || '—'}</p>
-                  <p className="text-[10px] text-[#A0A0A0] mt-1">{lang === 'sw' ? 'Ziara' : 'ANC Visits'}</p>
+                  <p className="text-[19px] font-black text-toto-teal leading-none font-numeric-tabular">{mother.gravida || '—'}</p>
+                  <p className="text-[10px] text-toto-light font-bold mt-1.5 uppercase tracking-wider">{lang === 'sw' ? 'Ziara' : 'ANC Visits'}</p>
                 </div>
               </Link>
               <Link to="/learn" className="active:scale-[0.97] transition-transform">
-                <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                  <div className="w-9 h-9 rounded-[12px] bg-[#F5F0FF] flex items-center justify-center mx-auto mb-2">
-                    <BookOpen size={17} className="text-[#7C3AED]" />
+                <div className="bg-white rounded-[24px] p-3.5 border border-[#F0F0F0] text-center shadow-card hover:border-toto-teal/15 transition-colors">
+                  <div className="w-9.5 h-9.5 rounded-[14px] bg-toto-purple/10 flex items-center justify-center mx-auto mb-2.5">
+                    <BookOpen size={18} className="text-toto-purple" />
                   </div>
-                  <p className="text-[13px] font-bold text-[#0A0A0A]">{lang === 'sw' ? 'Elimu' : 'Learn'}</p>
-                  <p className="text-[10px] text-[#A0A0A0] mt-1">{lang === 'sw' ? 'Video' : 'Videos'}</p>
+                  <p className="text-[14px] font-black text-toto-black leading-none">{lang === 'sw' ? 'Elimu' : 'Learn'}</p>
+                  <p className="text-[10px] text-toto-light font-bold mt-2 uppercase tracking-wider">{lang === 'sw' ? 'Video' : 'Videos'}</p>
                 </div>
               </Link>
               <Link to="/ai-health" className="active:scale-[0.97] transition-transform">
-                <div className={`rounded-[20px] p-3.5 border text-center shadow-card ${
-                  mother.risk_level === 'critical' ? 'bg-[#E51010]/5 border-[#E51010]/20' :
-                  mother.risk_level === 'high' ? 'bg-[#F9A825]/5 border-[#F9A825]/20' : 'bg-white border-[#F0F0F0]'
-                }`}>
-                  <div className="w-9 h-9 rounded-[12px] bg-[#F5F5F7] flex items-center justify-center mx-auto mb-2">
-                    <Shield size={17} className={mother.risk_level === 'critical' || mother.risk_level === 'high' ? 'text-[#E51010]' : 'text-[#2E7A5D]'} />
+                <div className={cn(
+                  "rounded-[24px] p-3.5 border text-center shadow-card transition-colors",
+                  mother.risk_level === 'critical' ? 'bg-toto-red/5 border-toto-red/15 text-toto-red' :
+                  mother.risk_level === 'high' ? 'bg-toto-amber/5 border-toto-amber/15 text-toto-ochre' : 'bg-white border-[#F0F0F0]'
+                )}>
+                  <div className={cn(
+                    "w-9.5 h-9.5 rounded-[14px] flex items-center justify-center mx-auto mb-2.5",
+                    mother.risk_level === 'critical' ? 'bg-toto-red/10' :
+                    mother.risk_level === 'high' ? 'bg-toto-amber/10' : 'bg-toto-green/10'
+                  )}>
+                    <Shield size={18} className={mother.risk_level === 'critical' || mother.risk_level === 'high' ? 'text-toto-red' : 'text-toto-green'} />
                   </div>
-                  <p className={`text-[18px] font-extrabold leading-none ${
-                    mother.risk_level === 'critical' ? 'text-[#E51010]' :
-                    mother.risk_level === 'high' ? 'text-[#F9A825]' : 'text-[#2E7A5D]'
-                  }`}>{mother.risk_score ?? '—'}</p>
-                  <p className="text-[10px] text-[#A0A0A0] mt-1">{lang === 'sw' ? 'Hatari' : 'Risk'}</p>
+                  <p className="text-[19px] font-black leading-none font-numeric-tabular">{mother.risk_score ?? '—'}</p>
+                  <p className="text-[10px] text-toto-light font-bold mt-1.5 uppercase tracking-wider">{lang === 'sw' ? 'Hatari' : 'Risk'}</p>
                 </div>
               </Link>
             </div>
@@ -222,32 +245,32 @@ export default function Home() {
 
         {/* ── CHILD CARE MODE: Stats ── */}
         {(isCaregiverOnly || !isPregnant) && hasChildren && (
-          <div className="mx-4 mb-5 grid grid-cols-3 gap-2">
+          <div className="mx-4 mb-5 grid grid-cols-3 gap-2 animate-fade-in">
             <Link to="/vaccines" className="active:scale-[0.97] transition-transform">
               <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                <div className="w-9 h-9 rounded-[12px] bg-[#E6F4F1] flex items-center justify-center mx-auto mb-2">
-                  <Shield size={17} className="text-[#1B6B5A]" />
+                <div className="w-9 h-9 rounded-[12px] bg-toto-teal/10 flex items-center justify-center mx-auto mb-2">
+                  <Shield size={17} className="text-toto-teal" />
                 </div>
-                <p className="text-[13px] font-bold text-[#0A0A0A]">{lang === 'sw' ? 'Chanjo' : 'Vaccines'}</p>
-                <p className="text-[10px] text-[#A0A0A0] mt-0.5">{lang === 'sw' ? 'Hali' : 'Status'}</p>
+                <p className="text-[13px] font-bold text-toto-black">{lang === 'sw' ? 'Chanjo' : 'Vaccines'}</p>
+                <p className="text-[10px] text-toto-light mt-0.5">{lang === 'sw' ? 'Hali' : 'Status'}</p>
               </div>
             </Link>
             <Link to="/growth" className="active:scale-[0.97] transition-transform">
               <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                <div className="w-9 h-9 rounded-[12px] bg-[#F0FAF5] flex items-center justify-center mx-auto mb-2">
-                  <TrendingUp size={17} className="text-[#2E7A5D]" />
+                <div className="w-9 h-9 rounded-[12px] bg-toto-green/10 flex items-center justify-center mx-auto mb-2">
+                  <TrendingUp size={17} className="text-toto-green" />
                 </div>
-                <p className="text-[13px] font-bold text-[#0A0A0A]">{lang === 'sw' ? 'Ukuaji' : 'Growth'}</p>
-                <p className="text-[10px] text-[#A0A0A0] mt-0.5">{lang === 'sw' ? 'Grafu' : 'Charts'}</p>
+                <p className="text-[13px] font-bold text-toto-black">{lang === 'sw' ? 'Ukuaji' : 'Growth'}</p>
+                <p className="text-[10px] text-toto-light mt-0.5">{lang === 'sw' ? 'Grafu' : 'Charts'}</p>
               </div>
             </Link>
             <Link to="/ai-health" className="active:scale-[0.97] transition-transform">
               <div className="bg-white rounded-[20px] p-3.5 border border-[#F0F0F0] text-center shadow-card">
-                <div className="w-9 h-9 rounded-[12px] bg-[#F5F0FF] flex items-center justify-center mx-auto mb-2">
-                  <Sparkles size={17} className="text-[#7C3AED]" />
+                <div className="w-9 h-9 rounded-[12px] bg-toto-purple/10 flex items-center justify-center mx-auto mb-2">
+                  <Sparkles size={17} className="text-toto-purple" />
                 </div>
-                <p className="text-[13px] font-bold text-[#0A0A0A]">AI</p>
-                <p className="text-[10px] text-[#A0A0A0] mt-0.5">{lang === 'sw' ? 'Uchambuzi' : 'Insights'}</p>
+                <p className="text-[13px] font-bold text-toto-black">AI</p>
+                <p className="text-[10px] text-toto-light mt-0.5">{lang === 'sw' ? 'Uchambuzi' : 'Insights'}</p>
               </div>
             </Link>
           </div>
@@ -255,14 +278,14 @@ export default function Home() {
 
         {/* ── Children Section ── */}
         <div className="px-4 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-[18px] font-bold tracking-[-0.01em] text-[#1B6B5A]">
+          <div className="flex items-center justify-between mb-3 animate-fade-in">
+            <h2 className="text-[18px] font-bold tracking-[-0.01em] text-toto-teal" style={{ fontFamily: "'Merriweather', Georgia, serif" }}>
               {isPregnant && !hasChildren
                 ? (lang === 'sw' ? 'Watoto Wako' : 'Your Children')
                 : t('my_children')}
             </h2>
             <Link to="/add-child">
-              <button className="flex items-center gap-1.5 bg-[#1B6B5A] text-white pl-3 pr-4 py-2 rounded-full text-[12px] font-semibold active:scale-[0.95] transition-transform shadow-teal-glow-sm">
+              <button className="flex items-center gap-1.5 bg-toto-teal text-white pl-3 pr-4 py-2 rounded-full text-[12px] font-semibold active:scale-[0.95] transition-transform shadow-teal-glow-sm">
                 <Plus size={14} /> {t('add_child')}
               </button>
             </Link>
@@ -271,14 +294,14 @@ export default function Home() {
           {children.length === 0 ? (
             <Link to="/add-child" className="block active:scale-[0.98] transition-transform">
               <div className="bg-white rounded-[24px] border border-dashed border-[#E5E5E5] p-8 flex flex-col items-center gap-3">
-                <div className="w-14 h-14 rounded-[18px] bg-[#1B6B5A]/10 flex items-center justify-center">
-                  <Plus size={24} className="text-[#1B6B5A]" />
+                <div className="w-14 h-14 rounded-[18px] bg-toto-teal/10 flex items-center justify-center">
+                  <Plus size={24} className="text-toto-teal" />
                 </div>
                 <div className="text-center">
-                  <p className="text-[15px] font-bold text-[#0A0A0A] mb-1">
+                  <p className="text-[15px] font-bold text-toto-black mb-1">
                     {lang === 'sw' ? 'Ongeza Mtoto' : 'Add a Child'}
                   </p>
-                  <p className="text-[13px] text-[#A0A0A0]">
+                  <p className="text-[13px] text-toto-light">
                     {lang === 'sw' ? 'Anza kufuatilia afya ya mtoto wako' : "Start tracking your child's health"}
                   </p>
                 </div>

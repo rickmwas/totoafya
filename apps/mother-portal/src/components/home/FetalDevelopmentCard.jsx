@@ -86,95 +86,100 @@ export default function FetalDevelopmentCard({ mother, lang }) {
   const trimLabel = lang === 'sw' ? cfg.label_sw : cfg.label;
 
   return (
-    <Link to="/anc" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-200">
-      <div className="rounded-[28px] overflow-hidden" style={{ background: cfg.gradient }}>
+    <Link to="/anc" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-300">
+      <div className="rounded-[28px] overflow-hidden relative shadow-[0_12px_36px_rgba(0,0,0,0.06)]" style={{ background: cfg.gradient }}>
 
         {/* Subtle mesh pattern overlay */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.04]"
+        <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+
+        {/* Glow decoration */}
+        <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full opacity-[0.15] blur-2xl pointer-events-none" style={{ backgroundColor: cfg.dot }} />
 
         <div className="relative p-5">
 
-          {/* Top: label + due badge */}
-          <div className="flex items-start justify-between mb-5">
+          {/* Top: Trimester Details + Due Badge */}
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-[9px] tracking-[0.22em] font-bold uppercase mb-1" style={{ color: cfg.accent }}>
+              <p className="text-[9px] tracking-[0.2em] font-extrabold uppercase mb-0.5" style={{ color: cfg.accent }}>
                 {lang === 'sw' ? 'MTOTO WAKO LEO' : 'YOUR BABY TODAY'}
               </p>
-              <p className="text-[12px] font-semibold text-white/60">{trimLabel}</p>
+              <p className="text-[12px] font-bold text-white/70">{trimLabel}</p>
             </div>
             {eddFormatted && (
-              <div className="rounded-full px-3 py-1.5 flex items-center gap-1.5"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}>
+              <div className="rounded-full px-3 py-1.5 flex items-center gap-2"
+                style={{ backgroundColor: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse-dot" style={{ backgroundColor: cfg.dot }} />
-                <span className="text-[10px] font-bold text-white/80">{eddFormatted}</span>
+                <span className="text-[10px] font-black text-white/80 tracking-tight">{eddFormatted}</span>
               </div>
             )}
           </div>
 
-          {/* Hero: Week number */}
-          <div className="flex items-end gap-4 mb-6">
-            <div>
-              <div className="text-[80px] font-extrabold leading-none tracking-[-0.04em] text-white" style={{ textShadow: `0 0 40px ${cfg.accent}50` }}>
-                {weeksPregnant ?? '—'}
-              </div>
-              <p className="text-[13px] font-semibold text-white/50 mt-1 tracking-wide uppercase">
-                {lang === 'sw' ? 'WIKI' : 'WEEKS'}
+          {/* Main Content: Split layout */}
+          <div className="flex items-start justify-between gap-4 mb-5">
+            {/* Left: Size comparison and description */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[20px] font-black text-white leading-tight mb-2 tracking-tight">
+                {lang === 'sw' ? 'Ukubwa wa ' : 'Size of a '}<span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80" style={{ textShadow: `0 2px 10px ${cfg.accent}30` }}>{fetal.size}</span>
               </p>
+              <p className="text-[12.5px] text-white/75 leading-relaxed font-semibold line-clamp-3">{update}</p>
             </div>
-            {/* Vertical divider + fetal info */}
-            <div className="mb-2 pb-1 border-l border-white/15 pl-4 flex flex-col gap-2">
-              <div>
-                <p className="text-[9px] tracking-[0.15em] uppercase font-bold text-white/40 mb-0.5">
-                  {lang === 'sw' ? 'UKUBWA' : 'SIZE'}
-                </p>
-                <p className="text-[17px] font-extrabold text-white leading-none">{fetal.size}</p>
-              </div>
-              <div className="flex gap-3">
-                <div>
-                  <p className="text-[9px] text-white/40 font-medium">{lang === 'sw' ? 'Uzito' : 'Weight'}</p>
-                  <p className="text-[13px] font-bold text-white/80">{fetal.weight}</p>
-                </div>
-                <div>
-                  <p className="text-[9px] text-white/40 font-medium">{lang === 'sw' ? 'Urefu' : 'Length'}</p>
-                  <p className="text-[13px] font-bold text-white/80">{fetal.length}cm</p>
-                </div>
+
+            {/* Right: Premium glass circular week badge */}
+            <div className="w-22 h-22 rounded-full bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center relative shadow-[inset_0_1px_3px_rgba(255,255,255,0.2)] flex-shrink-0">
+              <span className="text-[32px] font-black text-white leading-none tracking-tight">{weeksPregnant ?? '—'}</span>
+              <span className="text-[8px] tracking-[0.1em] font-black text-white/60 uppercase leading-none mt-1">{lang === 'sw' ? 'WIKI' : 'WEEKS'}</span>
+              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white flex items-center justify-center text-[12px] shadow-sm border border-toto-teal/10 animate-bounce-in">
+                👶
               </div>
             </div>
           </div>
 
+          {/* Fetal metrics row */}
+          <div className="grid grid-cols-3 gap-2.5 mb-5">
+            <div className="bg-white/5 backdrop-blur-md rounded-[16px] border border-white/10 p-2.5 flex flex-col">
+              <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider">{lang === 'sw' ? 'Uzito' : 'Weight'}</span>
+              <span className="text-[13px] font-black text-white mt-0.5">{fetal.weight}</span>
+            </div>
+            <div className="bg-white/5 backdrop-blur-md rounded-[16px] border border-white/10 p-2.5 flex flex-col">
+              <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider">{lang === 'sw' ? 'Urefu' : 'Length'}</span>
+              <span className="text-[13px] font-black text-white mt-0.5">{fetal.length} cm</span>
+            </div>
+            <div className="bg-white/5 backdrop-blur-md rounded-[16px] border border-white/10 p-2.5 flex flex-col">
+              <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider">{lang === 'sw' ? 'Katika Siku' : 'Progress'}</span>
+              <span className="text-[13px] font-black text-white mt-0.5 truncate">{Math.round(progress)}%</span>
+            </div>
+          </div>
+
           {/* Progress bar */}
-          <div className="mb-5">
-            <div className="h-[3px] rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
+          <div className="mb-1">
+            <div className="h-[4px] rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}>
               <div
                 className="h-full rounded-full transition-all duration-1000"
                 style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${cfg.accent}, ${cfg.dot})` }}
               />
             </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-[9px] text-white/30 font-medium">{lang === 'sw' ? 'Wiki 1' : 'Week 1'}</span>
-              <span className="text-[9px] font-bold" style={{ color: cfg.accent }}>{Math.round(progress)}% {lang === 'sw' ? 'kamili' : 'complete'}</span>
-              <span className="text-[9px] text-white/30 font-medium">{lang === 'sw' ? 'Wiki 40' : 'Week 40'}</span>
+            <div className="flex justify-between mt-2">
+              <span className="text-[8.5px] text-white/35 font-bold uppercase tracking-wider">{lang === 'sw' ? 'Wiki 1' : 'Week 1'}</span>
+              <span className="text-[8.5px] text-white/35 font-bold uppercase tracking-wider">{lang === 'sw' ? 'Wiki 40' : 'Week 40'}</span>
             </div>
           </div>
 
-          {/* Update text */}
-          <p className="text-[13px] text-white/75 leading-relaxed font-medium">{update}</p>
         </div>
 
-        {/* Bottom bar */}
+        {/* Premium bottom glass container bar */}
         <div className="flex items-center justify-between px-5 py-3.5"
-          style={{ backgroundColor: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(8px)' }}>
+          style={{ backgroundColor: 'rgba(0,0,0,0.22)', backdropFilter: 'blur(10px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <div>
             <p className="text-[9px] tracking-[0.15em] uppercase font-bold text-white/40 mb-0.5">
               {lang === 'sw' ? 'SIKU ZILIZOBAKI' : 'DAYS UNTIL DUE'}
             </p>
-            <p className="text-[18px] font-extrabold text-white leading-none">
-              {daysUntilDue !== null && daysUntilDue > 0 ? daysUntilDue : '—'}
+            <p className="text-[17px] font-black text-white leading-none font-numeric-tabular">
+              {daysUntilDue !== null && daysUntilDue > 0 ? `${daysUntilDue} ${lang === 'sw' ? 'siku' : 'days'}` : '—'}
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-white/50">
-            <span className="text-[12px] font-semibold">{lang === 'sw' ? 'Kumbukumbu za ANC' : 'View ANC records'}</span>
+          <div className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200">
+            <span className="text-[11.5px] font-bold">{lang === 'sw' ? 'Kumbukumbu za ANC' : 'View ANC records'}</span>
             <ArrowRight size={13} />
           </div>
         </div>

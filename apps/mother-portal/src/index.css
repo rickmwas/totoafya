@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,8 @@
 
 @layer base {
   :root {
-    --font-inter: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --font-merriweather: 'Merriweather', Georgia, serif;
 
     --background: 38 50% 97%;
     --foreground: 0 0% 3.9%;
@@ -14,27 +15,33 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 161 59% 37%;
+    --primary: 173 100% 21%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 38 30% 95%;
+    --secondary: 44 100% 45%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 38 30% 95%;
+    --muted: 38 20% 90%;
     --muted-foreground: 0 0% 40%;
-    --accent: 38 30% 95%;
+    --accent: 44 100% 45%;
     --accent-foreground: 0 0% 9%;
-    --destructive: 0 90% 48%;
+    --destructive: 358 64% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 38 20% 88%;
     --input: 38 20% 88%;
-    --ring: 161 59% 37%;
+    --ring: 173 100% 21%;
     --radius: 1.5rem;
 
-    /* Semantic health colors */
-    --health-green: 158 47% 33%;
-    --health-amber: 43 95% 57%;
-    --health-red: 0 88% 48%;
-    --health-teal: 161 59% 37%;
+    /* Semantic health colors from THIG */
+    --health-green: 147 77% 27%;
+    --health-amber: 44 100% 50%;
+    --health-red: 358 64% 51%;
+    --health-teal: 173 100% 21%;
     --health-purple: 270 67% 55%;
+  }
+}
+
+@layer utilities {
+  .font-numeric-tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 

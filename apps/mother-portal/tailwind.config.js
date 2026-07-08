@@ -12,6 +12,7 @@ module.exports = {
     extend: {
       fontFamily: {
         inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'sans-serif'],
+        merriweather: ['Merriweather', 'Georgia', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -27,15 +28,15 @@ module.exports = {
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         // TotoAfya Design Tokens
-        'toto-teal': '#1B6B5A',
-        'toto-teal-dark': '#145244',
-        'toto-green': '#2E7A5D',
-        'toto-red': '#E51010',
-        'toto-amber': '#F9A825',
-        'toto-ochre': '#C8813A',
+        'toto-teal': '#006B5F',
+        'toto-teal-dark': '#005047',
+        'toto-green': '#107C41',
+        'toto-red': '#D13438',
+        'toto-amber': '#FFB900',
+        'toto-ochre': '#E68A00',
         'toto-purple': '#7C3AED',
         'toto-black': '#0A0A0A',
-        'toto-gray': '#666666',
+        'toto-gray': '#374151',
         'toto-light': '#A0A0A0',
         'toto-surface': '#F7F5F0',
         'toto-warm': '#FDFCF8',

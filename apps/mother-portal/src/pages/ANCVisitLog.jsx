@@ -96,26 +96,26 @@ export default function ANCVisitLog() {
       <div className="animate-fade-in">
         {/* Header */}
         <div className="relative px-4 pt-14 pb-6 overflow-hidden">
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-[#E91E8C] opacity-[0.05] blur-2xl pointer-events-none" />
-          <div className="absolute top-6 right-14 w-20 h-20 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-xl pointer-events-none" />
-          <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#E91E8C]/50 mb-1.5">
+          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-toto-red opacity-[0.05] blur-2xl pointer-events-none" />
+          <div className="absolute top-6 right-14 w-20 h-20 rounded-full bg-toto-teal opacity-[0.06] blur-xl pointer-events-none" />
+          <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-toto-red/60 mb-1.5">
             {lang === 'sw' ? 'UJAUZITO' : 'PREGNANCY CARE'}
           </p>
-          <h1 className="font-bold leading-tight text-[#1a1a1a] text-[34px]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <h1 className="font-bold leading-tight text-toto-black text-[34px]" style={{ fontFamily: "'Merriweather', Georgia, serif" }}>
             {t('anc_visits')}
           </h1>
         </div>
 
         {/* ANC Progress */}
-        <div className="mx-4 mb-4 bg-white rounded-[24px] p-5 border border-[#E5E5E5] shadow-card">
-          <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] mb-3">
+        <div className="mx-4 mb-4 bg-white rounded-[24px] p-5 border border-toto-surface shadow-card">
+          <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light mb-3">
             {lang === 'sw' ? 'MAENDELEO YA ANC' : 'ANC PROGRESS'}
           </p>
-          <div className="flex items-end gap-1 mb-3">
-            <span className="text-[48px] font-extrabold leading-none tracking-[-0.03em] text-[#1B6B5A]">
+          <div className="flex items-end gap-1 mb-3 animate-fade-in">
+            <span className="text-[48px] font-extrabold leading-none tracking-[-0.03em] text-toto-teal font-numeric-tabular">
               {visits.length}
             </span>
-            <span className="text-[16px] text-[#666666] mb-2">/ 8 {lang === 'sw' ? 'ziara' : 'visits'}</span>
+            <span className="text-[16px] text-toto-gray mb-2 font-numeric-tabular">/ 8 {lang === 'sw' ? 'ziara' : 'visits'}</span>
           </div>
           {/* Visit dots */}
           <div className="flex gap-2 flex-wrap">
@@ -123,10 +123,10 @@ export default function ANCVisitLog() {
               <div
                 key={i}
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all',
+                  'w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold transition-all font-numeric-tabular',
                   i < visits.length
-                    ? 'bg-[#2E7A5D] text-white shadow-green-glow'
-                    : 'bg-[#F7F5F0] border border-[#E5E5E5] text-[#A0A0A0]'
+                    ? 'bg-toto-teal text-white shadow-teal-glow-sm'
+                    : 'bg-[#F7F5F0] border border-toto-surface text-toto-light'
                 )}
               >
                 {i + 1}
@@ -134,7 +134,7 @@ export default function ANCVisitLog() {
             ))}
           </div>
           {visits.length < 8 && (
-            <p className="text-[12px] text-[#666666] mt-3">
+            <p className="text-[12px] text-toto-gray mt-3">
               {lang === 'sw'
                 ? `WHO inashauriwa ziara ${8 - visits.length} zaidi`
                 : `${8 - visits.length} more visits recommended by WHO`}
@@ -147,7 +147,7 @@ export default function ANCVisitLog() {
           <div className="px-4 mb-4">
             <button
               onClick={() => setShowForm(true)}
-              className="w-full h-14 rounded-full bg-[#1B6B5A] text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-full bg-toto-teal text-white text-[15px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all"
             >
               <Plus size={18} /> {t('add_visit')}
             </button>
@@ -156,45 +156,45 @@ export default function ANCVisitLog() {
 
         {/* Add Visit Form */}
         {showForm && (
-          <div className="mx-4 mb-4 bg-white rounded-[24px] p-5 border border-[#E5E5E5] shadow-card">
-            <p className="text-[16px] font-bold text-[#0A0A0A] mb-4">{t('add_visit')}</p>
+          <div className="mx-4 mb-4 bg-white rounded-[24px] p-5 border border-toto-surface shadow-card animate-fade-in">
+            <p className="text-[16px] font-bold text-toto-black mb-4">{t('add_visit')}</p>
             <div className="flex flex-col gap-4">
               {/* Date & Visit no */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">{t('date')}</label>
+                  <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">{t('date')}</label>
                   <input type="date" value={form.visit_date} onChange={e => setForm(f => ({...f, visit_date: e.target.value}))}
-                    className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
+                    className="w-full h-12 px-4 bg-toto-surface border border-toto-surface rounded-[14px] text-[14px] outline-none focus:border-toto-teal font-numeric-tabular" />
                 </div>
                 <div className="w-20">
-                  <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">Visit #</label>
+                  <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">Visit #</label>
                   <input type="number" value={form.visit_number} onChange={e => setForm(f => ({...f, visit_number: parseInt(e.target.value)}))}
-                    className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
+                    className="w-full h-12 px-4 bg-toto-surface border border-toto-surface rounded-[14px] text-[14px] outline-none focus:border-toto-teal font-numeric-tabular" />
                 </div>
               </div>
 
               {/* Facility */}
               <div>
-                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">
+                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">
                   {lang === 'sw' ? 'HOSPITALI' : 'FACILITY'}
                 </label>
                 <input type="text" value={form.facility} onChange={e => setForm(f => ({...f, facility: e.target.value}))} placeholder="e.g. Nairobi West Hospital"
-                  className="w-full h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
+                  className="w-full h-12 px-4 bg-toto-surface border border-toto-surface rounded-[14px] text-[14px] outline-none focus:border-toto-teal" />
               </div>
 
               {/* Blood Pressure */}
               <div>
-                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">{t('blood_pressure')}</label>
+                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">{t('blood_pressure')}</label>
                 <div className="flex items-center gap-2">
                   <input type="number" value={form.blood_pressure_systolic} onChange={e => setForm(f => ({...f, blood_pressure_systolic: e.target.value}))} placeholder="120"
-                    className="flex-1 h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
-                  <span className="text-[#A0A0A0] font-bold">/</span>
+                    className="flex-1 h-12 px-4 bg-toto-surface border border-toto-surface rounded-[14px] text-[14px] outline-none focus:border-toto-teal font-numeric-tabular" />
+                  <span className="text-toto-light font-bold">/</span>
                   <input type="number" value={form.blood_pressure_diastolic} onChange={e => setForm(f => ({...f, blood_pressure_diastolic: e.target.value}))} placeholder="80"
-                    className="flex-1 h-12 px-4 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[14px] outline-none focus:border-[#1B6B5A]" />
-                  <span className="text-[12px] text-[#A0A0A0]">mmHg</span>
+                    className="flex-1 h-12 px-4 bg-toto-surface border border-toto-surface rounded-[14px] text-[14px] outline-none focus:border-toto-teal font-numeric-tabular" />
+                  <span className="text-[12px] text-toto-light">mmHg</span>
                 </div>
                 {bpStatus(form.blood_pressure_systolic, form.blood_pressure_diastolic) === 'critical' && (
-                  <p className="text-[11px] text-[#E51010] mt-1 font-semibold">⚠️ {lang === 'sw' ? 'Shinikizo la juu sana — tafadhali wasiliana na daktari' : 'Very high BP — seek medical attention'}</p>
+                  <p className="text-[11px] text-toto-red mt-1.5 font-semibold">⚠️ {lang === 'sw' ? 'Shinikizo la juu sana — tafadhali wasiliana na daktari' : 'Very high BP — seek medical attention'}</p>
                 )}
               </div>
 
@@ -202,20 +202,20 @@ export default function ANCVisitLog() {
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { label: lang === 'sw' ? 'UZITO (kg)' : 'WEIGHT (kg)', key: 'weight_kg', placeholder: '65' },
-                  { label: lang === 'sw' ? 'UREFU WA FANDASI (cm)' : 'FUNDAL HT (cm)', key: 'fundal_height_cm', placeholder: '28' },
+                  { label: lang === 'sw' ? 'FANDASI (cm)' : 'FUNDAL HT (cm)', key: 'fundal_height_cm', placeholder: '28' },
                   { label: lang === 'sw' ? 'MAPIGO YA MOYO' : 'FETAL HR', key: 'fetal_heart_rate', placeholder: '140' },
                 ].map(({ label, key, placeholder }) => (
                   <div key={key}>
-                    <label className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#A0A0A0] block mb-2">{label}</label>
+                    <label className="text-[9px] tracking-[0.1em] uppercase font-bold text-toto-light block mb-2">{label}</label>
                     <input type="number" value={form[key]} onChange={e => setForm(f => ({...f, [key]: e.target.value}))} placeholder={placeholder}
-                      className="w-full h-12 px-3 bg-[#F7F5F0] border border-[#E5E5E5] rounded-[14px] text-[13px] outline-none focus:border-[#1B6B5A]" />
+                      className="w-full h-12 px-3 bg-toto-surface border border-toto-surface rounded-[14px] text-[13px] outline-none focus:border-toto-teal font-numeric-tabular" />
                   </div>
                 ))}
               </div>
 
               {/* Interventions */}
               <div>
-                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">
+                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">
                   {lang === 'sw' ? 'DAWA/HUDUMA' : 'INTERVENTIONS'}
                 </label>
                 <div className="flex flex-col gap-2">
@@ -228,16 +228,16 @@ export default function ANCVisitLog() {
                       key={key}
                       onClick={() => setForm(f => ({...f, [key]: !f[key]}))}
                       className={cn(
-                        'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98]',
+                        'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98] h-12',
                         form[key]
-                          ? 'bg-[#2E7A5D]/8 border-[#2E7A5D]/30 text-[#2E7A5D]'
-                          : 'bg-[#F7F5F0] border-[#E5E5E5] text-[#666666]'
+                          ? 'bg-toto-green/10 border-toto-green/30 text-toto-green'
+                          : 'bg-toto-surface border-toto-surface text-toto-gray'
                       )}
                     >
-                      <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0', form[key] ? 'bg-[#2E7A5D] border-[#2E7A5D]' : 'border-[#D0D0D0]')}>
+                      <div className={cn('w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0', form[key] ? 'bg-toto-green border-toto-green' : 'border-[#D0D0D0]')}>
                         {form[key] && <span className="text-white text-[10px] font-bold">✓</span>}
                       </div>
-                      <span className="text-[13px] font-medium">{lang === 'sw' ? sw : en}</span>
+                      <span className="text-[13px] font-semibold">{lang === 'sw' ? sw : en}</span>
                     </button>
                   ))}
                 </div>
@@ -245,7 +245,7 @@ export default function ANCVisitLog() {
 
               {/* Danger signs */}
               <div>
-                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] block mb-2">
+                <label className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light block mb-2">
                   {t('danger_signs')} {lang === 'sw' ? '(chagua zote zinazotumika)' : '(select all that apply)'}
                 </label>
                 <div className="flex flex-col gap-2">
@@ -257,14 +257,14 @@ export default function ANCVisitLog() {
                         key={sign.en}
                         onClick={() => toggleDangerSign(sign.en)}
                         className={cn(
-                          'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98]',
+                          'flex items-center gap-3 p-3 rounded-[14px] border text-left transition-all active:scale-[0.98] h-12',
                           active
-                            ? 'bg-[#E51010]/8 border-[#E51010]/30 text-[#E51010]'
-                            : 'bg-[#F7F5F0] border-[#E5E5E5] text-[#666666]'
+                            ? 'bg-toto-red/10 border-toto-red/30 text-toto-red font-bold'
+                            : 'bg-toto-surface border-toto-surface text-toto-gray'
                         )}
                       >
-                        <AlertTriangle size={14} className={active ? 'text-[#E51010]' : 'text-[#A0A0A0]'} />
-                        <span className="text-[13px] font-medium">{label}</span>
+                        <AlertTriangle size={14} className={active ? 'text-toto-red' : 'text-toto-light'} />
+                        <span className="text-[13px] font-semibold">{label}</span>
                       </button>
                     );
                   })}
@@ -272,10 +272,10 @@ export default function ANCVisitLog() {
               </div>
 
               <div className="flex gap-2 pt-1">
-                <button onClick={() => setShowForm(false)} className="flex-1 h-12 rounded-full border border-[#E5E5E5] text-[13px] font-semibold text-[#666666] active:scale-[0.97]">
+                <button onClick={() => setShowForm(false)} className="flex-1 h-12 rounded-full border border-toto-surface text-[13px] font-semibold text-toto-gray active:scale-[0.97]">
                   {t('cancel')}
                 </button>
-                <button onClick={saveVisit} disabled={saving} className="flex-1 h-12 rounded-full bg-[#1B6B5A] text-white text-[13px] font-bold shadow-teal-glow active:scale-[0.97] disabled:opacity-40">
+                <button onClick={saveVisit} disabled={saving} className="flex-1 h-12 rounded-full bg-toto-teal text-white text-[13px] font-bold shadow-teal-glow active:scale-[0.97] disabled:opacity-40">
                   {saving ? '...' : t('save')}
                 </button>
               </div>
@@ -285,12 +285,12 @@ export default function ANCVisitLog() {
 
         {/* Visit History */}
         <div className="px-4 pb-4">
-          <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] mb-3">
+          <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-toto-light mb-3">
             {lang === 'sw' ? 'HISTORIA YA ZIARA' : 'VISIT HISTORY'}
           </p>
           {visits.length === 0 ? (
-            <div className="bg-white rounded-[20px] p-6 border border-[#E5E5E5] text-center">
-              <p className="text-[14px] text-[#A0A0A0]">{lang === 'sw' ? 'Hakuna ziara bado' : 'No visits recorded yet'}</p>
+            <div className="bg-white rounded-[20px] p-6 border border-toto-surface text-center">
+              <p className="text-[14px] text-toto-light">{lang === 'sw' ? 'Hakuna ziara bado' : 'No visits recorded yet'}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -299,48 +299,92 @@ export default function ANCVisitLog() {
                 const hasDangerSigns = visit.danger_signs?.length > 0;
                 return (
                   <div key={visit.id} className={cn(
-                    'bg-white rounded-[20px] p-4 border shadow-card',
-                    hasDangerSigns ? 'border-[#E51010]/30' : bp === 'warning' ? 'border-[#F9A825]/30' : 'border-[#E5E5E5]'
+                    'bg-white rounded-[20px] p-4 border shadow-card transition-all duration-200',
+                    hasDangerSigns ? 'border-toto-red/30 bg-toto-red/5' : bp === 'warning' ? 'border-toto-amber/30 bg-toto-amber/5' : 'border-toto-surface'
                   )}>
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0]">
+                        <p className="text-[10px] tracking-[0.12em] uppercase font-bold text-toto-light font-numeric-tabular">
                           {lang === 'sw' ? 'ZIARA' : 'VISIT'} {visit.visit_number}
                         </p>
-                        <p className="text-[16px] font-bold text-[#0A0A0A]">
+                        <p className="text-[16px] font-bold text-toto-black font-numeric-tabular">
                           {visit.visit_date ? format(parseISO(visit.visit_date), 'MMM d, yyyy') : '—'}
                         </p>
-                        {visit.facility && <p className="text-[12px] text-[#A0A0A0]">{visit.facility}</p>}
+                        {visit.facility && <p className="text-[12px] text-toto-gray font-medium mt-0.5">{visit.facility}</p>}
                       </div>
                       {hasDangerSigns && (
-                        <div className="flex items-center gap-1 bg-[#E51010]/10 rounded-full px-2.5 py-1">
-                          <AlertTriangle size={12} className="text-[#E51010]" />
-                          <span className="text-[10px] text-[#E51010] font-bold">{visit.danger_signs.length}</span>
+                        <div className="flex items-center gap-1 bg-toto-red/10 rounded-full px-2.5 py-1">
+                          <AlertTriangle size={12} className="text-toto-red animate-pulse-dot" />
+                          <span className="text-[10px] text-toto-red font-extrabold font-numeric-tabular">{visit.danger_signs.length}</span>
                         </div>
                       )}
                     </div>
+
+                    {/* Gridded visit metrics */}
                     <div className="grid grid-cols-3 gap-2">
                       {visit.blood_pressure_systolic && (
-                        <div className={cn('rounded-[12px] p-2 text-center', bp === 'critical' ? 'bg-[#E51010]/8' : bp === 'warning' ? 'bg-[#F9A825]/8' : 'bg-[#F7F5F0]')}>
-                          <p className="text-[11px] font-extrabold" style={{ color: bp === 'critical' ? '#E51010' : bp === 'warning' ? '#F9A825' : '#1B6B5A' }}>
+                        <div className={cn(
+                          'rounded-[14px] p-2 text-center border flex flex-col justify-center',
+                          bp === 'critical' ? 'bg-toto-red/10 border-toto-red/20 text-toto-red' :
+                          bp === 'warning' ? 'bg-toto-amber/10 border-toto-amber/20 text-toto-ochre' :
+                          'bg-toto-surface border-toto-surface text-toto-teal'
+                        )}>
+                          <p className="text-[12px] font-extrabold leading-none font-numeric-tabular">
                             {visit.blood_pressure_systolic}/{visit.blood_pressure_diastolic}
                           </p>
-                          <p className="text-[9px] text-[#A0A0A0] mt-0.5">mmHg</p>
+                          <p className="text-[8px] tracking-wider uppercase font-bold text-toto-light mt-1">BP (mmHg)</p>
                         </div>
                       )}
                       {visit.weight_kg && (
-                        <div className="bg-[#F7F5F0] rounded-[12px] p-2 text-center">
-                          <p className="text-[11px] font-extrabold text-[#2E7A5D]">{visit.weight_kg}kg</p>
-                          <p className="text-[9px] text-[#A0A0A0] mt-0.5">{t('weight')}</p>
+                        <div className="bg-toto-surface border border-toto-surface rounded-[14px] p-2 text-center flex flex-col justify-center text-toto-black">
+                          <p className="text-[12px] font-extrabold leading-none font-numeric-tabular">{visit.weight_kg}kg</p>
+                          <p className="text-[8px] tracking-wider uppercase font-bold text-toto-light mt-1">{t('weight')}</p>
                         </div>
                       )}
                       {visit.haemoglobin && (
-                        <div className="bg-[#F7F5F0] rounded-[12px] p-2 text-center">
-                          <p className="text-[11px] font-extrabold text-[#0A0A0A]">{visit.haemoglobin} g/dl</p>
-                          <p className="text-[9px] text-[#A0A0A0] mt-0.5">Hb</p>
+                        <div className="bg-toto-surface border border-toto-surface rounded-[14px] p-2 text-center flex flex-col justify-center text-toto-black">
+                          <p className="text-[12px] font-extrabold leading-none font-numeric-tabular">{visit.haemoglobin}</p>
+                          <p className="text-[8px] tracking-wider uppercase font-bold text-toto-light mt-1">Hb (g/dl)</p>
+                        </div>
+                      )}
+                      {visit.fundal_height_cm && (
+                        <div className="bg-toto-surface border border-toto-surface rounded-[14px] p-2 text-center flex flex-col justify-center text-toto-black">
+                          <p className="text-[12px] font-extrabold leading-none font-numeric-tabular">{visit.fundal_height_cm}cm</p>
+                          <p className="text-[8px] tracking-wider uppercase font-bold text-toto-light mt-1">Fundal Ht</p>
+                        </div>
+                      )}
+                      {visit.fetal_heart_rate && (
+                        <div className="bg-toto-surface border border-toto-surface rounded-[14px] p-2 text-center flex flex-col justify-center text-toto-black">
+                          <p className="text-[12px] font-extrabold leading-none font-numeric-tabular">{visit.fetal_heart_rate}</p>
+                          <p className="text-[8px] tracking-wider uppercase font-bold text-toto-light mt-1">Fetal HR</p>
                         </div>
                       )}
                     </div>
+
+                    {/* Interventions list */}
+                    {(visit.ttv_given || visit.ifas_given || visit.llin_given) && (
+                      <div className="flex flex-wrap gap-1.5 mt-3 border-t border-toto-surface pt-2.5">
+                        {visit.ttv_given && <span className="text-[8.5px] font-extrabold uppercase tracking-wider bg-toto-green/10 text-toto-green px-2.5 py-0.5 rounded-full">✓ TTV</span>}
+                        {visit.ifas_given && <span className="text-[8.5px] font-extrabold uppercase tracking-wider bg-toto-green/10 text-toto-green px-2.5 py-0.5 rounded-full">✓ IFAS</span>}
+                        {visit.llin_given && <span className="text-[8.5px] font-extrabold uppercase tracking-wider bg-toto-green/10 text-toto-green px-2.5 py-0.5 rounded-full">✓ Net (LLIN)</span>}
+                      </div>
+                    )}
+
+                    {/* Danger Signs detailed layout */}
+                    {hasDangerSigns && (
+                      <div className="bg-toto-red/10 border border-toto-red/20 rounded-[14px] p-2.5 mt-3">
+                        <p className="text-[9px] font-extrabold text-toto-red tracking-wider uppercase mb-1.5 flex items-center gap-1">
+                          <AlertTriangle size={11} /> Reported Danger Signs
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {visit.danger_signs.map(sign => (
+                            <span key={sign} className="text-[9px] font-bold text-toto-red bg-white border border-toto-red/20 px-2 py-0.5 rounded-full">
+                              {sign}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

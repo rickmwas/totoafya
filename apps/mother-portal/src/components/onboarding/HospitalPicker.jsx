@@ -47,7 +47,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
 
       {/* Main input */}
       <div className="relative z-50">
-        <div className="flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#1B6B5A] transition-colors">
+        <div className="flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[18px] px-4 focus-within:ring-2 focus-within:ring-toto-teal/20 focus-within:border-toto-teal transition-all duration-300 shadow-sm overflow-hidden">
           <MapPin size={15} className="text-[#A0A0A0] flex-shrink-0" />
           <input
             type="text"
@@ -58,7 +58,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
               setIsDropdownOpen(true);
             }}
             placeholder={lang === 'sw' ? 'Tafuta hospitali...' : 'Search for a hospital...'}
-            className="flex-1 h-14 text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none bg-transparent"
+            className="flex-1 h-14 text-[15px] font-semibold text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none bg-transparent"
           />
           {loading && <Loader2 size={14} className="animate-spin text-[#A0A0A0]" />}
           {query && (
@@ -70,7 +70,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
 
         {/* Dropdown list */}
         {isDropdownOpen && (
-          <div className="absolute z-50 top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white rounded-[16px] border border-[#E5E5E5] shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+          <div className="absolute z-50 top-full left-0 right-0 mt-1.5 max-h-60 overflow-y-auto bg-white rounded-[20px] border border-[#E5E5E5] shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
             {loading ? (
               <div className="p-4 text-center text-[#A0A0A0] text-[13px]">
                 {lang === 'sw' ? 'Inapakia...' : 'Loading facilities...'}
@@ -85,19 +85,19 @@ export default function HospitalPicker({ value, onChange, lang }) {
                   key={f.id || i}
                   type="button"
                   onClick={() => selectHospital(f)}
-                  className="w-full px-4 py-3 text-left hover:bg-[#F5F5F7] flex items-center gap-3 border-b border-[#F5F5F7] last:border-0 active:bg-[#F5F5F7]"
+                  className="w-full px-4 py-3.5 text-left hover:bg-toto-teal/5 flex items-center gap-3 border-b border-[#F5F5F7] last:border-0 active:bg-toto-teal/5"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#1B6B5A]/10 flex items-center justify-center flex-shrink-0">
-                    <MapPin size={13} className="text-[#1B6B5A]" />
+                  <div className="w-8 h-8 rounded-full bg-toto-teal/10 flex items-center justify-center flex-shrink-0">
+                    <MapPin size={13} className="text-toto-teal" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-[#0A0A0A]">{f.name}</p>
+                    <p className="text-[13px] font-bold text-[#0A0A0A]">{f.name}</p>
                     <p className="text-[11px] text-[#A0A0A0] truncate">
                       {f.location || (lang === 'sw' ? 'Kituo cha Afya' : 'Health Center')}
                     </p>
                   </div>
                   {value === f.name && (
-                    <Check size={14} className="text-[#1B6B5A] flex-shrink-0" />
+                    <Check size={14} className="text-toto-teal flex-shrink-0" />
                   )}
                 </button>
               ))
