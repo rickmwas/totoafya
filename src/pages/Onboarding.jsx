@@ -1,6 +1,6 @@
 import db from '@/api/totoafyaClient';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, Bell, ChevronRight, Heart } from 'lucide-react';
 
@@ -117,6 +117,44 @@ export default function Onboarding() {
   const [pregForm, setPregForm] = useState({ lmp: '', gravida: 1, parity: 0, trimester: null, is_first: null, risk_factors: [] });
   const [childForm, setChildForm] = useState({ full_name: '', date_of_birth: '', gender: '', birth_weight_kg: '' });
 
+  useEffect(() => {
+    const fetchExistingMother = async () => {
+      if (user?.id) {
+        try {
+          const existing = await db.entities.Mother.filter({ user_id: user.id });
+          if (existing && existing.length > 0) {
+            const m = existing[0];
+            setForm(f => ({
+              ...f,
+              full_name: m.full_name || '',
+              national_id: m.national_id || '',
+              anc_number: m.anc_number || '',
+              phone: m.phone || '',
+              county: m.county || '',
+              facility_id: m.facility_id || '',
+              facility_name: m.facility_name || '',
+              facility_phone: m.facility_phone || '',
+              facility_emergency_phone: m.facility_emergency_phone || '',
+            }));
+            if (m.caregiver_type) setCaregiverType(m.caregiver_type);
+            if (m.pregnancy_status) setMode(m.pregnancy_status);
+            if (m.lmp) {
+              setPregForm(p => ({
+                ...p,
+                lmp: m.lmp,
+                gravida: m.gravida || 1,
+                parity: m.parity || 0,
+              }));
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching existing mother profile:", err);
+        }
+      }
+    };
+    fetchExistingMother();
+  }, [user]);
+
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setP = (k, v) => setPregForm(f => ({ ...f, [k]: v }));
   const setC = (k, v) => setChildForm(f => ({ ...f, [k]: v }));
@@ -145,6 +183,12 @@ export default function Onboarding() {
       const edd = lmp ? new Date(new Date(lmp).getTime() + 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null;
       const effectiveMode = isCaregiverOnly ? 'child' : mode;
 
+      const cleanForm = {
+        ...form,
+        national_id: form.national_id?.trim() || null,
+        anc_number: form.anc_number?.trim() || null,
+      };
+
       let mother;
       let existingMothers = [];
       if (user?.id) {
@@ -153,7 +197,7 @@ export default function Onboarding() {
 
       if (existingMothers && existingMothers.length > 0) {
         mother = await db.entities.Mother.update(existingMothers[0].id, {
-          ...form,
+          ...cleanForm,
           caregiver_type: caregiverType || 'mother',
           pregnancy_status: effectiveMode === 'pregnant' ? 'pregnant' : 'postpartum',
           lmp: isCaregiverOnly ? null : lmp,
@@ -167,7 +211,7 @@ export default function Onboarding() {
         });
       } else {
         mother = await db.entities.Mother.create({
-          ...form,
+          ...cleanForm,
           user_id: user?.id || null,
           facility_phone: form.facility_phone || null,
           facility_emergency_phone: form.facility_emergency_phone || null,

@@ -282,6 +282,10 @@ CREATE INDEX IF NOT EXISTS idx_growth_records_child ON growth_records(child_id);
 CREATE INDEX IF NOT EXISTS idx_immunizations_child ON immunizations(child_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_child ON milestones(child_id);
 CREATE INDEX IF NOT EXISTS idx_ai_alerts_mother ON ai_alerts(mother_id);
+CREATE INDEX IF NOT EXISTS idx_anc_visits_mother_date ON anc_visits(mother_id, visit_date DESC);
+CREATE INDEX IF NOT EXISTS idx_growth_records_child_date ON growth_records(child_id, recorded_date DESC);
+CREATE INDEX IF NOT EXISTS idx_immunizations_child_date ON immunizations(child_id, scheduled_date DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_alerts_mother_created ON ai_alerts(mother_id, created_at DESC);
 
 -- =========================================================================
 -- 11. ROW LEVEL SECURITY (RLS) POLICIES
@@ -391,7 +395,16 @@ CREATE POLICY "Facility staff manage facility mothers"
 
 CREATE POLICY "Mothers select and update own profile"
     ON mothers FOR ALL TO authenticated
-    USING (user_id = auth.uid());
+    USING (
+        user_id = auth.uid() 
+        OR (
+            user_id IS NULL 
+            AND (
+                replace(lower(national_id), ' ', '') = split_part(auth.jwt() ->> 'email', '@', 1)
+                OR replace(lower(anc_number), ' ', '') = split_part(auth.jwt() ->> 'email', '@', 1)
+            )
+        )
+    );
 
 -- D. CHILDREN policies
 CREATE POLICY "Super admins full access to children"
@@ -411,7 +424,7 @@ CREATE POLICY "Facility staff manage visits"
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 CREATE POLICY "Mothers view own visits"
-    ON anc_visits FOR SELECT TO authenticated
+    ON anc_visits FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- F. GROWTH RECORDS policies
@@ -420,7 +433,7 @@ CREATE POLICY "Facility staff manage growth records"
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
 CREATE POLICY "Mothers view own child growth records"
-    ON growth_records FOR SELECT TO authenticated
+    ON growth_records FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- G. IMMUNIZATIONS policies
@@ -447,7 +460,7 @@ CREATE POLICY "Facility staff manage alerts"
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 CREATE POLICY "Mothers view own alerts"
-    ON ai_alerts FOR SELECT TO authenticated
+    ON ai_alerts FOR ALL TO authenticated
     USING (mother_id = (SELECT id FROM mothers WHERE user_id = auth.uid()));
 
 -- J. LEARNING CONTENTS policies

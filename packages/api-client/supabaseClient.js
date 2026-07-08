@@ -131,6 +131,16 @@ export const makeSupabaseStore = (entityName) => {
       if (error) throw error;
       return dbToClient(record);
     },
+    bulkCreate: async (records) => {
+      if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+      const dbRecords = records.map(clientToDb);
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert(dbRecords)
+        .select();
+      if (error) throw error;
+      return (data || []).map(dbToClient);
+    },
     
     update: async (id, data) => {
       if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');

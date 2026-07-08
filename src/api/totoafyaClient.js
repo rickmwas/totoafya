@@ -146,6 +146,18 @@ function makeEntityStore(name) {
       saveStore(name, records);
       return newRecord;
     },
+    bulkCreate: async (recordsList) => {
+      const records = getStore(name);
+      const newRecords = recordsList.map(r => ({
+        ...r,
+        id: generateId(),
+        created_date: new Date().toISOString(),
+        updated_date: new Date().toISOString(),
+      }));
+      records.push(...newRecords);
+      saveStore(name, records);
+      return newRecords;
+    },
     update: async (id, data) => {
       const records = getStore(name);
       const idx = records.findIndex(r => r.id === id);
