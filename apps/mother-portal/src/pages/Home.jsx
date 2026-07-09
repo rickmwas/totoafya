@@ -13,6 +13,7 @@ import ModeHeader from '@/components/home/ModeHeader';
 import QuickActions from '@/components/home/QuickActions';
 import EmergencyCallBar from '@/components/shared/EmergencyCallBar';
 import { useProfile } from '@/context/ProfileContext';
+import { cn } from '@/lib/utils';
 
 const getGreeting = (lang) => {
   const hour = new Date().getHours();
