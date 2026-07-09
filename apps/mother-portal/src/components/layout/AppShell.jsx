@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Shield, TrendingUp, BookOpen, Settings, HeartHandshake } from 'lucide-react';
+import { Home, Shield, TrendingUp, BookOpen, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/context/LanguageContext';
 import { useProfile } from '@/context/ProfileContext';
@@ -10,18 +10,12 @@ export default function AppShell({ children }) {
   const { t } = useLang();
   const { profile } = useProfile();
 
-  const isPregnant = profile?.pregnancy_status === 'pregnant';
-  const isCaregiverOnly = profile?.caregiver_type === 'father' || profile?.caregiver_type === 'guardian';
-
   const navItems = [
-    { to: '/', icon: Home, key: 'home', always: true },
-    ...(!isCaregiverOnly && isPregnant
-      ? [{ to: '/anc', icon: HeartHandshake, key: 'anc', always: false }]
-      : []),
-    { to: '/vaccines', icon: Shield, key: 'vaccines', always: true },
-    { to: '/growth', icon: TrendingUp, key: 'growth', always: true },
-    { to: '/learn', icon: BookOpen, key: 'learn', always: true },
-    { to: '/settings', icon: Settings, key: 'settings', always: true },
+    { to: '/', icon: Home, key: 'home' },
+    { to: '/care', icon: Shield, key: 'care' },
+    { to: '/growth', icon: TrendingUp, key: 'growth' },
+    { to: '/learn', icon: BookOpen, key: 'learn' },
+    { to: '/more', icon: User, key: 'more' },
   ];
 
   const isActive = (to) => {

@@ -286,75 +286,56 @@ export default function Onboarding() {
 
   // ── STEP 0: Welcome ──────────────────────────────────────────────────────────
   if (step === 0) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto overflow-y-auto pb-10 font-sans">
+    <div className="min-h-screen bg-[#f7f9f7] flex flex-col max-w-[430px] mx-auto overflow-y-auto pb-10 font-sans">
       {/* Hero Image Card */}
-      <div className="relative mx-4 mt-4 mb-6 h-[46vh] rounded-[32px] overflow-hidden flex-shrink-0 shadow-[0_12px_36px_rgba(0,0,0,0.06)] bg-toto-teal/5">
+      <div className="relative mx-4 mt-4 mb-6 h-[42vh] rounded-[32px] overflow-hidden flex-shrink-0 bg-toto-teal/5 shadow-[0_12px_36px_rgba(0,0,0,0.06)]">
         <img
-          src="/onboarding_welcome.png"
-          alt="Mother and baby"
+          src="/onboarding_journey_both.png"
+          alt="Mother and father"
           className="w-full h-full object-cover transition-transform ease-out hover:scale-105"
           style={{ transitionDuration: '6000ms' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-toto-teal/40 via-transparent to-black/15" />
-        
-        {/* Brand Pill */}
-        <div className="absolute top-4 left-4">
-          <div className="flex items-center gap-2 bg-white/80 backdrop-blur-md rounded-full px-3.5 py-1.5 shadow-sm border border-white/40">
-            <div className="w-7 h-7 rounded-[9px] bg-toto-teal flex items-center justify-center shadow-sm">
-              <Heart size={13} className="text-white fill-white animate-pulse" />
-            </div>
-            <span className="text-[14px] font-extrabold text-toto-black tracking-tight">TotoAfya</span>
-          </div>
-        </div>
-
-        {/* Notification Icon */}
-        <div className="absolute top-4 right-4">
-          <button className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center shadow-sm border border-white/40 relative active:scale-95 transition-transform">
-            <Bell size={16} className="text-toto-black" />
-            <div className="w-2 h-2 bg-toto-teal rounded-full absolute top-2.5 right-2.5 border border-white animate-ping" />
-            <div className="w-2 h-2 bg-toto-teal rounded-full absolute top-2.5 right-2.5 border border-white" />
-          </button>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f7f9f7] via-transparent to-transparent" />
       </div>
 
       {/* Hero Content */}
-      <div className="flex flex-col flex-1 px-6">
-        <h1 className="text-[38px] font-extrabold leading-[1.08] text-toto-black tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          {lang === 'sw' ? 'Afya Bora' : 'Better Health'}{' '}
-          <span className="text-toto-teal block">{lang === 'sw' ? 'Huanzia Hapa' : 'Starts Here'}</span>
-        </h1>
-        <p className="text-[14px] text-toto-light font-extrabold mt-2 tracking-wide uppercase">
-          {lang === 'sw' ? 'MWENZAKO WA AFYA YA FAMILIA' : 'YOUR FAMILY HEALTH COMPANION'}
-        </p>
+      <div className="flex flex-col flex-1 px-6 justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-[34px] font-extrabold leading-[1.1] text-toto-black tracking-tight">
+            {lang === 'sw' ? 'Utunzaji wa kuaminika kwa kila hatua' : 'Trusted care for every step'}
+          </h1>
+          <p className="text-[14px] text-toto-gray mt-3.5 leading-relaxed font-medium">
+            {lang === 'sw' 
+              ? 'Mwongozo wa kibinafsi, vikumbusho na usaidizi kwako na mtoto wako.' 
+              : 'Personalized guidance, reminders and support for you and your baby.'}
+          </p>
 
-        {/* Highlight Feature Cards */}
-        <div className="grid grid-cols-3 gap-3 mt-6 mb-8">
-          {[
-            { icon: '🤰', color: '#D946EF', bg: 'bg-[#FFF0F5]/40', border: 'border-pink-100', en: 'Prenatal Care', sw: 'Huduma ya Ujauzito', subEn: 'Track & prepare', subSw: 'Kua tayari' },
-            { icon: '🛡️', color: '#006B5F', bg: 'bg-[#F0FAF5]/40', border: 'border-teal-100', en: 'Vaccine Tracker', sw: 'Ratiba ya Chanjo', subEn: 'Stay updated', subSw: 'Kaa salama' },
-            { icon: '📈', color: '#2563EB', bg: 'bg-[#EFF6FF]/40', border: 'border-blue-100', en: 'Growth Monitor', sw: 'Ukuaji wa Mtoto', subEn: 'Track progress', subSw: 'Ukuaji rahisi' },
-          ].map(({ icon, color, bg, border, en, sw, subEn, subSw }) => (
-            <div key={en} className="bg-white rounded-[24px] p-3.5 border border-[#F0F0F0] shadow-card flex flex-col items-center gap-2 text-center transition-all duration-300 hover:shadow-card-hover hover:border-toto-teal/15">
-              <div className={cn("w-11 h-11 rounded-full flex items-center justify-center text-[20px] shadow-sm border", bg, border)}>
-                {icon}
+          {/* Checklist Items */}
+          <div className="flex flex-col gap-3 mt-6">
+            {[
+              { en: 'Track your pregnancy', sw: 'Fuatilia ujauzito wako' },
+              { en: "Monitor baby's growth", sw: "Fuatilia ukuaji wa mtoto" },
+              { en: 'Get AI health insights', sw: 'Pata ushauri wa afya wa AI' }
+            ].map((item) => (
+              <div key={item.en} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-toto-green/10 flex items-center justify-center text-toto-green flex-shrink-0">
+                  <Check size={14} strokeWidth={3} />
+                </div>
+                <span className="text-[14px] font-semibold text-toto-black">
+                  {lang === 'sw' ? item.sw : item.en}
+                </span>
               </div>
-              <p className="text-[11px] font-black leading-[1.2] tracking-tight mt-1" style={{ color }}>
-                {lang === 'sw' ? sw : en}
-              </p>
-              <p className="text-[9px] text-toto-light leading-tight font-semibold mt-0.5">
-                {lang === 'sw' ? subSw : subEn}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Language Picker */}
-        <div className="flex flex-col items-center gap-2 mb-8">
+        <div className="flex flex-col items-center gap-2 mt-6">
           <span className="text-[9px] tracking-[0.2em] font-black uppercase text-toto-light">CHOOSE LANGUAGE</span>
-          <div className="bg-[#EBEBEB]/50 border border-white/20 rounded-full p-1 flex gap-1 w-full max-w-[280px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-md">
+          <div className="bg-toto-gray/10 border border-white/20 rounded-full p-0.5 flex gap-1 w-full max-w-[240px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.03)]">
             {[
               { code: 'en', flagText: 'EN', label: 'English' },
-              { code: 'sw', flagText: 'KE', label: 'Kiswahili' }
+              { code: 'sw', flagText: 'KE', label: 'Swahili' }
             ].map(({ code, flagText, label }) => {
               const selected = lang === code;
               return (
@@ -362,18 +343,12 @@ export default function Onboarding() {
                   key={code}
                   onClick={() => setLanguage(code)}
                   className={cn(
-                    'flex-1 flex items-center justify-center gap-2 h-9 rounded-full text-[13px] font-extrabold transition-all duration-200 active:scale-[0.96]',
+                    'flex-1 flex items-center justify-center gap-1.5 h-8 rounded-full text-[12px] font-bold transition-all duration-200 active:scale-[0.96]',
                     selected
                       ? 'bg-toto-teal text-white shadow-sm'
-                      : 'text-[#666666]'
+                      : 'text-toto-gray'
                   )}
                 >
-                  <div className={cn(
-                    'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black',
-                    selected ? 'bg-white/20 text-white' : 'bg-black/5 text-[#666666]'
-                  )}>
-                    {flagText}
-                  </div>
                   {label}
                 </button>
               );
@@ -381,13 +356,30 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <div className="pb-6 mt-auto">
-          <ContinueBtn onClick={() => setStep(1)}>
-            <span>Get Started</span> <ArrowRight size={16} strokeWidth={2.5} />
-          </ContinueBtn>
-          <p className="text-center text-[11px] text-toto-light mt-3.5 font-medium">
-            {lang === 'sw' ? 'Inachukua dakika 2 tu' : 'Takes just 2 minutes'}
-          </p>
+        {/* Bottom bar with Indicator dots and Next/Skip buttons */}
+        <div className="mt-8">
+          {/* Indicator Dots */}
+          <div className="flex justify-center gap-2 mb-6">
+            <div className="w-2.5 h-2.5 rounded-full bg-toto-teal" />
+            <div className="w-2.5 h-2.5 rounded-full bg-toto-light/35" />
+            <div className="w-2.5 h-2.5 rounded-full bg-toto-light/35" />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => setStep(1)} 
+              className="text-toto-gray hover:text-toto-black font-bold text-[15px] transition-colors"
+            >
+              {lang === 'sw' ? 'Ruka' : 'Skip'}
+            </button>
+            
+            <button
+              onClick={() => setStep(1)}
+              className="h-12 px-8 bg-toto-teal hover:bg-toto-teal-dark active:scale-[0.96] text-white rounded-full font-bold text-[15px] shadow-[0_6px_20px_rgba(13,98,61,0.2)] transition-all duration-200"
+            >
+              {lang === 'sw' ? 'Kisha' : 'Next'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

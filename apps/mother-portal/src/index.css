@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,36 +6,35 @@
 
 @layer base {
   :root {
-    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-    --font-merriweather: 'Merriweather', Georgia, serif;
+    --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 
-    --background: 38 50% 97%;
-    --foreground: 0 0% 3.9%;
+    --background: 140 10% 97.5%;
+    --foreground: 150 11% 7.8%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 150 11% 7.8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 173 100% 21%;
+    --popover-foreground: 150 11% 7.8%;
+    --primary: 150 77% 21.8%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 44 100% 45%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 38 20% 90%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 44 100% 45%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 358 64% 51%;
+    --secondary: 150 72% 42.4%;
+    --secondary-foreground: 150 11% 7.8%;
+    --muted: 150 6% 92%;
+    --muted-foreground: 150 4% 44%;
+    --accent: 150 72% 42.4%;
+    --accent-foreground: 150 11% 7.8%;
+    --destructive: 3 100% 67.3%;
     --destructive-foreground: 0 0% 100%;
-    --border: 38 20% 88%;
-    --input: 38 20% 88%;
-    --ring: 173 100% 21%;
+    --border: 150 6% 90%;
+    --input: 150 6% 90%;
+    --ring: 150 77% 21.8%;
     --radius: 1.5rem;
 
-    /* Semantic health colors from THIG */
-    --health-green: 147 77% 27%;
+    /* Semantic health colors adapted to the new theme */
+    --health-green: 150 72% 42.4%;
     --health-amber: 44 100% 50%;
-    --health-red: 358 64% 51%;
-    --health-teal: 173 100% 21%;
-    --health-purple: 270 67% 55%;
+    --health-red: 3 100% 67.3%;
+    --health-teal: 150 77% 21.8%;
+    --health-purple: 259 84% 53%;
   }
 }
 
@@ -46,8 +45,8 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #F7F5F0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f7f9f7;
   
   /* Prevent pull-to-refresh and horizontal history swipe-navigation */
   overscroll-behavior: none;

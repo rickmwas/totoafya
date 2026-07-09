@@ -11,6 +11,8 @@ const translations = {
     anc: 'ANC',
     settings: 'Settings',
     ai_assistant: 'AI Health',
+    care: 'Care',
+    more: 'More',
     // Home
     good_morning: 'Good morning',
     good_afternoon: 'Good afternoon',
@@ -107,6 +109,8 @@ const translations = {
     anc: 'ANC',
     settings: 'Mipangilio',
     ai_assistant: 'Afya AI',
+    care: 'Huduma',
+    more: 'Zaidi',
     // Home
     good_morning: 'Habari za asubuhi',
     good_afternoon: 'Habari za mchana',

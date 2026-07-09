@@ -1,8 +1,6 @@
 import db from '@/api/totoafyaClient';
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
@@ -12,7 +10,6 @@ export default function PatientChatbot({ mother, children, lang }) {
   const roleLabel = caregiverType === 'father' ? (lang === 'sw' ? 'baba' : 'Dad') 
                   : caregiverType === 'guardian' ? (lang === 'sw' ? 'mlezi' : 'Guardian')
                   : (lang === 'sw' ? 'mama' : 'Mum');
-
 
   const greeting = lang === 'sw'
     ? `Habari! Mimi ni msaidizi wako wa afya wa AI. Nina taarifa zenu zote za afya na ninaweza kukusaidia na maswali yoyote kuhusu afya ya ${caregiverType === 'mother' ? 'ujauzito wako, ' : ''}watoto wako, au afya kwa ujumla kama ${roleLabel}. Unaweza kuniuliza nini?`
@@ -94,39 +91,39 @@ AI:`;
         : ['What are danger signs?', 'What vaccine is due next?', 'What is a balanced diet for a child?']);
 
   return (
-    <div className="flex flex-col h-[520px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 bg-gradient-to-r from-[#0047FF]/5 to-transparent flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
-          <Bot size={15} className="text-white" />
+    <div className="flex flex-col h-[520px] bg-white rounded-[32px] border border-[#e5e7eb] shadow-sm overflow-hidden animate-slide-up">
+      {/* Mini Info Header */}
+      <div className="px-5 py-4 border-b border-[#e5e7eb] flex items-center gap-3 bg-gradient-to-r from-toto-teal/5 to-transparent flex-shrink-0">
+        <div className="w-9 h-9 rounded-full bg-toto-teal flex items-center justify-center shadow-sm">
+          <Bot size={18} className="text-white" />
         </div>
         <div>
-          <p className="text-[13px] font-bold text-[#0A0A0A] leading-none">
+          <p className="text-[13.5px] font-extrabold text-[#131714] leading-none">
             {lang === 'sw' ? 'Msaidizi wa Afya' : 'Health Assistant'}
           </p>
-          <p className="text-[10px] text-[#A0A0A0]">
+          <p className="text-[10px] text-toto-gray font-semibold mt-0.5">
             {lang === 'sw' ? 'Ana taarifa zako zote' : 'Has your full health profile'}
           </p>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+      {/* Messages Scroll Area */}
+      <div className="flex-1 overflow-y-auto px-5 py-5 flex flex-col gap-4">
         {messages.map((msg, i) => (
-          <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+          <div key={i} className={cn('flex gap-2.5', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
             {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-glow-sm">
-                <Bot size={11} className="text-white" />
+              <div className="w-7 h-7 rounded-full bg-toto-teal/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot size={13} className="text-toto-teal" />
               </div>
             )}
             <div className={cn(
-              'max-w-[82%] rounded-[16px] px-4 py-2.5 text-[13px] leading-relaxed',
+              'max-w-[78%] rounded-[20px] px-4.5 py-3 text-[13.5px] leading-relaxed font-medium',
               msg.role === 'user'
-                ? 'bg-[#0047FF] text-white rounded-tr-[4px]'
-                : 'bg-[#F5F5F7] text-[#0A0A0A] rounded-tl-[4px]'
+                ? 'bg-toto-teal text-white rounded-tr-[4px]'
+                : 'bg-[#f0f2f0] text-[#131714] rounded-tl-[4px]'
             )}>
               {msg.role === 'assistant' ? (
-                <ReactMarkdown className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-p:text-[13px]">
+                <ReactMarkdown className="prose prose-sm max-w-none prose-p:text-[13.5px] prose-p:text-[#131714] prose-p:leading-relaxed">
                   {msg.content}
                 </ReactMarkdown>
               ) : (
@@ -134,33 +131,36 @@ AI:`;
               )}
             </div>
             {msg.role === 'user' && (
-              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5">
-                <User size={11} className="text-white" />
+              <div className="w-7 h-7 rounded-full bg-toto-teal flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm text-white font-extrabold text-[10px]">
+                U
               </div>
             )}
           </div>
         ))}
 
         {loading && (
-          <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
-              <Bot size={11} className="text-white" />
+          <div className="flex gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-toto-teal/10 flex items-center justify-center flex-shrink-0">
+              <Bot size={13} className="text-toto-teal" />
             </div>
-            <div className="bg-[#F5F5F7] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
+            <div className="bg-[#f0f2f0] rounded-[20px] rounded-tl-[4px] px-5 py-3.5 flex gap-1.5 items-center">
               {[0, 1, 2].map(i => (
-                <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#A0A0A0] animate-pulse-dot"
+                <div key={i} className="w-2 h-2 rounded-full bg-toto-gray/50 animate-pulse-dot"
                   style={{ animationDelay: `${i * 0.2}s` }} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Quick questions — show only at start */}
+        {/* Quick questions (Suggestive chips) */}
         {messages.length === 1 && !loading && (
           <div className="flex flex-wrap gap-2 mt-1">
             {QUICK_QUESTIONS.map(q => (
-              <button key={q} onClick={() => { setInput(q); }}
-                className="text-[12px] font-semibold text-[#0047FF] bg-[#0047FF]/8 border border-[#0047FF]/20 px-3 py-1.5 rounded-full active:scale-[0.96] transition-all">
+              <button 
+                key={q} 
+                onClick={() => setInput(q)}
+                className="text-[12.5px] font-bold text-toto-teal bg-toto-teal/5 border border-toto-teal/20 px-3.5 py-1.5 rounded-full active:scale-95 transition-all"
+              >
                 {q}
               </button>
             ))}
@@ -170,24 +170,29 @@ AI:`;
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-3 py-3 border-t border-[#F5F5F7] flex gap-2 flex-shrink-0">
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder={lang === 'sw' ? 'Uliza swali lolote la afya...' : 'Ask any health question...'}
-          rows={1}
-          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#0047FF] max-h-24 leading-relaxed"
-          style={{ fontSize: '16px' }}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm active:scale-[0.92] transition-all disabled:opacity-30 self-end"
-        >
-          <Send size={15} className="text-white" />
-        </button>
+      {/* Bottom Message Input Bar */}
+      <div className="px-4 py-3.5 border-t border-[#e5e7eb] flex flex-col gap-2 bg-white flex-shrink-0">
+        <div className="flex gap-2.5">
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder={lang === 'sw' ? 'Uliza swali lolote la afya...' : 'Ask any health question...'}
+            rows={1}
+            className="flex-1 resize-none px-4 py-3 bg-[#f7f9f7] rounded-[16px] text-[14px] text-[#131714] placeholder:text-toto-gray/70 border border-[#e5e7eb] outline-none focus:border-toto-teal max-h-24 leading-relaxed font-medium"
+            style={{ fontSize: '16px' }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim() || loading}
+            className="w-11 h-11 rounded-full bg-toto-teal hover:bg-toto-teal-dark flex items-center justify-center flex-shrink-0 shadow-sm active:scale-90 transition-all disabled:opacity-35 self-end text-white"
+          >
+            <Send size={16} />
+          </button>
+        </div>
+        <span className="text-[10px] text-toto-gray text-center font-semibold">
+          {lang === 'sw' ? 'AI inaweza kufanya makosa. Thibitisha ushauri muhimu wa matibabu.' : 'AI can make mistakes. Verify important medical advice.'}
+        </span>
       </div>
     </div>
   );

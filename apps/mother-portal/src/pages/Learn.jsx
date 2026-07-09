@@ -637,41 +637,50 @@ export default function Learn() {
     .filter(c => (c.relevance_score || 0) >= 40)
     .sort((a, b) => (b.relevance_score || 0) - (a.relevance_score || 0))
     .slice(0, 3);
-
   return (
     <AppShell>
-      <div className="animate-fade-in pb-16 bg-[#FAFAFA] min-h-screen">
+      <div className="animate-fade-in pb-16 bg-[#f7f9f7] min-h-screen font-sans text-[#131714]">
         
-        {/* Banner with modern soft gradients */}
-        <div className="relative px-4 pt-14 pb-8 overflow-hidden bg-gradient-to-b from-[#7C3AED]/5 to-transparent">
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#7C3AED] opacity-[0.08] blur-3xl pointer-events-none" />
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 w-72 h-32 rounded-full bg-[#1B6B5A] opacity-[0.04] blur-2xl pointer-events-none" />
-          
-          <p className="text-[10px] tracking-[0.25em] font-extrabold uppercase text-[#7C3AED] mb-1.5 flex items-center gap-1">
-            <Sparkle size={10} className="fill-[#7C3AED]" />
+        {/* Header (Screen 09) */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 bg-white border-b border-[#e5e7eb]">
+          <Link to="/" className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+            <ChevronLeft size={20} className="text-[#131714]" />
+          </Link>
+          <h1 className="text-[18px] font-extrabold text-[#131714]">
+            {lang === 'sw' ? 'Jifunze' : 'Learn'}
+          </h1>
+          <button 
+            className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+            onClick={() => alert(lang === 'sw' ? 'Chaguo' : 'Options')}
+          >
+            <MoreVertical size={20} className="text-[#131714]" />
+          </button>
+        </div>
+
+        {/* Search Bar & Subtitle inside Header container */}
+        <div className="relative px-6 py-6 overflow-hidden">
+          <p className="text-[11px] tracking-[0.25em] font-extrabold uppercase text-toto-teal mb-1.5 flex items-center gap-1">
+            <Sparkle size={10} className="fill-toto-teal" />
             {lang === 'sw' ? 'ELIMU YA AFYA' : 'HEALTH EDUCATION'}
           </p>
-          <h1 className="font-extrabold leading-tight text-[#111111] text-[34px] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            {t('learning_hub') || (lang === 'sw' ? 'Kituo cha Maarifa' : 'Learning Hub')}
-          </h1>
-          <p className="text-[13px] text-[#777777] mt-1">
+          <p className="text-[13.5px] text-[#6e7772] mt-1 font-semibold">
             {lang === 'sw' ? 'Pata masomo yaliyochaguliwa kwa ajili ya safari yako ya afya' : 'Get guides tailored specifically to your health journey'}
           </p>
           
           {/* Search bar inside header */}
-          <div className="relative mt-6 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9A9A9A]" size={16} />
+          <div className="relative mt-5 max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-toto-gray" size={16} />
             <input
               type="text"
               placeholder={lang === 'sw' ? 'Tafuta masomo, miongozo, video...' : 'Search articles, videos, guides...'}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white border border-[#EBEBEB] text-[13px] text-[#0A0A0A] placeholder-[#9A9A9A] focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all shadow-card"
+              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-white border border-[#e5e7eb] text-[13.5px] text-[#131714] placeholder-toto-gray/60 focus:outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all shadow-sm font-semibold"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#F5F5F7] flex items-center justify-center text-[#777777] hover:text-[#0A0A0A]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#f0f2f0] flex items-center justify-center text-toto-gray hover:text-toto-black"
               >
                 <X size={12} />
               </button>
@@ -681,8 +690,8 @@ export default function Learn() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <div className="w-8 h-8 border-3 border-[#7C3AED] border-t-transparent rounded-full animate-spin" />
-            <p className="text-[12px] text-[#888]">{lang === 'sw' ? 'Inapakia maarifa...' : 'Loading resources...'}</p>
+            <div className="w-8 h-8 border-3 border-toto-teal border-t-transparent rounded-full animate-spin" />
+            <p className="text-[12.5px] text-toto-gray font-bold">{lang === 'sw' ? 'Inapakia maarifa...' : 'Loading resources...'}</p>
           </div>
         ) : (
           <>
@@ -851,8 +860,8 @@ export default function Learn() {
                     className={cn(
                       'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.95] shadow-sm',
                       isActive
-                        ? 'bg-[#111111] text-white ring-2 ring-[#111111]/10'
-                        : 'bg-white border border-[#EBEBEB] text-[#666666] hover:bg-[#F5F5F7]'
+                        ? 'bg-[#0d623d] text-white'
+                        : 'bg-white border border-[#e5e7eb] text-[#6e7772] hover:bg-[#f0f2f0]'
                     )}
                   >
                     {config && <span>{config.icon}</span>}

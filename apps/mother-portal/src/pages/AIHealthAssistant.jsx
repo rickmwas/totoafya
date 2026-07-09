@@ -1,7 +1,7 @@
 import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, AlertTriangle, TrendingUp, Bell, RefreshCw, ChevronRight, Shield, MessageCircle } from 'lucide-react';
+import { Sparkles, AlertTriangle, TrendingUp, Bell, RefreshCw, ChevronRight, Shield, MessageCircle, ChevronLeft, MoreVertical } from 'lucide-react';
 import EmergencyCallBar from '@/components/shared/EmergencyCallBar';
 
 import { useLang } from '@/context/LanguageContext';
@@ -174,37 +174,47 @@ Patient data: ${JSON.stringify(contextData, null, 2)}`,
 
   return (
     <AppShell>
-      <div className="animate-fade-in">
-        {/* Header */}
-        <div className="relative px-4 pt-14 pb-6 overflow-hidden">
-          <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-[#C8813A] opacity-[0.06] blur-2xl pointer-events-none" />
-          <div className="absolute top-6 right-14 w-20 h-20 rounded-full bg-[#1B6B5A] opacity-[0.06] blur-xl pointer-events-none" />
-          <div className="flex items-center gap-2 mb-1.5">
-            <Sparkles size={13} className="text-[#C8813A]" />
-            <p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#C8813A]/70">
-              {lang === 'sw' ? 'AKILI BANDIA' : 'AI POWERED'}
-            </p>
-          </div>
-          <h1 className="font-bold leading-tight text-[#1a1a1a] text-[34px]" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-            {lang === 'sw' ? 'Afya ya AI' : 'AI Health'}
+      <div className="animate-fade-in bg-[#f7f9f7] min-h-screen pb-12 font-sans text-[#131714]">
+        
+        {/* Header (Screen 08) */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+          <Link to="/" className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform">
+            <ChevronLeft size={20} className="text-[#131714]" />
+          </Link>
+          <h1 className="text-[18px] font-extrabold text-[#131714]">
+            {lang === 'sw' ? 'Msaidizi wa AI' : 'AI Assistant'}
           </h1>
+          <button 
+            className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
+            onClick={() => alert(lang === 'sw' ? 'Chaguo' : 'Options')}
+          >
+            <MoreVertical size={20} className="text-[#131714]" />
+          </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mx-4 mb-4 bg-white rounded-[16px] p-1 border border-[#E5E5E5]">
+        {/* Tabs (Analysis vs Chat) */}
+        <div className="flex bg-white border-b border-[#e5e7eb] px-6 mb-5">
           <button
             onClick={() => setActiveTab('analysis')}
-            className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'analysis' ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
+            className={`flex-1 pb-3 text-[14px] font-bold text-center relative transition-all ${
+              activeTab === 'analysis' ? 'text-toto-teal' : 'text-[#6e7772] hover:text-[#131714]'
+            }`}
           >
-            <Sparkles size={13} /> {lang === 'sw' ? 'Uchambuzi' : 'Analysis'}
+            {lang === 'sw' ? 'Uchambuzi' : 'Analysis'}
+            {activeTab === 'analysis' && (
+              <div className="absolute bottom-0 left-4 right-4 h-[2px] bg-toto-teal rounded-full" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('chat')}
-            className={cn('flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'chat' ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm' : 'text-[#666666]')}
+            className={`flex-1 pb-3 text-[14px] font-bold text-center relative transition-all ${
+              activeTab === 'chat' ? 'text-toto-teal' : 'text-[#6e7772] hover:text-[#131714]'
+            }`}
           >
-            <MessageCircle size={13} /> {lang === 'sw' ? 'Mazungumzo' : 'Chat'}
+            {lang === 'sw' ? 'Soga' : 'AI Chat'}
+            {activeTab === 'chat' && (
+              <div className="absolute bottom-0 left-4 right-4 h-[2px] bg-toto-teal rounded-full" />
+            )}
           </button>
         </div>
 

@@ -26,6 +26,10 @@ import ChildProfile from '@/pages/ChildProfile';
 import PatentDocument from '@/pages/PatentDocument';
 import PitchDeck from '@/pages/PitchDeck';
 import Login from '@/pages/Login';
+import Care from '@/pages/Care';
+import Profile from '@/pages/Profile';
+import Emergency from '@/pages/Emergency';
+import Community from '@/pages/Community';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkAppState } = useAuth();
@@ -84,6 +88,10 @@ const AuthenticatedApp = () => {
       <Route path="/learn" element={<Learn />} />
       <Route path="/ai-health" element={<AIHealthAssistant />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/care" element={<Care />} />
+      <Route path="/more" element={<Profile />} />
+      <Route path="/emergency" element={<Emergency />} />
+      <Route path="/community" element={<Community />} />
       <Route path="/add-child" element={<AddChild />} />
       <Route path="/child/:id" element={<ChildProfile />} />
       <Route path="/patent" element={<PatentDocument />} />

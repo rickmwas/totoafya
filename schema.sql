@@ -441,8 +441,8 @@ CREATE POLICY "Facility staff manage immunizations"
     ON immunizations FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
-CREATE POLICY "Mothers view child immunizations"
-    ON immunizations FOR SELECT TO authenticated
+CREATE POLICY "Mothers manage child immunizations"
+    ON immunizations FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- H. MILESTONES policies
