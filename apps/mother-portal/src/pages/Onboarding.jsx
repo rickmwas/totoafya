@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, Bell, ChevronRight, Heart } from 'lucide-react';
 
 import { useLang } from '@/context/LanguageContext';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 import { cn } from '@/lib/utils';
 import HospitalPicker from '@/components/onboarding/HospitalPicker';
 

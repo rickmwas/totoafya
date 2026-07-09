@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, User, PhoneCall, MessageSquare, Globe, LogOut, ShieldCheck, Heart, Landmark } from 'lucide-react';
 import db from '@/api/totoafyaClient';
 import { useLang } from '@/context/LanguageContext';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 import AppShell from '@/components/layout/AppShell';
 
 export default function Profile() {

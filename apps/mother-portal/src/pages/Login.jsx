@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import db from '@/api/totoafyaClient';
-import { useAuth } from '@/lib/AuthContext';
+import { useAuth } from '../lib/AuthContext';
 import { Shield, Lock, CreditCard, ArrowRight, UserPlus, Baby, Fingerprint, Eye, EyeOff } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
