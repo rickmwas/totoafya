@@ -44,19 +44,25 @@ export default function GrowthTracker() {
   const saveRecord = async () => {
     if (!selectedChild) return;
     setSaving(true);
-    const ageMonths = differenceInMonths(parseISO(form.recorded_date), parseISO(selectedChild.date_of_birth));
-    await db.entities.GrowthRecord.create({
-      child_id: selectedChild.id,
-      ...form,
-      weight_kg: parseFloat(form.weight_kg) || null,
-      height_cm: parseFloat(form.height_cm) || null,
-      muac_cm: parseFloat(form.muac_cm) || null,
-      age_months: ageMonths,
-    });
-    await loadRecords(selectedChild.id);
-    setForm({ weight_kg: '', height_cm: '', muac_cm: '', recorded_date: new Date().toISOString().split('T')[0] });
-    setShowForm(false);
-    setSaving(false);
+    try {
+      const ageMonths = differenceInMonths(parseISO(form.recorded_date), parseISO(selectedChild.date_of_birth));
+      await db.entities.GrowthRecord.create({
+        child_id: selectedChild.id,
+        ...form,
+        weight_kg: parseFloat(form.weight_kg) || null,
+        height_cm: parseFloat(form.height_cm) || null,
+        muac_cm: parseFloat(form.muac_cm) || null,
+        age_months: ageMonths,
+      });
+      await loadRecords(selectedChild.id);
+      setForm({ weight_kg: '', height_cm: '', muac_cm: '', recorded_date: new Date().toISOString().split('T')[0] });
+      setShowForm(false);
+    } catch (err) {
+      console.error("Failed to save growth record:", err);
+      alert(lang === 'sw' ? `Imeshindwa kuhifadhi kipimo cha ukuaji: ${err.message || err}` : `Failed to save growth record: ${err.message || err}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const chartData = records.map(r => {

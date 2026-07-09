@@ -67,19 +67,25 @@ export default function ANCVisitLog() {
   const saveVisit = async () => {
     if (!mother) return;
     setSaving(true);
-    await db.entities.ANCVisit.create({
-      ...form,
-      mother_id: mother.id,
-      blood_pressure_systolic: parseFloat(form.blood_pressure_systolic) || null,
-      blood_pressure_diastolic: parseFloat(form.blood_pressure_diastolic) || null,
-      weight_kg: parseFloat(form.weight_kg) || null,
-      fundal_height_cm: parseFloat(form.fundal_height_cm) || null,
-      fetal_heart_rate: parseFloat(form.fetal_heart_rate) || null,
-      haemoglobin: parseFloat(form.haemoglobin) || null,
-    });
-    await loadData();
-    setShowForm(false);
-    setSaving(false);
+    try {
+      await db.entities.ANCVisit.create({
+        ...form,
+        mother_id: mother.id,
+        blood_pressure_systolic: parseFloat(form.blood_pressure_systolic) || null,
+        blood_pressure_diastolic: parseFloat(form.blood_pressure_diastolic) || null,
+        weight_kg: parseFloat(form.weight_kg) || null,
+        fundal_height_cm: parseFloat(form.fundal_height_cm) || null,
+        fetal_heart_rate: parseFloat(form.fetal_heart_rate) || null,
+        haemoglobin: parseFloat(form.haemoglobin) || null,
+      });
+      await loadData();
+      setShowForm(false);
+    } catch (err) {
+      console.error("Failed to save ANC visit:", err);
+      alert(lang === 'sw' ? `Imeshindwa kuhifadhi ziara: ${err.message || err}` : `Failed to save visit: ${err.message || err}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const bpStatus = (sys, dia) => {

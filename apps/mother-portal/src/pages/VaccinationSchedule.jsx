@@ -56,29 +56,44 @@ export default function VaccinationSchedule() {
 
   const markGiven = async (vaccine) => {
     setSaving(true);
-    await db.entities.Immunization.update(vaccine.id, {
-      status: 'given',
-      given_date: new Date().toISOString().split('T')[0],
-    });
-    await loadVaccines(selectedChild.id);
-    setSaving(false);
+    try {
+      await db.entities.Immunization.update(vaccine.id, {
+        status: 'given',
+        given_date: new Date().toISOString().split('T')[0],
+      });
+      await loadVaccines(selectedChild.id);
+    } catch (err) {
+      console.error("Failed to mark vaccine as given:", err);
+      alert(lang === 'sw' ? `Imeshindwa kusasisha chanjo: ${err.message || err}` : `Failed to update vaccine: ${err.message || err}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const seedSchedule = async () => {
     if (!selectedChild) return;
     setSaving(true);
-    const dob = parseISO(selectedChild.date_of_birth);
-    const records = KENYA_VACCINE_SCHEDULE.map(v => ({
-      child_id: selectedChild.id,
-      vaccine_name: v.name,
-      age_weeks: v.age_weeks,
-      scheduled_date: new Date(dob.getTime() + v.age_weeks * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: 'scheduled',
-      dose_number: 1,
-    }));
-    await db.entities.Immunization.bulkCreate(records);
-    await loadVaccines(selectedChild.id);
-    setSaving(false);
+    try {
+      const dob = parseISO(selectedChild.date_of_birth);
+      if (isNaN(dob.getTime())) {
+        throw new Error(lang === 'sw' ? 'Tarehe ya kuzaliwa ya mtoto si sahihi.' : 'Child date of birth is invalid.');
+      }
+      const records = KENYA_VACCINE_SCHEDULE.map(v => ({
+        child_id: selectedChild.id,
+        vaccine_name: v.name,
+        age_weeks: v.age_weeks,
+        scheduled_date: new Date(dob.getTime() + v.age_weeks * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: 'scheduled',
+        dose_number: 1,
+      }));
+      await db.entities.Immunization.bulkCreate(records);
+      await loadVaccines(selectedChild.id);
+    } catch (err) {
+      console.error("Failed to generate schedule:", err);
+      alert(lang === 'sw' ? `Imeshindwa kutengeneza ratiba: ${err.message || err}` : `Failed to generate schedule: ${err.message || err}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const statsCount = (status) => vaccines.filter(v => v.status === status).length;
