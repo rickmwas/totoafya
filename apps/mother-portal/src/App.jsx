@@ -63,8 +63,9 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Redirect authenticated user with incomplete profile to onboarding
-  if (user && !user.profile_complete && currentPath !== '/onboarding' && currentPath !== '/login') {
+  // Only redirect mothers (role: 'user') with explicitly incomplete profiles to onboarding.
+  // Use === false (not just falsy) to avoid redirect when profile_complete is undefined (mock/no-supabase mode).
+  if (user && user.role === 'user' && user.profile_complete === false && currentPath !== '/onboarding' && currentPath !== '/login') {
     return <Navigate to="/onboarding" replace />;
   }
 

@@ -105,7 +105,7 @@ function PaywallAlert({ error, lang, facilityName }) {
 export default function Onboarding() {
   const navigate = useNavigate();
   const { t, lang, setLanguage } = useLang();
-  const { user } = useAuth();
+  const { user, checkAppState } = useAuth();
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState(null);
   const [caregiverType, setCaregiverType] = useState(null);
@@ -269,6 +269,8 @@ export default function Onboarding() {
           health_status: 'healthy',
         });
       }
+      // Refresh user session so profile_complete is updated in React state
+      await checkAppState();
       navigate('/');
     } catch (err) {
       console.error(err);
