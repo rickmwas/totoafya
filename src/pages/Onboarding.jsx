@@ -20,15 +20,47 @@ const RISK_FACTORS = [
 
 // ── Reusable atoms ─────────────────────────────────────────────────────────────
 
+import { 
+  Heart, 
+  Shield, 
+  TrendingUp, 
+  Sparkles, 
+  BookOpen, 
+  MapPin, 
+  Syringe, 
+  Calendar,
+  Activity,
+  CheckCircle
+} from 'lucide-react';
+
+function BrandHeader() {
+  return (
+    <div className="flex items-center gap-2 select-none">
+      <div className="rounded-xl bg-gradient-to-br from-[#1B6B5A] to-[#145244] w-9 h-9 flex items-center justify-center shadow-md">
+        <Heart size={14} className="text-white fill-white" />
+      </div>
+      <div className="flex flex-col leading-none">
+        <span className="font-bold tracking-tight text-[#0A0A0A] text-md">
+          <span className="text-[#1B6B5A]">Toto</span>
+          <span className="text-[#C8813A]">Afya</span>
+        </span>
+        <span className="font-semibold tracking-[0.2em] text-[#1B6B5A] uppercase text-[7px]">
+          Digital
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function ProgressBar({ current, total }) {
   return (
-    <div className="flex items-center gap-1 w-24">
+    <div className="flex items-center gap-1.5 w-24">
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
           className={cn(
-            "h-[3px] rounded-full transition-all duration-300 flex-1",
-            i <= current ? "bg-[#044C3A]" : "bg-[#EAEAEA]"
+            "h-1 rounded-full transition-all duration-500 ease-out flex-1",
+            i <= current ? "bg-[#1B6B5A]" : "bg-gray-200"
           )}
         />
       ))}
@@ -41,7 +73,7 @@ function StepHeader({ onBack, current, total }) {
     <div className="flex items-center justify-between w-full mb-8 flex-shrink-0">
       <button
         onClick={onBack}
-        className="w-10 h-10 rounded-full bg-white border border-[#F0F0F0] flex items-center justify-center active:scale-[0.95] transition-transform shadow-sm"
+        className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center active:scale-[0.92] transition-transform shadow-sm hover:border-[#1B6B5A]/20"
       >
         <ArrowLeft size={16} className="text-[#0A0A0A]" />
       </button>
@@ -60,20 +92,31 @@ function InputField({ label, value, onChange, type = 'text', placeholder }) {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-[52px] px-4 bg-white border border-[#EAEAEA] rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#C0C0C0] outline-none focus:border-[#044C3A] focus:shadow-[0_0_0_3px_rgba(4,76,58,0.06)] transition-all"
+        className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#C0C0C0] outline-none focus:border-[#1B6B5A] focus:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all"
       />
     </div>
   );
 }
 
-function ContinueBtn({ onClick, disabled, loading, children }) {
+function ContinueBtn({ onClick, disabled, loading, icon: Icon = ArrowRight, children }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="w-full h-[56px] rounded-full bg-[#044C3A] text-white text-[16px] font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-[0_4px_18px_rgba(4,76,58,0.15)] disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
+      className="w-full h-[56px] rounded-full bg-[#1B6B5A] hover:bg-[#145244] text-white text-[16px] font-bold flex items-center justify-between pl-6 pr-2.5 active:scale-[0.98] transition-all shadow-teal-glow disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
     >
-      {loading ? <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : children}
+      {loading ? (
+        <div className="w-full flex justify-center items-center">
+          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          <span className="flex-1 text-center font-bold tracking-tight">{children}</span>
+          <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+            <Icon size={18} className="text-white" strokeWidth={2.5} />
+          </div>
+        </>
+      )}
     </button>
   );
 }
@@ -255,92 +298,66 @@ export default function Onboarding() {
 
   // ── STEP 0: Welcome ──────────────────────────────────────────────────────────
   if (step === 0) return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto overflow-y-auto pb-10 font-sans">
-      {/* Hero Image Card */}
-      <div className="relative mx-4 mt-4 mb-6 h-[46vh] rounded-[32px] overflow-hidden flex-shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto overflow-y-auto pb-10 font-sans">
+      {/* Soft integrated top cover banner (Google/Apple layout) */}
+      <div className="relative w-full h-[40vh] flex-shrink-0 overflow-hidden bg-[#FDFCF8]">
         <img
           src="/onboarding_welcome.png"
-          alt="Mother and baby"
+          alt="Welcome to TotoAfya"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#044C3A]/30 via-transparent to-black/10" />
+        {/* Soft fade overlay to blend the banner into the page's background */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FDFCF8] via-[#FDFCF8]/90 to-transparent" />
         
-        {/* Brand Pill */}
-        <div className="absolute top-4 left-4">
-          <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-full px-3.5 py-1.5 shadow-sm border border-[#F0F0F0]/50">
-            <div className="w-7 h-7 rounded-[9px] bg-[#044C3A] flex items-center justify-center shadow-sm">
-              <Heart size={13} className="text-white fill-white" />
-            </div>
-            <span className="text-[14px] font-extrabold text-[#0A0A0A] tracking-tight">TotoAfya</span>
-          </div>
-        </div>
-
-        {/* Notification Icon */}
-        <div className="absolute top-4 right-4">
-          <button className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center shadow-sm border border-[#F0F0F0]/50 relative active:scale-95 transition-transform">
-            <Bell size={16} className="text-[#0A0A0A]" />
-            <div className="w-2.5 h-2.5 bg-[#044C3A] rounded-full absolute top-2 right-2 border-2 border-white" />
-          </button>
+        {/* Brand logo pill */}
+        <div className="absolute top-6 left-6">
+          <BrandHeader />
         </div>
       </div>
 
-      {/* Hero Content */}
+      {/* Title block */}
       <div className="flex flex-col flex-1 px-6">
-        <h1 className="text-[38px] font-bold leading-[1.1] text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-          {lang === 'sw' ? 'Afya Bora' : 'Better Health'}{' '}
-          <span className="text-[#044C3A] block">{lang === 'sw' ? 'Huanzia Hapa' : 'Starts Here'}</span>
+        <h1 className="text-[34px] font-extrabold leading-[1.15] text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          Welcome to <br />
+          <span className="text-[#1B6B5A]">Toto</span><span className="text-[#C8813A]">Afya</span> <span className="text-[#1B6B5A]">Digital</span>
         </h1>
-        <p className="text-[14px] text-[#707070] font-semibold mt-2.5 tracking-tight">
-          Your family health companion
+        <p className="text-[14px] text-gray-500 font-semibold mt-2.5 leading-relaxed tracking-tight">
+          Your trusted companion through pregnancy, child growth and family health.
         </p>
 
-        {/* Highlight Feature Cards */}
-        <div className="grid grid-cols-3 gap-2.5 mt-6 mb-8">
+        {/* Feature Icons Grid (soft styled, borderless) */}
+        <div className="grid grid-cols-3 gap-4 my-6">
           {[
-            { icon: '🤰', color: '#D946EF', bg: '#FFF0F5', en: 'Prenatal Care', sw: 'Huduma ya Ujauzito', subEn: 'Track & stay prepared', subSw: 'Kua tayari' },
-            { icon: '🛡️', color: '#044C3A', bg: '#E8F5F2', en: 'Vaccine Tracker', sw: 'Ratiba ya Chanjo', subEn: 'Never miss a vaccine', subSw: 'Kamwe usikose' },
-            { icon: '📈', color: '#2563EB', bg: '#EFF6FF', en: 'Growth Monitor', sw: 'Ukuaji wa Mtoto', subEn: 'Track growth with ease', subSw: 'Ukuaji rahisi' },
-          ].map(({ icon, color, bg, en, sw, subEn, subSw }) => (
-            <div key={en} className="bg-white rounded-[22px] p-3 border border-[#F0F0F0] shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col items-center gap-1.5 text-center">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-[18px] shadow-sm" style={{ backgroundColor: bg }}>
-                {icon}
+            { label: 'Prenatal Care', icon: Heart, bg: 'bg-[#C8813A]/10', color: 'text-[#C8813A]' },
+            { label: 'Vaccines', icon: Shield, bg: 'bg-[#1B6B5A]/10', color: 'text-[#1B6B5A]' },
+            { label: 'Growth Tracking', icon: TrendingUp, bg: 'bg-[#2E7A5D]/10', color: 'text-[#2E7A5D]' }
+          ].map((item, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center gap-1.5">
+              <div className={`w-11 h-11 rounded-full ${item.bg} flex items-center justify-center`}>
+                <item.icon size={20} className={item.color} />
               </div>
-              <p className="text-[11px] font-extrabold leading-[1.25] tracking-tight" style={{ color }}>
-                {lang === 'sw' ? sw : en}
-              </p>
-              <p className="text-[9px] text-[#999999] leading-tight font-medium">
-                {lang === 'sw' ? subSw : subEn}
-              </p>
+              <span className="text-[11px] font-bold text-gray-700 leading-tight">{item.label}</span>
             </div>
           ))}
         </div>
 
-        {/* Language Picker */}
+        {/* Language selector */}
         <div className="flex flex-col items-center gap-2 mb-8">
-          <span className="text-[11px] tracking-[0.1em] font-bold uppercase text-[#999999]">Choose your language</span>
-          <div className="bg-[#F2F2F2] rounded-full p-1 flex gap-1 w-full max-w-[280px]">
+          <div className="bg-gray-100 rounded-full p-1 flex gap-1 w-full max-w-[240px]">
             {[
-              { code: 'en', flagText: 'EN', label: 'English' },
-              { code: 'sw', flagText: 'KE', label: 'Kiswahili' }
-            ].map(({ code, flagText, label }) => {
+              { code: 'en', label: 'English' },
+              { code: 'sw', label: 'Kiswahili' }
+            ].map(({ code, label }) => {
               const selected = lang === code;
               return (
                 <button
                   key={code}
                   onClick={() => setLanguage(code)}
                   className={cn(
-                    'flex-1 flex items-center justify-center gap-2 h-9 rounded-full text-[13px] font-bold transition-all active:scale-[0.98]',
-                    selected
-                      ? 'bg-[#044C3A] text-white shadow-sm'
-                      : 'text-[#666666]'
+                    'flex-1 py-1.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.97]',
+                    selected ? 'bg-[#1B6B5A] text-white shadow-sm' : 'text-[#666666]'
                   )}
                 >
-                  <div className={cn(
-                    'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black',
-                    selected ? 'bg-white/20 text-white' : 'bg-black/5 text-[#666666]'
-                  )}>
-                    {flagText}
-                  </div>
                   {label}
                 </button>
               );
@@ -348,11 +365,12 @@ export default function Onboarding() {
           </div>
         </div>
 
+        {/* Action Call to Action */}
         <div className="pb-6 mt-auto">
           <ContinueBtn onClick={() => setStep(1)}>
-            <span>Get Started</span> <ArrowRight size={16} strokeWidth={2.5} />
+            {lang === 'sw' ? 'Anza Sasa' : 'Get Started'}
           </ContinueBtn>
-          <p className="text-center text-[11px] text-[#A0A0A0] mt-3.5 font-medium">
+          <p className="text-center text-[11px] text-gray-400 mt-3 font-semibold">
             {lang === 'sw' ? 'Inachukua dakika 2 tu' : 'Takes just 2 minutes'}
           </p>
         </div>
@@ -362,17 +380,17 @@ export default function Onboarding() {
 
   // ── STEP 1: Who are you? ─────────────────────────────────────────────────────
   if (step === 1) return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(0)} current={0} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#044C3A] mb-2">
+        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">
           {lang === 'sw' ? 'HATUA 1 YA 4' : 'STEP 1 OF 4'}
         </p>
-        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {lang === 'sw' ? 'Wewe ni nani?' : 'Who are you?'}
         </h2>
-        <p className="text-[14px] text-[#707070] font-medium mt-2 leading-relaxed">
+        <p className="text-[14px] text-gray-500 font-semibold mt-1 leading-relaxed">
           {lang === 'sw' ? 'Tutabinafsisha programu kwa hali yako' : "We'll personalize the app for your role"}
         </p>
       </div>
@@ -410,31 +428,31 @@ export default function Onboarding() {
               key={key}
               onClick={() => { setCaregiverType(key); setStep(key === 'mother' ? 2 : 3); }}
               className={cn(
-                'w-full rounded-[24px] p-3.5 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center',
+                'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
                 sel
-                  ? 'border-[#044C3A] bg-[#E8F5F2]/20 shadow-[0_4px_16px_rgba(4,76,58,0.04)]'
-                  : 'bg-white border-[#F2F2F2]'
+                  ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm'
+                  : 'bg-white border-gray-100'
               )}
             >
-              {/* Photo Image Left */}
-              <div className="w-[72px] h-[72px] rounded-[18px] overflow-hidden flex-shrink-0 mr-4 shadow-sm">
+              {/* Photo Image Left (borderless, soft) */}
+              <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
                 <img src={imgUrl} alt={en} className="w-full h-full object-cover" />
               </div>
 
               {/* Title & Description Middle */}
               <div className="flex-1 min-w-0 pr-2">
                 <p className="text-[16px] font-extrabold text-[#0A0A0A] tracking-tight">{lang === 'sw' ? sw : en}</p>
-                <p className="text-[12px] text-[#707070] mt-1 font-semibold leading-tight">{lang === 'sw' ? sub_sw : sub_en}</p>
+                <p className="text-[12px] text-gray-500 mt-1 font-semibold leading-tight">{lang === 'sw' ? sub_sw : sub_en}</p>
               </div>
 
               {/* Select indicator Right */}
               <div className="flex-shrink-0 ml-2">
                 {sel ? (
-                  <div className="w-6 h-6 rounded-full bg-[#044C3A] flex items-center justify-center shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-[#1B6B5A] flex items-center justify-center shadow-sm">
                     <Check size={12} className="text-white" strokeWidth={3} />
                   </div>
                 ) : (
-                  <ChevronRight size={16} className="text-[#C0C0C0]" />
+                  <ChevronRight size={16} className="text-gray-300" />
                 )}
               </div>
             </button>
@@ -446,17 +464,17 @@ export default function Onboarding() {
 
   // ── STEP 2: Journey Selection ────────────────────────────────────────────────
   if (step === 2) return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(1)} current={1} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#044C3A] mb-2">
+        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">
           {lang === 'sw' ? 'HATUA 2 YA 4' : 'STEP 2 OF 4'}
         </p>
-        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {lang === 'sw' ? 'Uko wapi katika safari yako?' : 'Where are you in your journey?'}
         </h2>
-        <p className="text-[14px] text-[#707070] font-medium mt-2 leading-relaxed">
+        <p className="text-[14px] text-gray-500 font-semibold mt-1 leading-relaxed">
           {lang === 'sw' ? "Tutabadilisha programu" : "We'll tailor the app to your situation"}
         </p>
       </div>
@@ -466,11 +484,11 @@ export default function Onboarding() {
         <button
           onClick={() => { setMode('pregnant'); setStep(3); }}
           className={cn(
-            'w-full rounded-[24px] p-3.5 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center',
-            mode === 'pregnant' ? 'border-[#044C3A] bg-[#E8F5F2]/20 shadow-[0_4px_16px_rgba(4,76,58,0.04)]' : 'bg-white border-[#F2F2F2]'
+            'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
+            mode === 'pregnant' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
-          <div className="w-[72px] h-[72px] rounded-[18px] overflow-hidden flex-shrink-0 mr-4 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
             <img
               src="/onboarding_journey_pregnant.png"
               alt="Pregnant"
@@ -479,18 +497,18 @@ export default function Onboarding() {
           </div>
           <div className="flex-1 min-w-0 pr-2">
             <p className="text-[16px] font-extrabold text-[#0A0A0A] tracking-tight">{lang === 'sw' ? 'Mimi ni mjamzito' : 'I am pregnant'}</p>
-            <p className="text-[12px] text-[#707070] mt-1 font-semibold leading-tight">
+            <p className="text-[12px] text-gray-500 mt-1 font-semibold leading-tight">
               {lang === 'sw' ? 'Fuatilia ziara za ANC, ukuaji wa mtoto' : 'Track ANC visits, fetal development & milestones'}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {['ANC Tracker', 'Fetal Timeline'].map(tag => (
-                <span key={tag} className="text-[9px] bg-[#E8F5F2] text-[#044C3A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
+                <span key={tag} className="text-[9px] bg-[#1B6B5A]/10 text-[#1B6B5A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
               ))}
               <span className="text-[9px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold tracking-wide">Danger Alerts</span>
             </div>
           </div>
           <div className="flex-shrink-0 ml-2">
-            <ChevronRight size={16} className="text-[#C0C0C0]" />
+            <ChevronRight size={16} className="text-gray-300" />
           </div>
         </button>
 
@@ -498,11 +516,11 @@ export default function Onboarding() {
         <button
           onClick={() => { setMode('child'); setStep(3); }}
           className={cn(
-            'w-full rounded-[24px] p-3.5 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center',
-            mode === 'child' ? 'border-[#044C3A] bg-[#E8F5F2]/20 shadow-[0_4px_16px_rgba(4,76,58,0.04)]' : 'bg-white border-[#F2F2F2]'
+            'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
+            mode === 'child' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
-          <div className="w-[72px] h-[72px] rounded-[18px] overflow-hidden flex-shrink-0 mr-4 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
             <img
               src="/onboarding_journey_child.png"
               alt="Child"
@@ -511,26 +529,26 @@ export default function Onboarding() {
           </div>
           <div className="flex-1 min-w-0 pr-2">
             <p className="text-[16px] font-extrabold text-[#0A0A0A] tracking-tight">{lang === 'sw' ? 'Nina mtoto tayari' : 'I already have a child'}</p>
-            <p className="text-[12px] text-[#707070] mt-1 font-semibold leading-tight">
+            <p className="text-[12px] text-gray-500 mt-1 font-semibold leading-tight">
               {lang === 'sw' ? 'Fuatilia chanjo, ukuaji na hatua za maendeleo' : 'Track vaccines, growth charts & milestones'}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {['Vaccines', 'Growth Chart', 'Milestones'].map(tag => (
-                <span key={tag} className="text-[9px] bg-[#E8F5F2] text-[#044C3A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
+                <span key={tag} className="text-[9px] bg-[#1B6B5A]/10 text-[#1B6B5A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
               ))}
             </div>
           </div>
           <div className="flex-shrink-0 ml-2">
-            <ChevronRight size={16} className="text-[#C0C0C0]" />
+            <ChevronRight size={16} className="text-gray-300" />
           </div>
         </button>
 
         {/* Both option */}
         <button
           onClick={() => { setMode('pregnant'); setStep(3); }}
-          className="w-full rounded-[24px] p-3.5 border border-dashed border-[#E0E0E0] bg-white text-left transition-all active:scale-[0.98] duration-200 flex items-center"
+          className="w-full rounded-[24px] p-3 border border-dashed border-gray-200 bg-white text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:border-[#1B6B5A]/30"
         >
-          <div className="w-[72px] h-[72px] rounded-[18px] overflow-hidden flex-shrink-0 mr-4 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
             <img
               src="/onboarding_journey_both.png"
               alt="Family"
@@ -539,12 +557,12 @@ export default function Onboarding() {
           </div>
           <div className="flex-1 min-w-0 pr-2">
             <p className="text-[16px] font-extrabold text-[#0A0A0A] tracking-tight">{lang === 'sw' ? 'Mjamzito na nina watoto' : 'Pregnant + have children'}</p>
-            <p className="text-[12px] text-[#707070] mt-1 font-semibold leading-tight">
+            <p className="text-[12px] text-gray-500 mt-1 font-semibold leading-tight">
               {lang === 'sw' ? 'Tutawezesha hali zote mbili' : "We'll enable both modes for you"}
             </p>
           </div>
           <div className="flex-shrink-0 ml-2">
-            <ChevronRight size={16} className="text-[#C0C0C0]" />
+            <ChevronRight size={16} className="text-gray-300" />
           </div>
         </button>
       </div>
@@ -558,15 +576,15 @@ export default function Onboarding() {
     const dotTotal = isCaregiverOnly ? 3 : 4;
 
     return (
-      <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+      <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
         <StepHeader onBack={() => setStep(isCaregiverOnly ? 1 : 2)} current={dotIndex} total={dotTotal} />
 
         <div className="mb-8 flex-shrink-0">
-          <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#044C3A] mb-2">{stepLabel}</p>
-          <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+          <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">{stepLabel}</p>
+          <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {lang === 'sw' ? 'Maelezo Yako' : 'Your Details'}
           </h2>
-          <p className="text-[14px] text-[#707070] font-medium mt-2 leading-relaxed">
+          <p className="text-[14px] text-gray-500 font-semibold mt-1 leading-relaxed">
             {lang === 'sw' ? 'Taarifa zako ziko salama' : 'Your information is secure and private'}
           </p>
         </div>
@@ -582,7 +600,7 @@ export default function Onboarding() {
             <select
               value={form.county}
               onChange={e => setF('county', e.target.value)}
-              className="h-[52px] px-4 bg-white border border-[#EAEAEA] rounded-[16px] text-[15px] font-medium text-[#0A0A0A] outline-none focus:border-[#044C3A] focus:shadow-[0_0_0_3px_rgba(4,76,58,0.06)] transition-all appearance-none"
+              className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] outline-none focus:border-[#1B6B5A] focus:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all appearance-none"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
             >
               <option value="">{lang === 'sw' ? 'Chagua kaunti' : 'Select county'}</option>
@@ -600,10 +618,10 @@ export default function Onboarding() {
             lang={lang}
           />
 
-          {/* Hospital emergency details */}
-          <div className="bg-white rounded-[24px] border border-[#F2F2F2] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.01)] mt-2">
-            <div className="px-4 py-3 bg-[#FAFAFA] border-b border-[#F0F0F0]">
-              <p className="text-[11px] tracking-[0.12em] font-extrabold uppercase text-[#666666]">
+          {/* Hospital emergency details (soft outline) */}
+          <div className="bg-white rounded-[24px] border border-gray-150 overflow-hidden shadow-card mt-2">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+              <p className="text-[11px] tracking-[0.12em] font-extrabold uppercase text-gray-500">
                 {lang === 'sw' ? 'NAMBARI ZA HOSPITALI (SI LAZIMA)' : 'FACILITY PHONES (OPTIONAL)'}
               </p>
             </div>
@@ -628,7 +646,7 @@ export default function Onboarding() {
 
         <div className="mt-6 flex-shrink-0">
           <ContinueBtn onClick={() => setStep(4)} disabled={!form.full_name || !form.phone}>
-            <span>{lang === 'sw' ? 'Endelea' : 'Continue'}</span> <ArrowRight size={16} strokeWidth={2.5} />
+            {lang === 'sw' ? 'Endelea' : 'Continue'}
           </ContinueBtn>
         </div>
       </div>
@@ -637,27 +655,27 @@ export default function Onboarding() {
 
   // ── STEP 4C: Father / Guardian ───────────────────────────────────────────────
   if (step === 4 && (caregiverType === 'father' || caregiverType === 'guardian')) return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={2} total={3} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#044C3A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">{caregiverType === 'father' ? '👨' : '🧑'}</span>
-          <span className="text-[10px] font-extrabold text-[#044C3A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
             {lang === 'sw' ? (caregiverType === 'father' ? 'BABA' : 'MLEZI') : (caregiverType === 'father' ? 'FATHER' : 'GUARDIAN')}
           </span>
         </div>
-        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {lang === 'sw' ? 'Watoto Wanaohusika' : 'Children in Your Care'}
         </h2>
-        <p className="text-[14px] text-[#707070] font-medium mt-2 leading-relaxed">
+        <p className="text-[14px] text-gray-500 font-semibold mt-1 leading-relaxed">
           {lang === 'sw' ? 'Unaweza kuongeza watoto baadaye pia' : 'You can add more children later'}
         </p>
       </div>
 
       <div className="flex flex-col gap-4 flex-1 overflow-y-auto">
-        <div className="bg-white rounded-[24px] border border-[#F2F2F2] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.01)]">
-          <p className="text-[11px] tracking-[0.12em] font-extrabold uppercase text-[#999999] mb-4">
+        <div className="bg-white rounded-[24px] border border-gray-150 p-5 shadow-card">
+          <p className="text-[11px] tracking-[0.12em] font-extrabold uppercase text-gray-400 mb-4">
             {lang === 'sw' ? 'MTOTO WA KWANZA (SI LAZIMA)' : 'FIRST CHILD (OPTIONAL)'}
           </p>
           <div className="flex flex-col gap-4">
@@ -674,8 +692,8 @@ export default function Onboarding() {
               </label>
               <div className="flex gap-2">
                 {[
-                  { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#044C3A', activeBg: '#E8F5F2' },
-                  { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#D946A8', activeBg: '#FDF2FA' }
+                  { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#1B6B5A', activeBg: '#E8F5F2' },
+                  { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#C8813A', activeBg: '#FDF7F2' }
                 ].map(({ v, icon, en, sw, activeColor, activeBg }) => {
                   const active = childForm.gender === v;
                   return (
@@ -686,7 +704,7 @@ export default function Onboarding() {
                         'flex-1 h-12 rounded-[16px] flex items-center justify-center gap-2 border-2 transition-all active:scale-[0.97] font-extrabold text-[14px]',
                         active
                           ? 'shadow-[0_2px_12px_rgba(0,0,0,0.02)]'
-                          : 'border-[#F2F2F2] bg-white text-[#666666]'
+                          : 'border-gray-100 bg-white text-[#666666]'
                       )}
                       style={active ? { borderColor: activeColor, backgroundColor: activeBg, color: activeColor } : {}}
                     >
@@ -699,9 +717,9 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <div className="flex gap-3 bg-[#044C3A]/5 border border-[#044C3A]/10 rounded-[20px] p-4 mt-2">
+        <div className="flex gap-3 bg-[#1B6B5A]/5 border border-[#1B6B5A]/10 rounded-[20px] p-4 mt-2">
           <span className="text-lg flex-shrink-0">ℹ️</span>
-          <p className="text-[12.5px] text-[#555] leading-relaxed font-semibold">
+          <p className="text-[12.5px] text-gray-600 leading-relaxed font-semibold">
             {lang === 'sw'
               ? 'Kama baba au mlezi, utaweza kuona chanjo, ukuaji na arifa za afya za watoto wote.'
               : "As a father or guardian, you'll track vaccines, growth, and health alerts for all children."}
@@ -711,8 +729,8 @@ export default function Onboarding() {
 
       <div className="mt-6 flex-shrink-0">
         <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
-        <ContinueBtn loading={loading} onClick={handleSubmit}>
-          <Check size={18} strokeWidth={2.5} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
+        <ContinueBtn loading={loading} onClick={handleSubmit} icon={Check}>
+          {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>
       </div>
     </div>
@@ -720,17 +738,17 @@ export default function Onboarding() {
 
   // ── STEP 4A: Pregnancy Detail ────────────────────────────────────────────────
   if (step === 4 && mode === 'pregnant') return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={3} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#044C3A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">🤰</span>
-          <span className="text-[10px] font-extrabold text-[#044C3A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
             {lang === 'sw' ? 'HALI YA UJAUZITO' : 'PREGNANCY'}
           </span>
         </div>
-        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {lang === 'sw' ? 'Kuhusu Ujauzito Wako' : 'About Your Pregnancy'}
         </h2>
       </div>
@@ -744,7 +762,7 @@ export default function Onboarding() {
           <div className="grid grid-cols-3 gap-2.5">
             {[
               { v: 1, en: '1st', sw: 'Kwanza', sub: '1–13 wks', color: '#7C3AED', bg: '#F5F3FF' },
-              { v: 2, en: '2nd', sw: 'Pili', sub: '14–27 wks', color: '#044C3A', bg: '#E8F5F2' },
+              { v: 2, en: '2nd', sw: 'Pili', sub: '14–27 wks', color: '#1B6B5A', bg: '#E8F5F2' },
               { v: 3, en: '3rd', sw: 'Tatu', sub: '28+ wks', color: '#2E7A5D', bg: '#ECFDF5' },
             ].map(({ v, en, sw, sub, color, bg }) => {
               const active = pregForm.trimester === v;
@@ -753,15 +771,15 @@ export default function Onboarding() {
                   key={v}
                   onClick={() => setP('trimester', v)}
                   className={cn(
-                    'rounded-[20px] py-4 flex flex-col items-center gap-1 border-2 transition-all active:scale-[0.96] shadow-[0_2px_6px_rgba(0,0,0,0.01)]',
-                    active ? 'shadow-[0_4px_16px_rgba(0,0,0,0.03)]' : 'border-[#F2F2F2] bg-white'
+                    'rounded-[20px] py-4 flex flex-col items-center gap-1 border-2 transition-all active:scale-[0.96] shadow-card',
+                    active ? 'shadow-card-hover' : 'border-gray-100 bg-white'
                   )}
                   style={active ? { borderColor: color, backgroundColor: bg } : {}}
                 >
                   <span className="text-[20px] font-black" style={{ color: active ? color : '#0A0A0A' }}>
                     {lang === 'sw' ? sw : en}
                   </span>
-                  <span className="text-[10px] text-[#999] font-bold">{sub}</span>
+                  <span className="text-[10px] text-gray-400 font-bold">{sub}</span>
                 </button>
               );
             })}
@@ -771,9 +789,9 @@ export default function Onboarding() {
         {/* OR LMP */}
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <div className="flex-1 h-px bg-[#EAEAEA]" />
-            <span className="text-[11px] text-[#C0C0C0] font-bold tracking-wider">{lang === 'sw' ? 'AU INGIZA TAREHE' : 'OR ENTER EXACT DATE'}</span>
-            <div className="flex-1 h-px bg-[#EAEAEA]" />
+            <div className="flex-1 h-px bg-gray-200" />
+            <span className="text-[11px] text-gray-400 font-bold tracking-wider">{lang === 'sw' ? 'AU INGIZA TAREHE' : 'OR ENTER EXACT DATE'}</span>
+            <div className="flex-1 h-px bg-gray-200" />
           </div>
           <InputField
             label={lang === 'sw' ? 'Tarehe ya Hedhi ya Mwisho (LMP)' : 'Last Menstrual Period (LMP)'}
@@ -798,8 +816,8 @@ export default function Onboarding() {
                   className={cn(
                     'flex-1 h-12 rounded-[16px] text-[13px] font-extrabold border-2 transition-all active:scale-[0.97]',
                     active
-                      ? 'bg-[#044C3A] text-white border-[#044C3A] shadow-[0_4px_16px_rgba(4,76,58,0.15)]'
-                      : 'bg-white border-[#F2F2F2] text-[#666666]'
+                      ? 'bg-[#1B6B5A] text-white border-[#1B6B5A] shadow-teal-glow'
+                      : 'bg-white border-gray-100 text-[#666666]'
                   )}
                 >
                   {lang === 'sw' ? sw : en}
@@ -825,7 +843,7 @@ export default function Onboarding() {
                     'px-4 py-2.5 rounded-full text-[13px] font-bold border transition-all active:scale-[0.96]',
                     selected
                       ? 'bg-[#0A0A0A] text-white border-[#0A0A0A] shadow-sm'
-                      : 'bg-white border-[#EAEAEA] text-[#555]'
+                      : 'bg-white border-gray-200 text-gray-600'
                   )}
                 >
                   {lang === 'sw' ? sw : en}
@@ -838,8 +856,8 @@ export default function Onboarding() {
 
       <div className="mt-6 flex-shrink-0">
         <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
-        <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!pregForm.trimester && !pregForm.lmp}>
-          <Check size={18} strokeWidth={2.5} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
+        <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!pregForm.trimester && !pregForm.lmp} icon={Check}>
+          {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>
       </div>
     </div>
@@ -847,17 +865,17 @@ export default function Onboarding() {
 
   // ── STEP 4B: Child Detail ────────────────────────────────────────────────────
   if (step === 4 && mode === 'child') return (
-    <div className="min-h-screen bg-[#FCFCFC] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={3} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#044C3A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">👶</span>
-          <span className="text-[10px] font-extrabold text-[#044C3A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
             {lang === 'sw' ? 'MAELEZO YA MTOTO' : 'CHILD DETAILS'}
           </span>
         </div>
-        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
           {lang === 'sw' ? 'Mwambie kidogo kuhusu mtoto wako' : 'Tell us about your child'}
         </h2>
       </div>
@@ -877,8 +895,8 @@ export default function Onboarding() {
           </label>
           <div className="flex gap-3">
             {[
-              { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#044C3A', activeBg: '#E8F5F2' },
-              { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#D946A8', activeBg: '#FDF2FA' }
+              { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#1B6B5A', activeBg: '#E8F5F2' },
+              { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#C8813A', activeBg: '#FDF7F2' }
             ].map(({ v, icon, en, sw, activeColor, activeBg }) => {
               const active = childForm.gender === v;
               return (
@@ -886,10 +904,10 @@ export default function Onboarding() {
                   key={v}
                   onClick={() => setC('gender', v)}
                   className={cn(
-                    'flex-1 py-4.5 rounded-[22px] flex flex-col items-center gap-1.5 border-2 transition-all active:scale-[0.97]',
+                    'flex-1 py-4.5 rounded-[22px] flex flex-col items-center gap-1.5 border-2 transition-all active:scale-[0.97] shadow-card',
                     active
-                      ? 'shadow-[0_4px_16px_rgba(0,0,0,0.02)]'
-                      : 'border-[#F2F2F2] bg-white text-[#666666]'
+                      ? 'shadow-card-hover'
+                      : 'border-gray-100 bg-white text-gray-500'
                   )}
                   style={active ? { borderColor: activeColor, backgroundColor: activeBg } : {}}
                 >
@@ -907,7 +925,7 @@ export default function Onboarding() {
           <label className="text-[11px] tracking-[0.12em] font-bold uppercase text-[#666666] px-1">
             {lang === 'sw' ? 'UZITO WA KUZALIWA (SI LAZIMA)' : 'BIRTH WEIGHT — OPTIONAL'}
           </label>
-          <div className="flex items-center gap-2 bg-white border border-[#EAEAEA] rounded-[16px] px-4 focus-within:border-[#044C3A] focus-within:shadow-[0_0_0_3px_rgba(4,76,58,0.06)] transition-all shadow-[0_2px_6px_rgba(0,0,0,0.01)]">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-[16px] px-4 focus-within:border-[#1B6B5A] focus-within:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all shadow-[0_2px_6px_rgba(0,0,0,0.01)]">
             <input type="number" value={childForm.birth_weight_kg}
               onChange={e => setC('birth_weight_kg', e.target.value)}
               placeholder="e.g. 3.2" step="0.1" min="0.5" max="6"
@@ -919,8 +937,8 @@ export default function Onboarding() {
 
       <div className="mt-6 flex-shrink-0">
         <PaywallAlert error={paywallError} lang={lang} facilityName={form.facility_name} />
-        <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!childForm.full_name || !childForm.date_of_birth || !childForm.gender}>
-          <Check size={18} strokeWidth={2.5} /> {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
+        <ContinueBtn loading={loading} onClick={handleSubmit} disabled={!childForm.full_name || !childForm.date_of_birth || !childForm.gender} icon={Check}>
+          {lang === 'sw' ? 'Maliza Usajili' : 'Complete Setup'}
         </ContinueBtn>
       </div>
     </div>

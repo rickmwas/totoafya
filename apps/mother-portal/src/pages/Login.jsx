@@ -168,6 +168,21 @@ export default function Login() {
                 className="w-full h-12 px-4 rounded-[12px] bg-[#f7f9f7] border border-[#e5e7eb] text-[14px] font-medium outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all text-toto-black placeholder:text-[#a0aba5]/70"
               />
             </div>
+            {authType === 'anc_number' && (
+              <div className="bg-[#1B6B5A]/5 rounded-[20px] p-3.5 border border-[#1B6B5A]/10 flex gap-3.5 items-center mt-3 animate-fade-in">
+                <div className="w-[50px] h-[70px] rounded-lg overflow-hidden border border-gray-200 shadow-md flex-shrink-0">
+                  <img src="/mch_booklet.jpg" alt="MOH Booklet" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-[12.5px] font-bold text-toto-teal leading-tight">MOH Clinic Booklet</h4>
+                  <p className="text-[11px] text-gray-500 mt-0.5 font-semibold leading-relaxed">
+                    {lang === 'sw'
+                      ? 'Utapata namba ya usajili kwenye jalada la kitabu chako cha kliniki cha MOH216.'
+                      : 'You can find your registration serial printed on the front cover of your MOH216 booklet.'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

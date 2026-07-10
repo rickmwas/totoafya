@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, MoreVertical, Sparkles } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Sparkles, ArrowRight } from 'lucide-react';
 import db from '@/api/totoafyaClient';
 import { useLang } from '@/context/LanguageContext';
 import AppShell from '@/components/layout/AppShell';
@@ -209,8 +209,13 @@ export default function PregnancyOverview() {
         {/* Bottom Timeline CTA (Screen 05) */}
         <div className="mx-4">
           <Link to="/anc">
-            <button className="w-full h-14 bg-toto-teal hover:bg-toto-teal-dark active:scale-[0.97] text-white rounded-full font-bold text-[15px] shadow-[0_6px_20px_rgba(13,98,61,0.18)] transition-all duration-200 flex items-center justify-center">
-              {lang === 'sw' ? 'Ona Historia ya Kliniki ya ANC' : 'View Full ANC Timeline'}
+            <button className="w-full h-14 bg-toto-teal hover:bg-[#145244] active:scale-[0.97] text-white rounded-full font-bold text-[15px] shadow-[0_6px_20px_rgba(13,98,61,0.18)] transition-all duration-200 flex items-center justify-between pl-6 pr-2.5">
+              <span className="flex-1 text-center font-bold tracking-tight">
+                {lang === 'sw' ? 'Ona Historia ya Kliniki ya ANC' : 'View Full ANC Timeline'}
+              </span>
+              <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                <ArrowRight size={18} className="text-white" strokeWidth={2.5} />
+              </div>
             </button>
           </Link>
         </div>

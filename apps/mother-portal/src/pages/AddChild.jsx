@@ -220,12 +220,22 @@ export default function AddChild() {
           <button
             onClick={handleSave}
             disabled={saving || !form.full_name || !form.date_of_birth || !form.gender}
-            className="w-full h-16 rounded-full bg-[#1B6B5A] text-white text-[16px] font-bold flex items-center justify-center gap-2 shadow-teal-glow active:scale-[0.97] transition-all disabled:opacity-40 mt-2"
+            className="w-full h-14 rounded-full bg-[#1B6B5A] hover:bg-[#145244] text-white text-[16px] font-bold flex items-center justify-between pl-6 pr-2.5 active:scale-[0.97] transition-all shadow-teal-glow disabled:opacity-40 mt-2"
           >
-            {saving
-              ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              : <><Check size={18} /> {lang === 'sw' ? 'Hifadhi Mtoto' : 'Save Child'}</>
-            }
+            {saving ? (
+              <div className="w-full flex justify-center items-center">
+                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <>
+                <span className="flex-1 text-center font-bold tracking-tight">
+                  {lang === 'sw' ? 'Hifadhi Mtoto' : 'Save Child'}
+                </span>
+                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                  <Check size={18} className="text-white" strokeWidth={2.5} />
+                </div>
+              </>
+            )}
           </button>
         </div>
       </div>
