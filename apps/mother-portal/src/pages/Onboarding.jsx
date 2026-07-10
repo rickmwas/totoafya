@@ -1,7 +1,7 @@
 import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   ArrowRight, 
   ArrowLeft, 
@@ -17,7 +17,8 @@ import {
   Syringe,
   Calendar,
   Activity,
-  CheckCircle
+  CheckCircle,
+  Users
 } from 'lucide-react';
 
 import { useLang } from '@/context/LanguageContext';
@@ -332,83 +333,119 @@ export default function Onboarding() {
 
   // ── STEP 0: Welcome ──────────────────────────────────────────────────────────
   if (step === 0) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto overflow-y-auto pb-10 font-sans">
-      {/* Soft integrated top cover banner (Google/Apple layout) */}
-      <div className="relative w-full h-[40vh] flex-shrink-0 overflow-hidden bg-[#FDFCF8]">
-        <img
-          src="/onboarding_welcome.png"
-          alt="Welcome to TotoAfya"
-          className="w-full h-full object-cover"
-        />
-        {/* Soft fade overlay to blend the banner into the page's background */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#FDFCF8] via-[#FDFCF8]/90 to-transparent" />
-        
-        {/* Brand logo pill */}
-        <div className="absolute top-6 left-6">
-          <BrandHeader />
-        </div>
+    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto pt-6 font-sans relative overflow-x-hidden">
+      
+      {/* Decorative top-right leaf (matching the inspo screenshot) */}
+      <div className="absolute right-[-10px] top-[140px] w-28 h-40 opacity-75 pointer-events-none z-0">
+        <svg viewBox="0 0 100 150" className="w-full h-full fill-none stroke-[#1B6B5A]/20" strokeWidth="2.5">
+          <path d="M10 140 C30 110 50 80 80 40" />
+          <path d="M80 40 C75 25 60 15 50 30 C40 45 60 55 80 40 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.04]" />
+          <path d="M55 75 C45 65 30 60 25 70 C20 80 35 90 55 75 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
+          <path d="M40 95 C30 85 15 80 10 90 C5 100 20 110 40 95 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
+        </svg>
       </div>
 
-      {/* Title block */}
-      <div className="flex flex-col flex-1 px-6">
-        <h1 className="text-[34px] font-extrabold leading-[1.15] text-[#0A0A0A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-          Welcome to <br />
-          <span className="text-[#1B6B5A]">Toto</span><span className="text-[#C8813A]">Afya</span> <span className="text-[#1B6B5A]">Digital</span>
-        </h1>
-        <p className="text-[14px] text-gray-500 font-semibold mt-2.5 leading-relaxed tracking-tight">
-          Your trusted companion through pregnancy, child growth and family health.
+      {/* ── TOP SECTION: LOGO & SUBTITLE ── */}
+      <div className="flex flex-col items-center text-center px-6 z-10 flex-shrink-0">
+        <div className="h-16 flex items-center justify-center">
+          <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-12 object-contain" />
+        </div>
+        <p className="text-[10px] tracking-[0.2em] font-extrabold text-[#707070] mt-1.5 uppercase">
+          Healthy Mother, Healthy Family
         </p>
+        <div className="w-12 h-0.5 bg-[#1B6B5A] mt-2 rounded-full" />
+      </div>
 
-        {/* Feature Icons Grid (soft styled, borderless) */}
-        <div className="grid grid-cols-3 gap-4 my-6">
-          {[
-            { label: 'Prenatal Care', icon: Heart, bg: 'bg-[#C8813A]/10', color: 'text-[#C8813A]' },
-            { label: 'Vaccines', icon: Shield, bg: 'bg-[#1B6B5A]/10', color: 'text-[#1B6B5A]' },
-            { label: 'Growth Tracking', icon: TrendingUp, bg: 'bg-[#2E7A5D]/10', color: 'text-[#2E7A5D]' }
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center gap-1.5">
-              <div className={`w-11 h-11 rounded-full ${item.bg} flex items-center justify-center`}>
-                <item.icon size={20} className={item.color} />
-              </div>
-              <span className="text-[11px] font-bold text-gray-700 leading-tight">{item.label}</span>
-            </div>
-          ))}
+      {/* ── HEADLINE & SUBHEAD ── */}
+      <div className="flex flex-col items-center text-center px-6 mt-6 z-10 flex-shrink-0">
+        <h1 className="text-[28px] font-extrabold leading-[1.2] text-[#10453A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          {lang === 'sw' ? 'Safari yako ya afya bora' : 'Your journey to better health'}
+        </h1>
+        <p className="text-[13.5px] text-gray-500 font-semibold mt-2 max-w-sm leading-relaxed">
+          {lang === 'sw' 
+            ? 'Huduma binafsi, habari za afya za kuaminika na usaidizi kwako na familia yako.'
+            : 'Personalized care, trusted health information and support for you and your family.'}
+        </p>
+      </div>
+
+      {/* ── HERO IMAGE WITH ORGANIC BLOB BACKDROP ── */}
+      <div className="relative w-full flex justify-center items-center my-6 z-10 flex-1 min-h-[260px]">
+        {/* Decorative bottom-left leaves */}
+        <div className="absolute left-2 bottom-6 w-16 h-24 opacity-60 pointer-events-none">
+          <svg viewBox="0 0 60 100" className="w-full h-full fill-none stroke-[#1B6B5A]/20" strokeWidth="2.5">
+            <path d="M10 90 C20 70 30 50 50 10" />
+            <path d="M50 10 C45 0 35 -5 30 5 C25 15 35 20 50 10 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.04]" />
+            <path d="M35 35 C25 25 15 20 10 28 C5 36 15 42 35 35 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
+          </svg>
         </div>
 
-        {/* Language selector */}
-        <div className="flex flex-col items-center gap-2 mb-8">
-          <div className="bg-gray-100 rounded-full p-1 flex gap-1 w-full max-w-[240px]">
-            {[
-              { code: 'en', label: 'English' },
-              { code: 'sw', label: 'Kiswahili' }
-            ].map(({ code, label }) => {
-              const selected = lang === code;
-              return (
-                <button
-                  key={code}
-                  onClick={() => setLanguage(code)}
-                  className={cn(
-                    'flex-1 py-1.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.97]',
-                    selected ? 'bg-[#1B6B5A] text-white shadow-sm' : 'text-[#666666]'
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
+        {/* Organic Blob Frame */}
+        <div className="relative w-[300px] h-[250px] overflow-hidden flex justify-center items-center">
+          <div 
+            className="w-full h-full bg-[#1B6B5A]/5 absolute inset-0" 
+            style={{ 
+              borderRadius: '60% 40% 50% 50% / 40% 50% 30% 60%',
+              transform: 'scale(1.02)'
+            }}
+          />
+          <div 
+            className="w-[280px] h-[230px] overflow-hidden" 
+            style={{ 
+              borderRadius: '60% 40% 50% 50% / 40% 50% 30% 60%',
+            }}
+          >
+            <img 
+              src="/onboarding_welcome.png" 
+              alt="Mother and Child" 
+              className="w-full h-full object-cover scale-110 -translate-y-2 translate-x-1" 
+            />
           </div>
         </div>
 
-        {/* Action Call to Action */}
-        <div className="pb-6 mt-auto">
-          <ContinueBtn onClick={() => setStep(1)}>
-            {lang === 'sw' ? 'Anza Sasa' : 'Get Started'}
-          </ContinueBtn>
-          <p className="text-center text-[11px] text-gray-400 mt-3 font-semibold">
-            {lang === 'sw' ? 'Inachukua dakika 2 tu' : 'Takes just 2 minutes'}
-          </p>
+        {/* Floating Trusted Badge */}
+        <div className="absolute left-6 top-8 bg-white/95 backdrop-blur-sm border border-[#e5e7eb] rounded-[18px] p-3 shadow-md flex flex-col items-center justify-center text-center w-32 animate-fade-in hover:scale-105 transition-transform duration-300">
+          <div className="w-8 h-8 rounded-full bg-[#1B6B5A]/10 flex items-center justify-center mb-1 text-[#1B6B5A]">
+            <CheckCircle size={16} className="fill-[#1B6B5A]/20" />
+          </div>
+          <span className="text-[10px] font-extrabold text-[#1B6B5A] leading-tight">
+            {lang === 'sw' ? 'Inaaminika na' : 'Trusted by'}
+          </span>
+          <span className="text-[9.5px] font-bold text-gray-500 leading-tight">
+            {lang === 'sw' ? 'kina mama Kenya' : 'mothers across Kenya'}
+          </span>
         </div>
       </div>
+
+      {/* ── BUTTON & ACCOUNT CHECK ── */}
+      <div className="px-6 flex-shrink-0 z-10">
+        <ContinueBtn onClick={() => setStep(1)}>
+          {lang === 'sw' ? 'Anza Sasa' : 'Get Started'}
+        </ContinueBtn>
+        
+        <p className="text-center text-[12.5px] text-gray-500 font-semibold mt-4">
+          {lang === 'sw' ? 'Tayari una akaunti? ' : 'Already have an account? '}
+          <Link to="/login" className="text-[#1B6B5A] hover:underline font-extrabold">
+            {lang === 'sw' ? 'Ingia' : 'Sign in'}
+          </Link>
+        </p>
+      </div>
+
+      {/* ── FOOTER SECURE INFO BAR ── */}
+      <div className="mt-8 bg-[#F7F5F0] rounded-t-[32px] px-6 py-5 border-t border-[#e5e7eb] flex justify-between items-center z-10 flex-shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.015)]">
+        {[
+          { icon: Shield, sw: 'Data ipo salama', en: 'Your data is always secure' },
+          { icon: Activity, sw: 'Afya iliyohakikiwa', en: 'Clinically reviewed content' },
+          { icon: Users, sw: 'Kwa ajili ya Afrika', en: 'Designed for African families' }
+        ].map((item, idx) => (
+          <div key={idx} className="flex flex-col items-center text-center gap-1.5 flex-1 px-1">
+            <item.icon size={16} className="text-[#1B6B5A]" />
+            <span className="text-[9.5px] font-extrabold text-[#6e7772] leading-tight">
+              {lang === 'sw' ? item.sw : item.en}
+            </span>
+          </div>
+        ))}
+      </div>
+      
     </div>
   );
 
@@ -468,8 +505,8 @@ export default function Onboarding() {
                   : 'bg-white border-gray-100'
               )}
             >
-              {/* Photo Image Left (borderless, soft) */}
-              <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
+              {/* Photo Image Left (borderless, soft circular layout) */}
+              <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
                 <img src={imgUrl} alt={en} className="w-full h-full object-cover" />
               </div>
 
@@ -522,7 +559,7 @@ export default function Onboarding() {
             mode === 'pregnant' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
-          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
+          <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
             <img
               src="/onboarding_journey_pregnant.png"
               alt="Pregnant"
@@ -554,7 +591,7 @@ export default function Onboarding() {
             mode === 'child' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
-          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
+          <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
             <img
               src="/onboarding_journey_child.png"
               alt="Child"
@@ -582,7 +619,7 @@ export default function Onboarding() {
           onClick={() => { setMode('pregnant'); setStep(3); }}
           className="w-full rounded-[24px] p-3 border border-dashed border-gray-200 bg-white text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:border-[#1B6B5A]/30"
         >
-          <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 mr-4 shadow-sm bg-gray-50">
+          <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
             <img
               src="/onboarding_journey_both.png"
               alt="Family"
