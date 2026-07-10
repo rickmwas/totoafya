@@ -37,18 +37,7 @@ import {
 function BrandHeader() {
   return (
     <div className="flex items-center gap-2 select-none">
-      <div className="rounded-xl bg-gradient-to-br from-[#1B6B5A] to-[#145244] w-9 h-9 flex items-center justify-center shadow-md">
-        <Heart size={14} className="text-white fill-white" />
-      </div>
-      <div className="flex flex-col leading-none">
-        <span className="font-bold tracking-tight text-[#0A0A0A] text-md">
-          <span className="text-[#1B6B5A]">Toto</span>
-          <span className="text-[#C8813A]">Afya</span>
-        </span>
-        <span className="font-semibold tracking-[0.2em] text-[#1B6B5A] uppercase text-[7px]">
-          Digital
-        </span>
-      </div>
+      <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-9 object-contain" />
     </div>
   );
 }

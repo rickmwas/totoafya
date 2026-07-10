@@ -90,21 +90,8 @@ export default function Login() {
         
         {/* Logo and Greeting */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <svg className="w-8 h-8 text-toto-teal" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path 
-                d="M50 82C50 82 20 57.5 20 37C20 25.4 29.4 16 41 16C46.8 16 50 20 50 20C50 20 53.2 16 59 16C70.6 16 80 25.4 80 37C80 57.5 50 82 50 82Z" 
-                stroke="currentColor" 
-                strokeWidth="6" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-              <circle cx="50" cy="38" r="7" fill="currentColor" />
-              <path d="M34 50C34 44 42 42 50 42C58 42 66 44 66 50" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-              <circle cx="50" cy="56" r="5" fill="currentColor" />
-              <path d="M40 65C40 60 45 59 50 59C55 59 60 60 60 65" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-            <span className="text-[22px] font-extrabold text-toto-teal tracking-tight">TotoAfya</span>
+          <div className="flex items-center gap-2 mb-3 h-12">
+            <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain" />
           </div>
           
           <h1 className="text-[28px] font-extrabold text-[#131714] leading-tight">

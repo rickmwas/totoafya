@@ -27,14 +27,9 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
     )}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-[#E5E5E5] flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-9 h-9 rounded-[12px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm flex-shrink-0">
-            <Heart size={16} className="text-white" fill="white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-extrabold text-[#0A0A0A] leading-none truncate">TotoAfya</p>
-            <p className="text-[10px] text-[#0047FF] font-bold mt-0.5 truncate uppercase tracking-wider">{facilityName || 'Facility Portal'}</p>
-          </div>
+        <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+          <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-8 object-contain self-start" />
+          <p className="text-[9.5px] text-[#1B6B5A] font-bold truncate uppercase tracking-wider pl-0.5">{facilityName || 'Facility Portal'}</p>
         </div>
         {/* Close button on mobile */}
         <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] transition-colors">

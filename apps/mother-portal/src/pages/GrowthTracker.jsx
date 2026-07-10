@@ -1,6 +1,7 @@
 import db from '@/api/totoafyaClient';
 
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, TrendingUp, Scale, Ruler, ChevronLeft, MoreVertical, Check } from 'lucide-react';
 
 import { useLang } from '@/context/LanguageContext';

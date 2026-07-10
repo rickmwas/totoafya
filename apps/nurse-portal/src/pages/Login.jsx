@@ -83,9 +83,9 @@ export default function Login() {
       <div className="w-full max-w-[400px] bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center">
 
         {/* Brand Header */}
-        <div className="flex items-center gap-2.5 mb-6 text-slate-500">
-          <Activity className="w-5 h-5 text-emerald-600" />
-          <span className="text-xs font-semibold tracking-wider uppercase">TotoAfya Nurse Portal</span>
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain" />
+          <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mt-1">Nurse Portal</span>
         </div>
 
         {/* Welcome Text */}
