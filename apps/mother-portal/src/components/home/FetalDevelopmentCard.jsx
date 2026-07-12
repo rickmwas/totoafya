@@ -61,58 +61,42 @@ export default function FetalDevelopmentCard({ mother, lang }) {
 
   return (
     <Link to="/care" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-300">
-      <div className="rounded-[28px] bg-white border border-[#e5e7eb] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex items-center justify-between gap-4">
+      <div className="rounded-[32px] bg-white border border-[#EEF2EF] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex items-center justify-between gap-6 hover:shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
         
         {/* Left Side Info */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           <div>
-            <span className="text-[12px] font-bold text-toto-gray tracking-wide uppercase">
+            <span className="text-[12px] font-bold text-[#5F6C66] tracking-wide uppercase">
               {lang === 'sw' ? 'Ujauzito Wako' : 'Your Pregnancy'}
             </span>
-            <h4 className="text-[24px] font-extrabold text-toto-black leading-tight mt-1 tracking-tight">
+            <h4 className="text-[26px] font-extrabold text-[#17201D] leading-tight mt-1 tracking-tight">
               {weeksPregnant} {lang === 'sw' ? 'wiki' : 'weeks'} + {daysPregnantPart} {lang === 'sw' ? 'siku' : 'days'}
             </h4>
           </div>
 
           {/* Progress bar slider */}
           <div className="mt-5 w-full">
-            <div className="h-1.5 w-full bg-[#EBEBEB] rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-[#EEF2EF] rounded-full overflow-hidden">
               <div 
-                className="h-full rounded-full bg-[#E68A00] transition-all duration-1000"
+                className="h-full rounded-full bg-[#FF8A3D] transition-all duration-1000"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-[11px] font-bold text-toto-gray mt-2">
+            <div className="flex items-center justify-between text-[11px] font-bold text-[#5F6C66] mt-2.5 uppercase tracking-wider">
               <span>{trimesterText}</span>
               <span>{Math.round(progress)}% {lang === 'sw' ? 'kamili' : 'complete'}</span>
             </div>
           </div>
         </div>
 
-        {/* Right Side Illustration */}
-        <div className="w-18 h-18 rounded-full bg-[#FFF0EB] flex items-center justify-center shadow-[0_2px_10px_rgba(255,130,102,0.08)] flex-shrink-0">
-          <svg className="w-11 h-11 text-[#FF8266]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path 
-              d="M50 25C40 25 32 32 32 45C32 55 42 62 48 65C52 66.5 56 68 56 72C56 76 50 78 45 78" 
-              stroke="currentColor" 
-              strokeWidth="4.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-            />
-            <path 
-              d="M62 42C62 36 58 32 52 32" 
-              stroke="currentColor" 
-              strokeWidth="4" 
-              strokeLinecap="round" 
-            />
-            <path 
-              d="M55 58C62 55 68 48 68 40" 
-              stroke="currentColor" 
-              strokeWidth="4" 
-              strokeLinecap="round" 
-            />
-            <circle cx="50" cy="38" r="3.5" fill="currentColor" />
-          </svg>
+        {/* Right Side Realistic Womb Illustration */}
+        <div className="w-20 h-20 rounded-full border-2 border-[#FF8A3D]/25 overflow-hidden flex items-center justify-center shadow-md flex-shrink-0 bg-[#FFF4EB]">
+          <img 
+            src="/fetal_womb.png" 
+            alt="Fetal development inside the womb" 
+            className="w-full h-full object-cover scale-110" 
+            loading="lazy"
+          />
         </div>
 
       </div>

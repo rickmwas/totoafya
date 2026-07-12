@@ -41,7 +41,7 @@ export default function AppShell({ children }) {
                 key={to}
                 to={to}
                 className={cn(
-                  'flex items-center gap-2 px-4.5 py-2 rounded-full text-[13px] font-extrabold transition-all duration-200 active:scale-[0.96]',
+                  'flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-extrabold transition-all duration-200 active:scale-[0.96]',
                   active ? 'bg-toto-teal text-white shadow-teal-glow-sm' : 'text-toto-gray hover:bg-toto-teal/5 hover:text-toto-teal'
                 )}
               >

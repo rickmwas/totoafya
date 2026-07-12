@@ -35,8 +35,8 @@ import { cn } from '@/lib/utils';
 // Category Configuration with Premium Branding Colors
 const CATEGORY_CONFIG = {
   breastfeeding: { icon: '🤱', color: '#E91E8C', bg: '#FFF0F6', en: 'Breastfeeding', sw: 'Kunyonyesha' },
-  nutrition:     { icon: '🥗', color: '#2E7A5D', bg: '#F0FBF6', en: 'Nutrition', sw: 'Lishe' },
-  immunization:  { icon: '💉', color: '#1B6B5A', bg: '#E6F4F1', en: 'Immunization', sw: 'Chanjo' },
+  nutrition:     { icon: '🥗', color: '#006B4F', bg: '#F0FBF6', en: 'Nutrition', sw: 'Lishe' },
+  immunization:  { icon: '💉', color: '#006B4F', bg: '#E6F4F1', en: 'Immunization', sw: 'Chanjo' },
   hygiene:       { icon: '🧼', color: '#0099CC', bg: '#EEF9FF', en: 'Hygiene', sw: 'Usafi' },
   development:   { icon: '🌱', color: '#7C3AED', bg: '#F5F0FF', en: 'Development', sw: 'Maendeleo' },
   pregnancy:     { icon: '🤰', color: '#F9A825', bg: '#FFF8E1', en: 'Pregnancy', sw: 'Ujauzito' },
@@ -592,7 +592,7 @@ export default function Learn() {
   const getQuizBadge = (score, total) => {
     const pct = score / total;
     if (pct === 1) return { en: 'Super Star Student 🌟', sw: 'Mwanafunzi Shujaa 🌟', bg: 'bg-[#FFF8E1] border-[#F9A825]' };
-    if (pct >= 0.5) return { en: 'Knowledge Builder 🌱', sw: 'Mjenzi wa Maarifa 🌱', bg: 'bg-[#F0FBF6] border-[#2E7A5D]' };
+    if (pct >= 0.5) return { en: 'Knowledge Builder 🌱', sw: 'Mjenzi wa Maarifa 🌱', bg: 'bg-[#F0FBF6] border-[#006B4F]' };
     return { en: 'Curious Learner 📚', sw: 'Msomaji Mdadisi 📚', bg: 'bg-[#EEF9FF] border-[#0099CC]' };
   };
 
@@ -734,7 +734,7 @@ export default function Learn() {
                               {item.content_type === 'audio' ? (
                                 <Headphones size={15} className="text-[#7C3AED]" />
                               ) : item.content_type === 'article' ? (
-                                <FileText size={15} className="text-[#2E7A5D]" />
+                                <FileText size={15} className="text-[#006B4F]" />
                               ) : item.content_type === 'infographic' ? (
                                 <ImageIcon size={15} className="text-[#0099CC]" />
                               ) : (
@@ -757,7 +757,7 @@ export default function Learn() {
                                 onClick={(e) => toggleOfflineDownload(e, item.id)}
                                 className={cn(
                                   "w-6 h-6 rounded-full flex items-center justify-center transition-all",
-                                  isDownloaded ? "bg-[#2E7A5D]/10 text-[#2E7A5D]" : "bg-transparent text-[#9A9A9A] hover:bg-[#F5F5F7] hover:text-[#0A0A0A]"
+                                  isDownloaded ? "bg-[#006B4F]/10 text-[#006B4F]" : "bg-transparent text-[#9A9A9A] hover:bg-[#F5F5F7] hover:text-[#0A0A0A]"
                                 )}
                               >
                                 {isDownloaded ? <Check size={12} strokeWidth={3} /> : <Download size={12} />}
@@ -795,7 +795,7 @@ export default function Learn() {
                 <p className="text-[10px] tracking-[0.2em] uppercase font-extrabold text-[#A0A0A0] px-4 mb-3">
                   {lang === 'sw' ? 'MAZINGIRA MAALUM' : 'FEATURED CONTENT'}
                 </p>
-                <div className="flex gap-4.5 px-4 overflow-x-auto pb-2.5 no-scrollbar">
+                <div className="flex gap-5 px-4 overflow-x-auto pb-2.5 no-scrollbar">
                   {featured.map(item => {
                     const cat = CATEGORY_CONFIG[item.category] || CATEGORY_CONFIG.nutrition;
                     return (
@@ -819,7 +819,7 @@ export default function Learn() {
                               {item.content_type === 'audio' ? (
                                 <Headphones size={18} className="text-[#7C3AED]" />
                               ) : item.content_type === 'article' ? (
-                                <FileText size={18} className="text-[#2E7A5D]" />
+                                <FileText size={18} className="text-[#006B4F]" />
                               ) : item.content_type === 'infographic' ? (
                                 <ImageIcon size={18} className="text-[#0099CC]" />
                               ) : (
@@ -863,7 +863,7 @@ export default function Learn() {
                     className={cn(
                       'flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[12px] font-bold transition-all active:scale-[0.95] shadow-sm',
                       isActive
-                        ? 'bg-[#0d623d] text-white'
+                        ? 'bg-[#006B4F] text-white'
                         : 'bg-white border border-[#e5e7eb] text-[#6e7772] hover:bg-[#f0f2f0]'
                     )}
                   >
@@ -917,7 +917,7 @@ export default function Learn() {
                             {item.content_type === 'audio' ? (
                               <Headphones size={15} className="text-[#7C3AED]" />
                             ) : item.content_type === 'article' ? (
-                              <FileText size={15} className="text-[#2E7A5D]" />
+                              <FileText size={15} className="text-[#006B4F]" />
                             ) : item.content_type === 'infographic' ? (
                               <ImageIcon size={15} className="text-[#0099CC]" />
                             ) : (
@@ -939,7 +939,7 @@ export default function Learn() {
                               onClick={(e) => toggleOfflineDownload(e, item.id)}
                               className={cn(
                                 "w-6 h-6 rounded-full flex items-center justify-center transition-all",
-                                isDownloaded ? "bg-[#2E7A5D]/10 text-[#2E7A5D]" : "bg-transparent text-[#9A9A9A] hover:bg-[#F5F5F7]"
+                                isDownloaded ? "bg-[#006B4F]/10 text-[#006B4F]" : "bg-transparent text-[#9A9A9A] hover:bg-[#F5F5F7]"
                               )}
                             >
                               {isDownloaded ? <Check size={12} strokeWidth={3} /> : <Download size={12} />}
@@ -1213,17 +1213,17 @@ export default function Learn() {
                                 ? "bg-white border-[#EBEBEB] text-[#333333] hover:bg-[#F5F5F7] hover:border-[#7C3AED]/30"
                                 : isSelected
                                   ? isCorrect 
-                                    ? "bg-[#2E7A5D]/10 border-[#2E7A5D] text-[#2E7A5D]"
+                                    ? "bg-[#006B4F]/10 border-[#006B4F] text-[#006B4F]"
                                     : "bg-[#E51010]/10 border-[#E51010] text-[#E51010]"
                                   : isCorrect 
-                                    ? "bg-[#2E7A5D]/10 border-[#2E7A5D] text-[#2E7A5D]" 
+                                    ? "bg-[#006B4F]/10 border-[#006B4F] text-[#006B4F]" 
                                     : "bg-white border-[#EBEBEB] opacity-50"
                             )}
                           >
                             <span className="flex-1 pr-3">{option}</span>
                             {showExplanation && (
                               isCorrect ? (
-                                <CheckCircle2 size={16} className="text-[#2E7A5D] flex-shrink-0" />
+                                <CheckCircle2 size={16} className="text-[#006B4F] flex-shrink-0" />
                               ) : isSelected ? (
                                 <XCircle size={16} className="text-[#E51010] flex-shrink-0" />
                               ) : null
@@ -1283,9 +1283,9 @@ export default function Learn() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[#777777] font-semibold">{lang === 'sw' ? 'Zawadi za elimu:' : 'Knowledge Score:'}</span>
-                        <span className="font-extrabold text-[#2E7A5D] flex items-center gap-1">
+                        <span className="font-extrabold text-[#006B4F] flex items-center gap-1">
                           +{quizScore * 10} XP
-                          <Sparkle size={10} className="fill-[#2E7A5D]" />
+                          <Sparkle size={10} className="fill-[#006B4F]" />
                         </span>
                       </div>
                     </div>
@@ -1312,7 +1312,7 @@ export default function Learn() {
                 ) : (
                   <button
                     onClick={() => { setQuizActive(false); setQuizFinished(false); setPlaying(null); }}
-                    className="w-full h-12 rounded-full bg-[#2E7A5D] text-white text-[13px] font-bold active:scale-95 transition-transform"
+                    className="w-full h-12 rounded-full bg-[#006B4F] text-white text-[13px] font-bold active:scale-95 transition-transform"
                   >
                     {lang === 'sw' ? 'Kamilisha' : 'Finish & Continue'}
                   </button>

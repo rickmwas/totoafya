@@ -133,7 +133,7 @@ export default function GrowthTracker() {
                 key={child.id}
                 onClick={() => setSelectedChild(child)}
                 className={cn(
-                  'flex-shrink-0 px-4.5 py-2 rounded-full text-[13px] font-extrabold transition-all duration-200 active:scale-[0.96]',
+                  'flex-shrink-0 px-5 py-2 rounded-full text-[13px] font-extrabold transition-all duration-200 active:scale-[0.96]',
                   selectedChild?.id === child.id
                     ? 'bg-toto-teal text-white shadow-sm'
                     : 'bg-white border border-[#e5e7eb] text-toto-gray'
@@ -181,7 +181,7 @@ export default function GrowthTracker() {
                   { label: lang === 'sw' ? 'Urefu' : 'Height', value: latest.height_cm, unit: 'cm', color: 'text-toto-green bg-toto-green/5' },
                   { label: 'MUAC', value: latest.muac_cm, unit: 'cm', color: 'text-toto-purple bg-toto-purple/5' },
                 ].map(({ label, value, unit, color }) => (
-                  <div key={label} className="bg-white rounded-[24px] p-4.5 border border-[#e5e7eb] shadow-sm flex flex-col justify-between">
+                  <div key={label} className="bg-white rounded-[24px] p-5 border border-[#e5e7eb] shadow-sm flex flex-col justify-between">
                     <span className="text-[10px] font-bold text-toto-gray tracking-wider uppercase">{label}</span>
                     <p className="text-[22px] font-extrabold text-[#131714] mt-2 font-numeric-tabular leading-none">
                       {value ?? '—'}<span className="text-[12px] font-semibold text-toto-gray ml-0.5">{unit}</span>
@@ -307,7 +307,7 @@ export default function GrowthTracker() {
                 </p>
                 <div className="flex flex-col gap-2.5">
                   {[...records].reverse().slice(0, 8).map(record => (
-                    <div key={record.id} className="bg-white rounded-[24px] p-4.5 border border-[#e5e7eb] flex items-center justify-between shadow-sm">
+                    <div key={record.id} className="bg-white rounded-[24px] p-5 border border-[#e5e7eb] flex items-center justify-between shadow-sm">
                       <div>
                         <p className="text-[13px] font-extrabold text-toto-black font-numeric-tabular">
                           {record.recorded_date ? format(parseISO(record.recorded_date), 'MMM d, yyyy') : '—'}

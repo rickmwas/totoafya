@@ -53,7 +53,7 @@ function ProgressBar({ current, total }) {
           key={i}
           className={cn(
             "h-1 rounded-full transition-all duration-500 ease-out flex-1",
-            i <= current ? "bg-[#1B6B5A]" : "bg-gray-200"
+            i <= current ? "bg-[#006B4F]" : "bg-gray-200"
           )}
         />
       ))}
@@ -66,7 +66,7 @@ function StepHeader({ onBack, current, total }) {
     <div className="flex items-center justify-between w-full mb-8 flex-shrink-0">
       <button
         onClick={onBack}
-        className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center active:scale-[0.92] transition-transform shadow-sm hover:border-[#1B6B5A]/20"
+        className="w-10 h-10 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center active:scale-[0.92] transition-transform shadow-sm hover:border-[#006B4F]/20"
       >
         <ArrowLeft size={16} className="text-[#0A0A0A]" />
       </button>
@@ -85,7 +85,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder }) {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#C0C0C0] outline-none focus:border-[#1B6B5A] focus:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all"
+        className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] placeholder:text-[#C0C0C0] outline-none focus:border-[#006B4F] focus:shadow-[0_0_0_3px_rgba(0,107,79,0.06)] transition-all"
       />
     </div>
   );
@@ -96,7 +96,7 @@ function ContinueBtn({ onClick, disabled, loading, icon: Icon = ArrowRight, chil
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="w-full h-[56px] rounded-full bg-[#1B6B5A] hover:bg-[#145244] text-white text-[16px] font-bold flex items-center justify-between pl-6 pr-2.5 active:scale-[0.98] transition-all shadow-teal-glow disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
+      className="w-full h-[56px] rounded-full bg-[#006B4F] hover:bg-[#00523c] text-white text-[16px] font-bold flex items-center justify-between pl-6 pr-2.5 active:scale-[0.98] transition-all shadow-[0_8px_30px_rgba(0,107,79,0.25)] disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed"
     >
       {loading ? (
         <div className="w-full flex justify-center items-center">
@@ -322,15 +322,15 @@ export default function Onboarding() {
 
   // ── STEP 0: Welcome ──────────────────────────────────────────────────────────
   if (step === 0) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto pt-6 font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto pt-6 font-sans relative overflow-x-hidden">
       
       {/* Decorative top-right leaf (matching the inspo screenshot) */}
       <div className="absolute right-[-10px] top-[140px] w-28 h-40 opacity-75 pointer-events-none z-0">
-        <svg viewBox="0 0 100 150" className="w-full h-full fill-none stroke-[#1B6B5A]/20" strokeWidth="2.5">
+        <svg viewBox="0 0 100 150" className="w-full h-full fill-none stroke-[#006B4F]/20" strokeWidth="2.5">
           <path d="M10 140 C30 110 50 80 80 40" />
-          <path d="M80 40 C75 25 60 15 50 30 C40 45 60 55 80 40 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.04]" />
-          <path d="M55 75 C45 65 30 60 25 70 C20 80 35 90 55 75 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
-          <path d="M40 95 C30 85 15 80 10 90 C5 100 20 110 40 95 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
+          <path d="M80 40 C75 25 60 15 50 30 C40 45 60 55 80 40 Z" fill="#006B4F" className="fill-[#006B4F]/[0.04]" />
+          <path d="M55 75 C45 65 30 60 25 70 C20 80 35 90 55 75 Z" fill="#006B4F" className="fill-[#006B4F]/[0.03]" />
+          <path d="M40 95 C30 85 15 80 10 90 C5 100 20 110 40 95 Z" fill="#006B4F" className="fill-[#006B4F]/[0.03]" />
         </svg>
       </div>
 
@@ -339,18 +339,18 @@ export default function Onboarding() {
         <div className="h-16 flex items-center justify-center">
           <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-12 object-contain" />
         </div>
-        <p className="text-[10px] tracking-[0.2em] font-extrabold text-[#707070] mt-1.5 uppercase">
+        <p className="text-[11px] tracking-[0.2em] font-extrabold text-[#5F6C66] mt-1.5 uppercase">
           Healthy Mother, Healthy Family
         </p>
-        <div className="w-12 h-0.5 bg-[#1B6B5A] mt-2 rounded-full" />
+        <div className="w-12 h-0.5 bg-[#006B4F] mt-2 rounded-full" />
       </div>
 
       {/* ── HEADLINE & SUBHEAD ── */}
       <div className="flex flex-col items-center text-center px-6 mt-6 z-10 flex-shrink-0">
-        <h1 className="text-[28px] font-extrabold leading-[1.2] text-[#10453A] tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <h1 className="text-[28px] font-extrabold leading-[1.2] text-[#006B4F] tracking-tight">
           {lang === 'sw' ? 'Safari yako ya afya bora' : 'Your journey to better health'}
         </h1>
-        <p className="text-[13.5px] text-gray-500 font-semibold mt-2 max-w-sm leading-relaxed">
+        <p className="text-[13.5px] text-[#5F6C66] font-semibold mt-2 max-w-sm leading-relaxed">
           {lang === 'sw' 
             ? 'Huduma binafsi, habari za afya za kuaminika na usaidizi kwako na familia yako.'
             : 'Personalized care, trusted health information and support for you and your family.'}
@@ -361,17 +361,17 @@ export default function Onboarding() {
       <div className="relative w-full flex justify-center items-center my-6 z-10 flex-1 min-h-[260px]">
         {/* Decorative bottom-left leaves */}
         <div className="absolute left-2 bottom-6 w-16 h-24 opacity-60 pointer-events-none">
-          <svg viewBox="0 0 60 100" className="w-full h-full fill-none stroke-[#1B6B5A]/20" strokeWidth="2.5">
+          <svg viewBox="0 0 60 100" className="w-full h-full fill-none stroke-[#006B4F]/20" strokeWidth="2.5">
             <path d="M10 90 C20 70 30 50 50 10" />
-            <path d="M50 10 C45 0 35 -5 30 5 C25 15 35 20 50 10 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.04]" />
-            <path d="M35 35 C25 25 15 20 10 28 C5 36 15 42 35 35 Z" fill="#1B6B5A" className="fill-[#1B6B5A]/[0.03]" />
+            <path d="M50 10 C45 0 35 -5 30 5 C25 15 35 20 50 10 Z" fill="#006B4F" className="fill-[#006B4F]/[0.04]" />
+            <path d="M35 35 C25 25 15 20 10 28 C5 36 15 42 35 35 Z" fill="#006B4F" className="fill-[#006B4F]/[0.03]" />
           </svg>
         </div>
 
         {/* Organic Blob Frame */}
         <div className="relative w-[300px] h-[250px] overflow-hidden flex justify-center items-center">
           <div 
-            className="w-full h-full bg-[#1B6B5A]/5 absolute inset-0" 
+            className="w-full h-full bg-[#006B4F]/5 absolute inset-0" 
             style={{ 
               borderRadius: '60% 40% 50% 50% / 40% 50% 30% 60%',
               transform: 'scale(1.02)'
@@ -392,14 +392,14 @@ export default function Onboarding() {
         </div>
 
         {/* Floating Trusted Badge */}
-        <div className="absolute left-6 top-8 bg-white/95 backdrop-blur-sm border border-[#e5e7eb] rounded-[18px] p-3 shadow-md flex flex-col items-center justify-center text-center w-32 animate-fade-in hover:scale-105 transition-transform duration-300">
-          <div className="w-8 h-8 rounded-full bg-[#1B6B5A]/10 flex items-center justify-center mb-1 text-[#1B6B5A]">
-            <CheckCircle size={16} className="fill-[#1B6B5A]/20" />
+        <div className="absolute left-6 top-8 bg-white/95 backdrop-blur-sm border border-[#EEF2EF] rounded-[18px] p-3 shadow-md flex flex-col items-center justify-center text-center w-32 animate-fade-in hover:scale-105 transition-transform duration-300">
+          <div className="w-8 h-8 rounded-full bg-[#006B4F]/10 flex items-center justify-center mb-1 text-[#006B4F]">
+            <CheckCircle size={16} className="fill-[#006B4F]/20" />
           </div>
-          <span className="text-[10px] font-extrabold text-[#1B6B5A] leading-tight">
+          <span className="text-[10px] font-extrabold text-[#006B4F] leading-tight">
             {lang === 'sw' ? 'Inaaminika na' : 'Trusted by'}
           </span>
-          <span className="text-[9.5px] font-bold text-gray-500 leading-tight">
+          <span className="text-[9.5px] font-bold text-[#5F6C66] leading-tight">
             {lang === 'sw' ? 'kina mama Kenya' : 'mothers across Kenya'}
           </span>
         </div>
@@ -411,24 +411,24 @@ export default function Onboarding() {
           {lang === 'sw' ? 'Anza Sasa' : 'Get Started'}
         </ContinueBtn>
         
-        <p className="text-center text-[12.5px] text-gray-500 font-semibold mt-4">
+        <p className="text-center text-[12.5px] text-[#5F6C66] font-semibold mt-4">
           {lang === 'sw' ? 'Tayari una akaunti? ' : 'Already have an account? '}
-          <Link to="/login" className="text-[#1B6B5A] hover:underline font-extrabold">
+          <Link to="/login" className="text-[#006B4F] hover:underline font-extrabold">
             {lang === 'sw' ? 'Ingia' : 'Sign in'}
           </Link>
         </p>
       </div>
 
       {/* ── FOOTER SECURE INFO BAR ── */}
-      <div className="mt-8 bg-[#F7F5F0] rounded-t-[32px] px-6 py-5 border-t border-[#e5e7eb] flex justify-between items-center z-10 flex-shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.015)]">
+      <div className="mt-8 bg-[#EEF2EF] rounded-t-[32px] px-6 py-5 border-t border-[#EEF2EF] flex justify-between items-center z-10 flex-shrink-0 shadow-[0_-4px_24px_rgba(0,0,0,0.015)]">
         {[
           { icon: Shield, sw: 'Data ipo salama', en: 'Your data is always secure' },
           { icon: Activity, sw: 'Afya iliyohakikiwa', en: 'Clinically reviewed content' },
           { icon: Users, sw: 'Kwa ajili ya Afrika', en: 'Designed for African families' }
         ].map((item, idx) => (
           <div key={idx} className="flex flex-col items-center text-center gap-1.5 flex-1 px-1">
-            <item.icon size={16} className="text-[#1B6B5A]" />
-            <span className="text-[9.5px] font-extrabold text-[#6e7772] leading-tight">
+            <item.icon size={16} className="text-[#006B4F]" />
+            <span className="text-[9.5px] font-extrabold text-[#5F6C66] leading-tight">
               {lang === 'sw' ? item.sw : item.en}
             </span>
           </div>
@@ -440,11 +440,11 @@ export default function Onboarding() {
 
   // ── STEP 1: Who are you? ─────────────────────────────────────────────────────
   if (step === 1) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(0)} current={0} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">
+        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#006B4F] mb-2">
           {lang === 'sw' ? 'HATUA 1 YA 4' : 'STEP 1 OF 4'}
         </p>
         <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -490,7 +490,7 @@ export default function Onboarding() {
               className={cn(
                 'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
                 sel
-                  ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm'
+                  ? 'border-[#006B4F] bg-[#006B4F]/[0.01] shadow-teal-glow-sm'
                   : 'bg-white border-gray-100'
               )}
             >
@@ -508,7 +508,7 @@ export default function Onboarding() {
               {/* Select indicator Right */}
               <div className="flex-shrink-0 ml-2">
                 {sel ? (
-                  <div className="w-6 h-6 rounded-full bg-[#1B6B5A] flex items-center justify-center shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-[#006B4F] flex items-center justify-center shadow-sm">
                     <Check size={12} className="text-white" strokeWidth={3} />
                   </div>
                 ) : (
@@ -524,11 +524,11 @@ export default function Onboarding() {
 
   // ── STEP 2: Journey Selection ────────────────────────────────────────────────
   if (step === 2) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(1)} current={1} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">
+        <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#006B4F] mb-2">
           {lang === 'sw' ? 'HATUA 2 YA 4' : 'STEP 2 OF 4'}
         </p>
         <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
@@ -545,7 +545,7 @@ export default function Onboarding() {
           onClick={() => { setMode('pregnant'); setStep(3); }}
           className={cn(
             'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
-            mode === 'pregnant' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
+            mode === 'pregnant' ? 'border-[#006B4F] bg-[#006B4F]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
           <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
@@ -562,7 +562,7 @@ export default function Onboarding() {
             </p>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {['ANC Tracker', 'Fetal Timeline'].map(tag => (
-                <span key={tag} className="text-[9px] bg-[#1B6B5A]/10 text-[#1B6B5A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
+                <span key={tag} className="text-[9px] bg-[#006B4F]/10 text-[#006B4F] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
               ))}
               <span className="text-[9px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold tracking-wide">Danger Alerts</span>
             </div>
@@ -577,7 +577,7 @@ export default function Onboarding() {
           onClick={() => { setMode('child'); setStep(3); }}
           className={cn(
             'w-full rounded-[24px] p-3 border-2 text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:shadow-card-hover',
-            mode === 'child' ? 'border-[#1B6B5A] bg-[#1B6B5A]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
+            mode === 'child' ? 'border-[#006B4F] bg-[#006B4F]/[0.01] shadow-teal-glow-sm' : 'bg-white border-gray-100'
           )}
         >
           <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
@@ -594,7 +594,7 @@ export default function Onboarding() {
             </p>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {['Vaccines', 'Growth Chart', 'Milestones'].map(tag => (
-                <span key={tag} className="text-[9px] bg-[#1B6B5A]/10 text-[#1B6B5A] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
+                <span key={tag} className="text-[9px] bg-[#006B4F]/10 text-[#006B4F] px-2 py-0.5 rounded-full font-bold tracking-wide">{tag}</span>
               ))}
             </div>
           </div>
@@ -606,7 +606,7 @@ export default function Onboarding() {
         {/* Both option */}
         <button
           onClick={() => { setMode('pregnant'); setStep(3); }}
-          className="w-full rounded-[24px] p-3 border border-dashed border-gray-200 bg-white text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:border-[#1B6B5A]/30"
+          className="w-full rounded-[24px] p-3 border border-dashed border-gray-200 bg-white text-left transition-all active:scale-[0.98] duration-200 flex items-center shadow-card hover:border-[#006B4F]/30"
         >
           <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mr-4 bg-[#F7F5F0]">
             <img
@@ -636,11 +636,11 @@ export default function Onboarding() {
     const dotTotal = isCaregiverOnly ? 3 : 4;
 
     return (
-      <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+      <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
         <StepHeader onBack={() => setStep(isCaregiverOnly ? 1 : 2)} current={dotIndex} total={dotTotal} />
 
         <div className="mb-8 flex-shrink-0">
-          <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#1B6B5A] mb-2">{stepLabel}</p>
+          <p className="text-[11px] tracking-[0.15em] font-extrabold uppercase text-[#006B4F] mb-2">{stepLabel}</p>
           <h2 className="text-[30px] font-bold leading-tight text-[#0A0A0A] tracking-tight animate-fade-in" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {lang === 'sw' ? 'Maelezo Yako' : 'Your Details'}
           </h2>
@@ -660,7 +660,7 @@ export default function Onboarding() {
             <select
               value={form.county}
               onChange={e => setF('county', e.target.value)}
-              className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] outline-none focus:border-[#1B6B5A] focus:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all appearance-none"
+              className="h-[52px] px-4 bg-white border border-gray-200 rounded-[16px] text-[15px] font-medium text-[#0A0A0A] outline-none focus:border-[#006B4F] focus:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all appearance-none"
               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 16px center' }}
             >
               <option value="">{lang === 'sw' ? 'Chagua kaunti' : 'Select county'}</option>
@@ -715,13 +715,13 @@ export default function Onboarding() {
 
   // ── STEP 4C: Father / Guardian ───────────────────────────────────────────────
   if (step === 4 && (caregiverType === 'father' || caregiverType === 'guardian')) return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={2} total={3} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#006B4F]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">{caregiverType === 'father' ? '👨' : '🧑'}</span>
-          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#006B4F] tracking-wider uppercase">
             {lang === 'sw' ? (caregiverType === 'father' ? 'BABA' : 'MLEZI') : (caregiverType === 'father' ? 'FATHER' : 'GUARDIAN')}
           </span>
         </div>
@@ -752,7 +752,7 @@ export default function Onboarding() {
               </label>
               <div className="flex gap-2">
                 {[
-                  { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#1B6B5A', activeBg: '#E8F5F2' },
+                  { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#006B4F', activeBg: '#E8F5F2' },
                   { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#C8813A', activeBg: '#FDF7F2' }
                 ].map(({ v, icon, en, sw, activeColor, activeBg }) => {
                   const active = childForm.gender === v;
@@ -777,7 +777,7 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <div className="flex gap-3 bg-[#1B6B5A]/5 border border-[#1B6B5A]/10 rounded-[20px] p-4 mt-2">
+        <div className="flex gap-3 bg-[#006B4F]/5 border border-[#006B4F]/10 rounded-[20px] p-4 mt-2">
           <span className="text-lg flex-shrink-0">ℹ️</span>
           <p className="text-[12.5px] text-gray-600 leading-relaxed font-semibold">
             {lang === 'sw'
@@ -798,13 +798,13 @@ export default function Onboarding() {
 
   // ── STEP 4A: Pregnancy Detail ────────────────────────────────────────────────
   if (step === 4 && mode === 'pregnant') return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={3} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#006B4F]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">🤰</span>
-          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#006B4F] tracking-wider uppercase">
             {lang === 'sw' ? 'HALI YA UJAUZITO' : 'PREGNANCY'}
           </span>
         </div>
@@ -822,7 +822,7 @@ export default function Onboarding() {
           <div className="grid grid-cols-3 gap-2.5">
             {[
               { v: 1, en: '1st', sw: 'Kwanza', sub: '1–13 wks', color: '#7C3AED', bg: '#F5F3FF' },
-              { v: 2, en: '2nd', sw: 'Pili', sub: '14–27 wks', color: '#1B6B5A', bg: '#E8F5F2' },
+              { v: 2, en: '2nd', sw: 'Pili', sub: '14–27 wks', color: '#006B4F', bg: '#E8F5F2' },
               { v: 3, en: '3rd', sw: 'Tatu', sub: '28+ wks', color: '#2E7A5D', bg: '#ECFDF5' },
             ].map(({ v, en, sw, sub, color, bg }) => {
               const active = pregForm.trimester === v;
@@ -876,7 +876,7 @@ export default function Onboarding() {
                   className={cn(
                     'flex-1 h-12 rounded-[16px] text-[13px] font-extrabold border-2 transition-all active:scale-[0.97]',
                     active
-                      ? 'bg-[#1B6B5A] text-white border-[#1B6B5A] shadow-teal-glow'
+                      ? 'bg-[#006B4F] text-white border-[#006B4F] shadow-teal-glow'
                       : 'bg-white border-gray-100 text-[#666666]'
                   )}
                 >
@@ -925,13 +925,13 @@ export default function Onboarding() {
 
   // ── STEP 4B: Child Detail ────────────────────────────────────────────────────
   if (step === 4 && mode === 'child') return (
-    <div className="min-h-screen bg-[#FDFCF8] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
+    <div className="min-h-screen bg-[#FFF6F0] flex flex-col max-w-[430px] mx-auto px-6 pt-6 pb-10 font-sans">
       <StepHeader onBack={() => setStep(3)} current={3} total={4} />
 
       <div className="mb-8 flex-shrink-0">
-        <div className="inline-flex items-center gap-2 bg-[#1B6B5A]/10 rounded-full px-3 py-1.5 mb-3.5">
+        <div className="inline-flex items-center gap-2 bg-[#006B4F]/10 rounded-full px-3 py-1.5 mb-3.5">
           <span className="text-xs">👶</span>
-          <span className="text-[10px] font-extrabold text-[#1B6B5A] tracking-wider uppercase">
+          <span className="text-[10px] font-extrabold text-[#006B4F] tracking-wider uppercase">
             {lang === 'sw' ? 'MAELEZO YA MTOTO' : 'CHILD DETAILS'}
           </span>
         </div>
@@ -940,7 +940,7 @@ export default function Onboarding() {
         </h2>
       </div>
 
-      <div className="flex flex-col gap-4.5 flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-5 flex-1 overflow-y-auto">
         <InputField
           label={lang === 'sw' ? "JINA LA MTOTO" : "CHILD'S NAME"}
           value={childForm.full_name} onChange={v => setC('full_name', v)}
@@ -955,7 +955,7 @@ export default function Onboarding() {
           </label>
           <div className="flex gap-3">
             {[
-              { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#1B6B5A', activeBg: '#E8F5F2' },
+              { v: 'male', icon: '👦', en: 'Boy', sw: 'Mvulana', activeColor: '#006B4F', activeBg: '#E8F5F2' },
               { v: 'female', icon: '👧', en: 'Girl', sw: 'Msichana', activeColor: '#C8813A', activeBg: '#FDF7F2' }
             ].map(({ v, icon, en, sw, activeColor, activeBg }) => {
               const active = childForm.gender === v;
@@ -964,7 +964,7 @@ export default function Onboarding() {
                   key={v}
                   onClick={() => setC('gender', v)}
                   className={cn(
-                    'flex-1 py-4.5 rounded-[22px] flex flex-col items-center gap-1.5 border-2 transition-all active:scale-[0.97] shadow-card',
+                    'flex-1 py-5 rounded-[22px] flex flex-col items-center gap-1.5 border-2 transition-all active:scale-[0.97] shadow-card',
                     active
                       ? 'shadow-card-hover'
                       : 'border-gray-100 bg-white text-gray-500'
@@ -985,7 +985,7 @@ export default function Onboarding() {
           <label className="text-[11px] tracking-[0.12em] font-bold uppercase text-[#666666] px-1">
             {lang === 'sw' ? 'UZITO WA KUZALIWA (SI LAZIMA)' : 'BIRTH WEIGHT — OPTIONAL'}
           </label>
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-[16px] px-4 focus-within:border-[#1B6B5A] focus-within:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all shadow-[0_2px_6px_rgba(0,0,0,0.01)]">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-[16px] px-4 focus-within:border-[#006B4F] focus-within:shadow-[0_0_0_3px_rgba(27,107,90,0.06)] transition-all shadow-[0_2px_6px_rgba(0,0,0,0.01)]">
             <input type="number" value={childForm.birth_weight_kg}
               onChange={e => setC('birth_weight_kg', e.target.value)}
               placeholder="e.g. 3.2" step="0.1" min="0.5" max="6"

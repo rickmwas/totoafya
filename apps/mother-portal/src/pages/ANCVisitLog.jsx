@@ -293,7 +293,7 @@ export default function ANCVisitLog({ hideShell = false }) {
                 const hasDangerSigns = visit.danger_signs?.length > 0;
                 return (
                   <div key={visit.id} className={cn(
-                    'bg-white rounded-[24px] p-4.5 border shadow-sm transition-all hover:border-toto-teal/20',
+                    'bg-white rounded-[24px] p-5 border shadow-sm transition-all hover:border-toto-teal/20',
                     hasDangerSigns ? 'border-toto-red/20 bg-toto-red/5' : bp === 'warning' ? 'border-toto-amber/20 bg-toto-amber/5' : 'border-[#e5e7eb]'
                   )}>
                     <div className="flex items-start justify-between mb-3.5">

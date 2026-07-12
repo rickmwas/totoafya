@@ -123,7 +123,7 @@ AI:`;
               </div>
             )}
             <div className={cn(
-              'max-w-[78%] rounded-[20px] px-4.5 py-3 text-[13.5px] leading-relaxed font-medium',
+              'max-w-[78%] rounded-[20px] px-5 py-3 text-[13.5px] leading-relaxed font-medium',
               msg.role === 'user'
                 ? 'bg-toto-teal text-white rounded-tr-[4px]'
                 : 'bg-[#f0f2f0] text-[#131714] rounded-tl-[4px]'

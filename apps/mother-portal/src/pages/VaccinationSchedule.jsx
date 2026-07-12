@@ -189,7 +189,7 @@ export default function VaccinationSchedule({ hideShell = false }) {
             return (
               <div 
                 key={vaccine.id}
-                className="bg-white border border-[#e5e7eb] rounded-[24px] p-4.5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex flex-col gap-3 hover:border-toto-teal/20 transition-all"
+                className="bg-white border border-[#e5e7eb] rounded-[24px] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex flex-col gap-3 hover:border-toto-teal/20 transition-all"
               >
                 <div className="flex justify-between items-start gap-4">
                   <div>

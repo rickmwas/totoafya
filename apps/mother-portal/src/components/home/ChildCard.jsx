@@ -34,7 +34,7 @@ export default function ChildCard({ child, nextVaccine, lastGrowth }) {
         {/* Top accent bar */}
         <div className={`h-[3.5px] w-full ${g.bar}`} />
 
-        <div className="p-4.5">
+        <div className="p-5">
           {/* Header row */}
           <div className="flex items-center gap-3">
             <div className={`w-11 h-11 rounded-[16px] flex items-center justify-center flex-shrink-0 ${g.initial} shadow-sm animate-bounce-in`}>
@@ -88,7 +88,7 @@ export default function ChildCard({ child, nextVaccine, lastGrowth }) {
 
           {/* At risk warning */}
           {(child.health_status === 'at_risk' || child.health_status === 'critical') && (
-            <div className="mt-4.5 flex items-center gap-2.5 rounded-[14px] px-3.5 py-2.5 border border-rose-100 bg-rose-50/40 shadow-[inset_0_1px_2px_rgba(229,16,16,0.02)]">
+            <div className="mt-5 flex items-center gap-2.5 rounded-[14px] px-3.5 py-2.5 border border-rose-100 bg-rose-50/40 shadow-[inset_0_1px_2px_rgba(229,16,16,0.02)]">
               <AlertTriangle size={14} className="text-[#E51010] flex-shrink-0" />
               <span className="text-[11.5px] text-[#E51010] font-black uppercase tracking-wider">
                 {lang === 'sw' ? 'Inahitaji umakini wa haraka' : 'Requires immediate attention'}

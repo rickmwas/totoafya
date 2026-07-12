@@ -145,10 +145,10 @@ export default function Home() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 rounded-[16px] bg-[#1B6B5A] flex items-center justify-center shadow-teal-glow-sm">
+          <div className="w-12 h-12 rounded-[16px] bg-[#006B4F] flex items-center justify-center shadow-teal-glow-sm">
             <span className="text-white text-[18px] font-extrabold">T</span>
           </div>
-          <div className="w-7 h-7 border-2 border-[#1B6B5A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-[#006B4F] border-t-transparent rounded-full animate-spin" />
         </div>
       </AppShell>
     );
@@ -165,7 +165,7 @@ export default function Home() {
             {lang === 'sw' ? 'Hakikisha una mtandao kisha jaribu tena' : 'Check your connection and try again'}
           </p>
           <button onClick={loadData}
-            className="h-12 px-8 rounded-full bg-[#1B6B5A] text-white text-[14px] font-bold shadow-teal-glow-sm active:scale-[0.97] transition-transform">
+            className="h-12 px-8 rounded-full bg-[#006B4F] text-white text-[14px] font-bold shadow-teal-glow-sm active:scale-[0.97] transition-transform">
             {lang === 'sw' ? 'Jaribu Tena' : 'Retry'}
           </button>
         </div>
@@ -175,32 +175,32 @@ export default function Home() {
 
   return (
     <AppShell>
-      <div className="animate-fade-in bg-[#f7f9f7] min-h-screen pb-12 font-sans text-[#131714]">
+      <div className="animate-fade-in bg-[#FFF6F0] min-h-screen pb-12 font-sans text-[#131714]">
 
         {/* ── Designer Top Bar & Greeting (Screen 04) ── */}
-        <div className="flex items-center justify-between px-4 pt-6 pb-4 bg-[#f7f9f7]/80 backdrop-blur-md sticky top-0 z-20">
+        <div className="flex items-center justify-between px-4 pt-6 pb-4 bg-[#FFF6F0]/80 backdrop-blur-md sticky top-0 z-20">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#006B5F] to-[#008F7E] flex items-center justify-center shadow-[0_4px_12px_rgba(0,107,95,0.15)] flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#006B4F] to-[#2E7A5D] flex items-center justify-center shadow-[0_4px_12px_rgba(0,107,79,0.15)] flex-shrink-0">
               <svg className="w-5.5 h-5.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-[16px] font-black tracking-tight text-toto-black leading-tight">TotoAfya</span>
-              <span className="text-[8.5px] font-bold text-toto-gray tracking-wider leading-none">Healthy family, stronger future</span>
+              <span className="text-[16px] font-black tracking-tight text-[#17201D] leading-tight">TotoAfya</span>
+              <span className="text-[8.5px] font-bold text-[#5F6C66] tracking-wider leading-none">Healthy family, stronger future</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {/* Notification Bell */}
-            <button className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] active:scale-95 transition-transform relative">
-              <Bell size={18} className="text-[#131714]" />
+            <button className="w-10 h-10 bg-white rounded-full border border-[#EEF2EF] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] active:scale-95 transition-transform relative">
+              <Bell size={18} className="text-[#17201D]" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-toto-red rounded-full border border-white" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#D64545] rounded-full border border-white" />
               )}
             </button>
             {/* Profile Avatar Card */}
             <Link to="/more">
-              <div className="w-10 h-10 rounded-full border border-[#e5e7eb] overflow-hidden bg-toto-teal/5 flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] font-bold text-toto-teal">
+              <div className="w-10 h-10 rounded-full border border-[#EEF2EF] overflow-hidden bg-[#E8F5EF] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] font-bold text-[#006B4F]">
                 {(mother?.full_name || 'A').charAt(0)}
               </div>
             </Link>
@@ -227,7 +227,7 @@ export default function Home() {
 
         {/* ── Today's Recommendation Banner (Screen 04) ── */}
         <div className="mx-4 mb-5">
-          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-5.5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-start gap-4 overflow-hidden relative">
+          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-start gap-4 overflow-hidden relative">
             <div className="flex-1">
               <p className="text-[10px] font-bold text-[#E68A00] tracking-widest uppercase">
                 {lang === 'sw' ? 'PENDEKEZO LA LEO' : "TODAY'S RECOMMENDATION"}
@@ -347,7 +347,7 @@ export default function Home() {
 
         {/* ── Promo Banner ── */}
         <div className="mx-4 mb-6">
-          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-5.5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-center gap-4 relative overflow-hidden">
+          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-center gap-4 relative overflow-hidden">
             <div className="flex-1 z-10">
               <h4 className="text-[17px] font-black text-[#006B5F] leading-snug">
                 {lang === 'sw' ? 'Jifunze, jiandae na ujiamini' : 'Learn, prepare and feel confident'}
@@ -431,7 +431,7 @@ export default function Home() {
                   setSymptomsOpen(false);
                   setAiChatOpen(true);
                 }}
-                className="w-full text-left p-4.5 rounded-[20px] border border-[#e5e7eb] bg-[#f8faf8]/40 hover:border-toto-teal hover:bg-toto-teal/5 active:scale-[0.99] transition-all flex items-center justify-between"
+                className="w-full text-left p-5 rounded-[20px] border border-[#e5e7eb] bg-[#f8faf8]/40 hover:border-toto-teal hover:bg-toto-teal/5 active:scale-[0.99] transition-all flex items-center justify-between"
               >
                 <span className="text-[14px] font-extrabold text-toto-black">{symptom.label}</span>
                 <ChevronRight size={16} className="text-toto-light" />
@@ -568,7 +568,7 @@ export default function Home() {
               {lang === 'sw' ? 'Nambari ya Dharura' : 'Call Emergency Hotline'}
             </p>
 
-            <div className="w-full bg-[#f8faf8] border border-[#e5e7eb] rounded-[24px] p-4.5 flex items-center justify-between gap-4 mt-8 hover:border-toto-teal/20 transition-all">
+            <div className="w-full bg-[#f8faf8] border border-[#e5e7eb] rounded-[24px] p-5 flex items-center justify-between gap-4 mt-8 hover:border-toto-teal/20 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-toto-teal/5 flex items-center justify-center text-toto-teal">
                   <MapPin size={16} />

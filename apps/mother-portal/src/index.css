@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,34 +6,40 @@
 
 @layer base {
   :root {
-    --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-    --background: 140 10% 97.5%;
-    --foreground: 150 11% 7.8%;
+    --background: 24 100% 97.3%; /* #FFF6F0 (warm orange-tinted white) */
+    --foreground: 162 19% 10.6%; /* #17201D */
     --card: 0 0% 100%;
-    --card-foreground: 150 11% 7.8%;
+    --card-foreground: 162 19% 10.6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 150 11% 7.8%;
-    --primary: 150 77% 21.8%;
+    --popover-foreground: 162 19% 10.6%;
+    
+    --primary: 164 100% 20.8%; /* #006B4F */
     --primary-foreground: 0 0% 100%;
-    --secondary: 150 72% 42.4%;
-    --secondary-foreground: 150 11% 7.8%;
-    --muted: 150 6% 92%;
-    --muted-foreground: 150 4% 44%;
-    --accent: 150 72% 42.4%;
-    --accent-foreground: 150 11% 7.8%;
-    --destructive: 3 100% 67.3%;
+    
+    --secondary: 23 100% 61.8%; /* #FF8A3D */
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 144 7.4% 93.7%; /* #EEF2EF */
+    --muted-foreground: 156 6.9% 39.6%; /* #5F6C66 */
+    
+    --accent: 25 100% 96.1%; /* #FFF4EB */
+    --accent-foreground: 23 100% 61.8%; /* #FF8A3D */
+    
+    --destructive: 0 63.3% 55.3%; /* #D64545 */
     --destructive-foreground: 0 0% 100%;
-    --border: 150 6% 90%;
-    --input: 150 6% 90%;
-    --ring: 150 77% 21.8%;
+    
+    --border: 144 7.4% 93.7%; /* #EEF2EF */
+    --input: 144 7.4% 93.7%;
+    --ring: 164 100% 20.8%;
     --radius: 1.5rem;
 
-    /* Semantic health colors adapted to the new theme */
+    /* Semantic health colors */
     --health-green: 150 72% 42.4%;
     --health-amber: 44 100% 50%;
-    --health-red: 3 100% 67.3%;
-    --health-teal: 150 77% 21.8%;
+    --health-red: 0 63.3% 55.3%;
+    --health-teal: 164 100% 20.8%;
     --health-purple: 259 84% 53%;
   }
 }
@@ -45,8 +51,9 @@
 }
 
 body {
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f7f9f7;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #FFF6F0;
+  color: #17201D;
   
   /* Prevent pull-to-refresh and horizontal history swipe-navigation */
   overscroll-behavior: none;
@@ -79,4 +86,3 @@ input, textarea, [contenteditable="true"] {
 .safe-padding-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
