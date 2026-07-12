@@ -232,8 +232,14 @@ export default function PregnancyOverview() {
   if (loading) {
     return (
       <AppShell>
-        <div className="flex flex-col items-center justify-center h-64 gap-4 bg-[#FFF6F0]">
-          <div className="w-8 h-8 border-2 border-[#006B4F] border-t-transparent rounded-full animate-spin" />
+        <div className="max-w-[440px] mx-auto p-5 pb-24 flex flex-col gap-6 animate-pulse bg-[#FFF6F0] min-h-screen">
+          <div className="h-8 bg-slate-200/80 rounded-[12px] w-1/2"></div>
+          <div className="bg-white rounded-[32px] h-48 bg-slate-200/60 shadow-sm border border-[#e5e7eb]"></div>
+          <div className="h-6 bg-slate-200/80 rounded-[12px] w-1/3 mt-2"></div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-28 bg-slate-200/60 rounded-[24px]"></div>
+            <div className="h-28 bg-slate-200/60 rounded-[24px]"></div>
+          </div>
         </div>
       </AppShell>
     );

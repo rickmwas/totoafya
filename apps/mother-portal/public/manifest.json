@@ -1,12 +1,12 @@
 {
-  "name": "TotoAfya — Kenya MCH",
-  "short_name": "TotoAfya",
+  "name": "TotoAfya — Caregiver",
+  "short_name": "TotoCare",
   "description": "Your trusted companion for maternal & child health in Kenya",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F7F5F0",
-  "theme_color": "#1B6B5A",
+  "background_color": "#FFF6F0",
+  "theme_color": "#006B4F",
   "categories": ["health", "medical"],
   "lang": "en",
   "icons": [

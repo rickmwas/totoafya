@@ -234,7 +234,21 @@ export default function NursePatientSearch({ onSelect }) {
         </button>
       </div>
 
-      {searched && (
+      {loading && (
+        <div className="mt-3 flex flex-col gap-2 animate-pulse">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[12px] bg-slate-200 flex-shrink-0"></div>
+              <div className="flex-1 flex flex-col gap-1.5">
+                <div className="h-3.5 bg-slate-200 rounded w-24"></div>
+                <div className="h-3 bg-slate-200 rounded w-48"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && searched && (
         <div className="mt-3">
           {results.length === 0 ? (
             <div className="bg-white rounded-[20px] border border-[#E5E5E5] p-6 text-center">

@@ -557,7 +557,7 @@ const integrations = {
 
 const localDb = { auth, entities, integrations };
 
-export const db = isSupabase ? supabaseDb : localDb;
+export const db = supabaseDb;
 export const totoafya = db;
 export default db;
 

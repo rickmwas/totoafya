@@ -144,11 +144,41 @@ export default function Home() {
   if (loading) {
     return (
       <AppShell>
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 rounded-[16px] bg-[#006B4F] flex items-center justify-center shadow-teal-glow-sm">
-            <span className="text-white text-[18px] font-extrabold">T</span>
+        <div className="max-w-[440px] mx-auto p-5 pb-24 flex flex-col gap-6 animate-pulse bg-[#FFF6F0] min-h-screen">
+          {/* Header Row */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-[18px] bg-slate-200/80"></div>
+              <div className="flex flex-col gap-1.5">
+                <div className="h-3.5 bg-slate-200/80 rounded w-20"></div>
+                <div className="h-3 bg-slate-200/80 rounded w-28"></div>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-slate-200/80"></div>
           </div>
-          <div className="w-7 h-7 border-2 border-[#006B4F] border-t-transparent rounded-full animate-spin" />
+
+          {/* Fetal Womb Stage Card */}
+          <div className="bg-white rounded-[36px] h-60 bg-slate-200/60 shadow-sm border border-[#e5e7eb]"></div>
+
+          {/* Action Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <div className="w-14 h-14 rounded-[22px] bg-slate-200/60"></div>
+                <div className="h-2.5 bg-slate-200/80 rounded w-12"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Section title */}
+          <div className="h-5 bg-slate-200/80 rounded w-1/3 mt-2"></div>
+          
+          {/* Card list */}
+          <div className="flex flex-col gap-3">
+            {[1, 2].map(i => (
+              <div key={i} className="h-24 bg-slate-200/60 rounded-[24px]"></div>
+            ))}
+          </div>
         </div>
       </AppShell>
     );

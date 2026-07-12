@@ -2,6 +2,7 @@ import db from '@/api/totoafyaClient';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { LayoutDashboard, Users, Baby, Stethoscope, Menu, Bell } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 import FacilitySidebar from '@/components/facility/FacilitySidebar';
 import FacilityOverview from '@/components/facility/FacilityOverview';
@@ -13,6 +14,46 @@ import FacilityAlerts from '@/components/facility/FacilityAlerts';
 import FacilityBilling from '@/components/facility/FacilityBilling';
 import FacilityNurses from '@/components/facility/FacilityNurses';
 import FacilityDeveloperDesk from '@/components/facility/FacilityDeveloperDesk';
+
+const MetricSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+    {[1, 2, 3, 4].map(i => (
+      <div key={i} className="bg-white p-6 rounded-[22px] border border-[#E5E5E5] flex items-start justify-between animate-pulse">
+        <div className="flex-grow">
+          <div className="h-3 bg-slate-200 rounded w-16 mb-3"></div>
+          <div className="h-8 bg-slate-200 rounded w-24 mb-3"></div>
+          <div className="h-3 bg-slate-200 rounded w-32"></div>
+        </div>
+        <div className="w-10 h-10 rounded-[12px] bg-slate-200 flex-shrink-0"></div>
+      </div>
+    ))}
+  </div>
+);
+
+const TableSkeleton = () => (
+  <div className="bg-white rounded-[20px] border border-[#E5E5E5] overflow-hidden animate-pulse">
+    <div className="h-12 bg-slate-50 border-b border-[#E5E5E5] flex items-center px-6 gap-6">
+      <div className="h-4 bg-slate-200 rounded w-32"></div>
+      <div className="h-4 bg-slate-200 rounded w-24"></div>
+      <div className="h-4 bg-slate-200 rounded w-20"></div>
+      <div className="h-4 bg-slate-200 rounded w-28"></div>
+    </div>
+    {[1, 2, 3, 4, 5].map(i => (
+      <div key={i} className="h-16 border-b border-[#FAFAFA] flex items-center px-6 gap-6">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+          <div className="flex flex-col gap-1.5 flex-1">
+            <div className="h-3 bg-slate-200 rounded w-36"></div>
+            <div className="h-3 bg-slate-200 rounded w-24"></div>
+          </div>
+        </div>
+        <div className="h-3 bg-slate-200 rounded w-24 flex-1"></div>
+        <div className="h-3 bg-slate-200 rounded w-20 flex-1"></div>
+        <div className="h-3 bg-slate-200 rounded w-32 flex-1"></div>
+      </div>
+    ))}
+  </div>
+);
 
 export default function FacilityDashboard() {
   const { user } = useAuth();
@@ -183,13 +224,15 @@ export default function FacilityDashboard() {
 
           <main className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="flex items-center justify-center h-64 mt-16">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-[16px] bg-[#2E5B47] flex items-center justify-center shadow-teal-glow">
-                    <span className="text-white text-[18px] font-extrabold">T</span>
+              <div className="p-4 md:p-6 lg:p-8">
+                {activeTab === 'overview' ? (
+                  <div>
+                    <MetricSkeleton />
+                    <TableSkeleton />
                   </div>
-                  <div className="w-7 h-7 border-2 border-[#2E5B47] border-t-transparent rounded-full animate-spin" />
-                </div>
+                ) : (
+                  <TableSkeleton />
+                )}
               </div>
             ) : (
               <div className="p-4 md:p-6 lg:p-8">{tabs[activeTab]}</div>
