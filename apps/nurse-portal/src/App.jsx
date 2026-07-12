@@ -30,11 +30,11 @@ const AuthenticatedApp = () => {
         <div className="flex flex-col items-center gap-5">
           <div
             className="w-16 h-16 rounded-[22px] flex items-center justify-center shadow-[0_8px_32px_rgba(27,107,90,0.28)]"
-            style={{ background: 'linear-gradient(145deg, #1B6B5A 0%, #2E8A74 100%)' }}
+            style={{ background: 'linear-gradient(145deg, #0F4C81 0%, #2E8A74 100%)' }}
           >
             <span className="text-white text-[26px] font-bold" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>T</span>
           </div>
-          <div className="w-6 h-6 border-2 border-[#1B6B5A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#0F4C81] border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );

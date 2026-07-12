@@ -54,7 +54,7 @@ export default function InvitePartner({ mother, lang, onUpdated }) {
                   {lang === 'sw' ? 'Ana ufikiaji kamili wa data' : 'Has full access to family data'}
                 </p>
               </div>
-              <span className="text-[10px] font-bold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2 py-1 rounded-full">Active</span>
+              <span className="text-[10px] font-bold text-[#0F4C81] bg-[#0F4C81]/10 px-2 py-1 rounded-full">Active</span>
             </div>
             <button
               onClick={handleRemove}
@@ -77,14 +77,14 @@ export default function InvitePartner({ mother, lang, onUpdated }) {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder={lang === 'sw' ? 'Barua pepe ya mshirika' : "Partner's email address"}
-                className="flex-1 h-12 px-4 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#7C3AED] transition-colors"
+                className="flex-1 h-12 px-4 bg-[#F4F6F8] border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#7C3AED] transition-colors"
               />
               <button
                 onClick={handleInvite}
                 disabled={saving || !email.trim()}
                 className={cn(
                   'h-12 px-4 rounded-[14px] text-[13px] font-bold flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50',
-                  saved ? 'bg-[#2E7A5D] text-white' : 'bg-[#7C3AED] text-white'
+                  saved ? 'bg-[#0F4C81] text-white' : 'bg-[#7C3AED] text-white'
                 )}
               >
                 {saved ? <Check size={15} /> : <Send size={15} />}

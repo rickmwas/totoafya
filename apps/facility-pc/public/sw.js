@@ -1,4 +1,4 @@
-const CACHE_NAME = 'totoafya-v1';
+const CACHE_NAME = 'totoadmin-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

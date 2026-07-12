@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 
-const COLORS = ['#0047FF', '#2E7A5D', '#F9A825', '#E51010', '#7C3AED'];
+const COLORS = ['#0047FF', '#0F4C81', '#F9A825', '#E51010', '#7C3AED'];
 
 export default function FacilityAnalytics({ data }) {
   const { mothers, children, immunizations, growthRecords } = data;
@@ -53,7 +53,7 @@ export default function FacilityAnalytics({ data }) {
           <h3 className="text-[14px] font-bold text-[#0A0A0A] mb-4">Vaccine Status Distribution</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={vaccineData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F7" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F4F6F8" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
@@ -69,7 +69,7 @@ export default function FacilityAnalytics({ data }) {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={riskData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {riskData.map((_, i) => <Cell key={i} fill={['#2E7A5D', '#F9A825', '#E51010', '#7C3AED'][i]} />)}
+                  {riskData.map((_, i) => <Cell key={i} fill={['#0F4C81', '#F9A825', '#E51010', '#7C3AED'][i]} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>
@@ -83,11 +83,11 @@ export default function FacilityAnalytics({ data }) {
           {countyData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={countyData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#F5F5F7" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#F4F6F8" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={70} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#2E7A5D" radius={[0, 6, 6, 0]} />
+                <Bar dataKey="count" fill="#0F4C81" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : <p className="text-[13px] text-[#A0A0A0] text-center py-16">No data yet</p>}
@@ -115,7 +115,7 @@ export default function FacilityAnalytics({ data }) {
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={pregnancyData} cx="50%" cy="50%" outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {pregnancyData.map((_, i) => <Cell key={i} fill={['#0047FF', '#2E7A5D', '#A0A0A0'][i]} />)}
+                  {pregnancyData.map((_, i) => <Cell key={i} fill={['#0047FF', '#0F4C81', '#A0A0A0'][i]} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>

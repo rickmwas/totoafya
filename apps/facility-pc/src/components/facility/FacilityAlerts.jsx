@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AlertTriangle, Info, AlertCircle, Check } from 'lucide-react';
 
 const SEVERITY = {
-  info:     { icon: Info,          bg: 'bg-[#0047FF]/8',  border: 'border-[#0047FF]/20', text: 'text-[#0047FF]',  badge: 'bg-[#0047FF]/10 text-[#0047FF]' },
+  info:     { icon: Info,          bg: 'bg-[#2E5B47]/8',  border: 'border-[#2E5B47]/20', text: 'text-[#2E5B47]',  badge: 'bg-[#2E5B47]/10 text-[#2E5B47]' },
   warning:  { icon: AlertTriangle, bg: 'bg-[#F9A825]/8',  border: 'border-[#F9A825]/20', text: 'text-[#F9A825]',  badge: 'bg-[#F9A825]/10 text-[#F9A825]' },
   critical: { icon: AlertCircle,   bg: 'bg-[#E51010]/8',  border: 'border-[#E51010]/20', text: 'text-[#E51010]',  badge: 'bg-[#E51010]/10 text-[#E51010]' },
 };
@@ -54,7 +54,7 @@ export default function FacilityAlerts({ alerts, onRefresh }) {
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${cfg.badge}`}>{alert.severity}</span>
                   <span className="text-[10px] text-[#A0A0A0] font-medium px-2 py-0.5 bg-white/60 rounded-full">{alert.alert_type?.replace('_', ' ')}</span>
-                  {!alert.is_read && <span className="text-[10px] font-bold px-2 py-0.5 bg-[#0047FF]/10 text-[#0047FF] rounded-full">Unread</span>}
+                  {!alert.is_read && <span className="text-[10px] font-bold px-2 py-0.5 bg-[#2E5B47]/10 text-[#2E5B47] rounded-full">Unread</span>}
                 </div>
                 <p className="text-[14px] font-bold text-[#0A0A0A]">{alert.title}</p>
                 <p className="text-[13px] text-[#666666] mt-0.5 leading-snug">{alert.message}</p>

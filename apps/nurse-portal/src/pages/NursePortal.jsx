@@ -49,11 +49,11 @@ export default function NursePortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7]">
+    <div className="min-h-screen bg-[#F4F6F8]">
       {/* Top Nav */}
       <nav className="bg-white border-b border-[#E5E5E5] px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-[12px] bg-[#2E7A5D] flex items-center justify-center shadow-green-glow">
+          <div className="w-9 h-9 rounded-[12px] bg-[#0F4C81] flex items-center justify-center shadow-green-glow">
             <Stethoscope size={17} className="text-white" />
           </div>
           <div>
@@ -64,13 +64,13 @@ export default function NursePortal() {
         <div className="flex items-center gap-2">
           <button
             onClick={lockSession}
-            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F5F5F7] transition-colors border border-[#E5E5E5] bg-white shadow-sm"
+            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F4F6F8] transition-colors border border-[#E5E5E5] bg-white shadow-sm"
           >
             <Lock size={13} /> Lock Station
           </button>
           <button
             onClick={() => db.auth.logout()}
-            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F5F5F7] transition-colors"
+            className="flex items-center gap-1.5 text-[12px] text-[#666666] font-semibold px-3 py-2 rounded-full hover:bg-[#F4F6F8] transition-colors"
           >
             <LogOut size={14} /> Sign out
           </button>
@@ -103,8 +103,8 @@ export default function NursePortal() {
                       onClick={() => handleSelectPatient(p)}
                       className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-all shadow-card hover:shadow-card-hover"
                     >
-                      <div className="w-10 h-10 rounded-[12px] bg-[#2E7A5D]/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[14px] font-extrabold text-[#2E7A5D]">
+                      <div className="w-10 h-10 rounded-[12px] bg-[#0F4C81]/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[14px] font-extrabold text-[#0F4C81]">
                           {p.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)}
                         </span>
                       </div>
@@ -118,7 +118,7 @@ export default function NursePortal() {
                         'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide flex-shrink-0',
                         p.risk_level === 'critical' ? 'bg-[#E51010]/10 text-[#E51010]' :
                         p.risk_level === 'high' ? 'bg-[#F9A825]/10 text-[#F9A825]' :
-                        'bg-[#2E7A5D]/10 text-[#2E7A5D]'
+                        'bg-[#0F4C81]/10 text-[#0F4C81]'
                       )}>
                         {p.risk_level || 'low'}
                       </div>

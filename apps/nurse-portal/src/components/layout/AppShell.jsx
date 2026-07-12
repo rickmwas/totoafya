@@ -34,7 +34,7 @@ export default function AppShell({ children }) {
       {/* Desktop/Tablet top nav */}
       <nav className="hidden sm:flex items-center justify-between px-6 md:px-10 py-3 bg-white/90 backdrop-blur-xl border-b border-[#E8E4DC] sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[10px] bg-[#1B6B5A] flex items-center justify-center shadow-teal-glow-sm">
+          <div className="w-8 h-8 rounded-[10px] bg-[#0F4C81] flex items-center justify-center shadow-teal-glow-sm">
             <span className="text-white text-[13px] font-extrabold">T</span>
           </div>
           <span className="text-[15px] font-extrabold text-[#0A0A0A]">TotoAfya</span>
@@ -48,7 +48,7 @@ export default function AppShell({ children }) {
                 to={to}
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-150',
-                  active ? 'bg-[#1B6B5A] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F0EDE6]'
+                  active ? 'bg-[#0F4C81] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F0EDE6]'
                 )}
               >
                 <Icon size={15} strokeWidth={active ? 2.5 : 1.8} />
@@ -77,7 +77,7 @@ export default function AppShell({ children }) {
                   className={cn(
                     'flex flex-col items-center gap-1 px-3 py-2 rounded-[20px] min-w-[48px] min-h-[48px] justify-center',
                     'transition-all duration-200 ease-out active:scale-[0.92] select-none',
-                    active ? 'bg-[#1B6B5A]' : 'bg-transparent'
+                    active ? 'bg-[#0F4C81]' : 'bg-transparent'
                   )}
                 >
                   <Icon size={20} strokeWidth={active ? 2.5 : 1.8} className={active ? 'text-white' : 'text-[#A0A0A0]'} />

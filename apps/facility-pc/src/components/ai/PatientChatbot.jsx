@@ -96,8 +96,8 @@ AI:`;
   return (
     <div className="flex flex-col h-[520px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 bg-gradient-to-r from-[#0047FF]/5 to-transparent flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
+      <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 bg-gradient-to-r from-[#2E5B47]/5 to-transparent flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-[#2E5B47] flex items-center justify-center shadow-teal-glow-sm">
           <Bot size={15} className="text-white" />
         </div>
         <div>
@@ -115,14 +115,14 @@ AI:`;
         {messages.map((msg, i) => (
           <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
             {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-glow-sm">
+              <div className="w-6 h-6 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-teal-glow-sm">
                 <Bot size={11} className="text-white" />
               </div>
             )}
             <div className={cn(
               'max-w-[82%] rounded-[16px] px-4 py-2.5 text-[13px] leading-relaxed',
               msg.role === 'user'
-                ? 'bg-[#0047FF] text-white rounded-tr-[4px]'
+                ? 'bg-[#2E5B47] text-white rounded-tr-[4px]'
                 : 'bg-[#F5F5F7] text-[#0A0A0A] rounded-tl-[4px]'
             )}>
               {msg.role === 'assistant' ? (
@@ -134,7 +134,7 @@ AI:`;
               )}
             </div>
             {msg.role === 'user' && (
-              <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 mt-0.5">
                 <User size={11} className="text-white" />
               </div>
             )}
@@ -143,7 +143,7 @@ AI:`;
 
         {loading && (
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
+            <div className="w-6 h-6 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
               <Bot size={11} className="text-white" />
             </div>
             <div className="bg-[#F5F5F7] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
@@ -160,7 +160,7 @@ AI:`;
           <div className="flex flex-wrap gap-2 mt-1">
             {QUICK_QUESTIONS.map(q => (
               <button key={q} onClick={() => { setInput(q); }}
-                className="text-[12px] font-semibold text-[#0047FF] bg-[#0047FF]/8 border border-[#0047FF]/20 px-3 py-1.5 rounded-full active:scale-[0.96] transition-all">
+                className="text-[12px] font-semibold text-[#2E5B47] bg-[#2E5B47]/8 border border-[#2E5B47]/20 px-3 py-1.5 rounded-full active:scale-[0.96] transition-all">
                 {q}
               </button>
             ))}
@@ -178,13 +178,13 @@ AI:`;
           onKeyDown={handleKey}
           placeholder={lang === 'sw' ? 'Uliza swali lolote la afya...' : 'Ask any health question...'}
           rows={1}
-          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#0047FF] max-h-24 leading-relaxed"
+          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#2E5B47] max-h-24 leading-relaxed"
           style={{ fontSize: '16px' }}
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm active:scale-[0.92] transition-all disabled:opacity-30 self-end"
+          className="w-10 h-10 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm active:scale-[0.92] transition-all disabled:opacity-30 self-end"
         >
           <Send size={15} className="text-white" />
         </button>

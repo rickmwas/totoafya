@@ -39,7 +39,7 @@ export default function NursePatientView({ patient, onBack }) {
   };
 
   const riskColor = patient.risk_level === 'critical' ? '#E51010' :
-    patient.risk_level === 'high' ? '#F9A825' : '#2E7A5D';
+    patient.risk_level === 'high' ? '#F9A825' : '#2E5B47';
 
   return (
     <div>
@@ -93,7 +93,7 @@ export default function NursePatientView({ patient, onBack }) {
             onClick={() => setTab(t.key)}
             className={cn(
               'flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all',
-              tab === t.key ? 'bg-[#2E7A5D] text-white shadow-green-glow' : 'text-[#666666]'
+              tab === t.key ? 'bg-[#2E5B47] text-white shadow-green-glow' : 'text-[#666666]'
             )}
           >
             {t.label}

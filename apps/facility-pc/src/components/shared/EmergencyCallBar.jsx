@@ -77,7 +77,7 @@ export default function EmergencyCallBar({ mother, lang, forceShow = false }) {
             <a href={`tel:${inquiryPhone}`}
               className="flex items-center justify-between w-full h-12 px-5 rounded-[16px] bg-white border-2 border-[#E5E5E5] font-bold text-[14px] active:scale-[0.97] transition-transform">
               <div className="flex items-center gap-3">
-                <Phone size={16} className="text-[#0047FF]" />
+                <Phone size={16} className="text-[#2E5B47]" />
                 <div>
                   <p className="text-[10px] font-bold text-[#A0A0A0] leading-none mb-0.5">
                     {lang === 'sw' ? 'MASWALI' : 'GENERAL INQUIRY'}
@@ -85,7 +85,7 @@ export default function EmergencyCallBar({ mother, lang, forceShow = false }) {
                   <p className="text-[14px] font-black text-[#0A0A0A] tracking-wide leading-none">{inquiryPhone}</p>
                 </div>
               </div>
-              <span className="text-[12px] font-bold text-[#0047FF]">
+              <span className="text-[12px] font-bold text-[#2E5B47]">
                 {lang === 'sw' ? 'Piga' : 'Call'}
               </span>
             </a>

@@ -62,7 +62,7 @@ export default function FacilityChildren({ children, growthRecords }) {
 
       <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-x-auto">
         <table className="w-full min-w-[700px]">
-          <thead className="bg-[#F5F5F7]">
+          <thead className="bg-[#F4F6F8]">
             <tr>
               {['Name', 'Age', 'Gender', 'Health Status', 'Weight', 'Height', 'Nutrition', 'Birth Weight', 'DOB'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-4 py-3">{h}</th>
@@ -73,7 +73,7 @@ export default function FacilityChildren({ children, growthRecords }) {
             {filtered.map(c => {
               const g = latestGrowth[c.id];
               return (
-                <tr key={c.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
+                <tr key={c.id} className="border-t border-[#F4F6F8] hover:bg-[#F4F6F8]/50 transition-colors">
                   <td className="px-4 py-3 text-[13px] font-semibold text-[#0A0A0A]">{c.full_name}</td>
                   <td className="px-4 py-3 text-[12px] text-[#666666]">{getAge(c.date_of_birth)}</td>
                   <td className="px-4 py-3">
@@ -83,7 +83,7 @@ export default function FacilityChildren({ children, growthRecords }) {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                      c.health_status === 'healthy' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' :
+                      c.health_status === 'healthy' ? 'bg-[#0F4C81]/10 text-[#0F4C81]' :
                       c.health_status === 'critical' ? 'bg-[#E51010]/10 text-[#E51010]' :
                       c.health_status === 'at_risk' ? 'bg-[#E51010]/10 text-[#E51010]' : 'bg-[#F9A825]/10 text-[#F9A825]'
                     }`}>{c.health_status || 'healthy'}</span>
@@ -93,7 +93,7 @@ export default function FacilityChildren({ children, growthRecords }) {
                   <td className="px-4 py-3">
                     {g?.nutrition_status ? (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                        g.nutrition_status === 'normal' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' :
+                        g.nutrition_status === 'normal' ? 'bg-[#0F4C81]/10 text-[#0F4C81]' :
                         g.nutrition_status === 'sam' ? 'bg-[#E51010]/10 text-[#E51010]' : 'bg-[#F9A825]/10 text-[#F9A825]'
                       }`}>{g.nutrition_status}</span>
                     ) : '—'}

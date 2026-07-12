@@ -1,6 +1,7 @@
 import db from '@/api/totoafyaClient';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { LayoutDashboard, Users, Baby, Stethoscope, Menu, Bell } from 'lucide-react';
 
 import FacilitySidebar from '@/components/facility/FacilitySidebar';
 import FacilityOverview from '@/components/facility/FacilityOverview';
@@ -144,7 +145,7 @@ export default function FacilityDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F7] font-inter">
+    <div className="min-h-screen bg-[#FAFBFB] font-inter">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -162,21 +163,11 @@ export default function FacilityDashboard() {
         />
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-0">
           {/* Mobile top bar */}
           <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E5E5E5] sticky top-0 z-30">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-[10px] bg-[#F5F5F7] active:scale-95 transition-transform"
-            >
-              <span className="flex flex-col gap-1">
-                <span className="w-5 h-0.5 bg-[#0A0A0A] rounded" />
-                <span className="w-5 h-0.5 bg-[#0A0A0A] rounded" />
-                <span className="w-3 h-0.5 bg-[#0A0A0A] rounded" />
-              </span>
-            </button>
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-7 h-7 rounded-[9px] bg-[#0047FF] flex items-center justify-center flex-shrink-0">
+              <div className="w-7 h-7 rounded-[9px] bg-[#2E5B47] flex items-center justify-center flex-shrink-0">
                 <span className="text-white text-[12px] font-extrabold">T</span>
               </div>
               <p className="text-[14px] font-extrabold text-[#0A0A0A] truncate">
@@ -194,16 +185,58 @@ export default function FacilityDashboard() {
             {loading ? (
               <div className="flex items-center justify-center h-64 mt-16">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 rounded-[16px] bg-[#0047FF] flex items-center justify-center shadow-teal-glow">
+                  <div className="w-12 h-12 rounded-[16px] bg-[#2E5B47] flex items-center justify-center shadow-teal-glow">
                     <span className="text-white text-[18px] font-extrabold">T</span>
                   </div>
-                  <div className="w-7 h-7 border-2 border-[#0047FF] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-7 h-7 border-2 border-[#2E5B47] border-t-transparent rounded-full animate-spin" />
                 </div>
               </div>
             ) : (
               <div className="p-4 md:p-6 lg:p-8">{tabs[activeTab]}</div>
             )}
           </main>
+
+          {/* Mobile Bottom Navigation (Native App feel) */}
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E5E5] px-2 py-2 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+            <div className="flex items-center justify-around">
+              {[
+                { key: 'overview', icon: LayoutDashboard, label: 'Overview' },
+                { key: 'mothers', icon: Users, label: 'Mothers' },
+                { key: 'children', icon: Baby, label: 'Children' },
+                { key: 'nurses', icon: Stethoscope, label: 'Nurses' }
+              ].map(item => {
+                const active = activeTab === item.key;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setActiveTab(item.key)}
+                    className={cn(
+                      'flex flex-col items-center gap-1 py-1 px-3 rounded-[16px] min-w-[60px] transition-all active:scale-[0.92]',
+                      active ? 'text-[#2E5B47]' : 'text-[#A0A0A0]'
+                    )}
+                  >
+                    <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
+                    <span className="text-[9px] font-bold uppercase tracking-wider leading-none">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+              
+              {/* More button to toggle full sidebar overlay */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="flex flex-col items-center gap-1 py-1 px-3 rounded-[16px] min-w-[60px] text-[#A0A0A0] transition-all active:scale-[0.92]"
+              >
+                <Menu size={20} strokeWidth={1.8} />
+                <span className="text-[9px] font-bold uppercase tracking-wider leading-none">
+                  More
+                </span>
+              </button>
+            </div>
+          </nav>
+
         </div>
       </div>
     </div>

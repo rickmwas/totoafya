@@ -104,7 +104,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
           <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-[16px] border border-[#E5E5E5] shadow-float overflow-hidden">
             {searchResults.map((h, i) => (
               <button key={i} onClick={() => selectHospital(h.name || h.display_name.split(',')[0])}
-                className="w-full px-4 py-3 text-left hover:bg-[#F5F5F7] flex items-center gap-3 border-b border-[#F5F5F7] last:border-0">
+                className="w-full px-4 py-3 text-left hover:bg-[#F4F6F8] flex items-center gap-3 border-b border-[#F4F6F8] last:border-0">
                 <MapPin size={13} className="text-[#0047FF] flex-shrink-0" />
                 <div>
                   <p className="text-[13px] font-semibold text-[#0A0A0A]">{h.name || h.display_name.split(',')[0]}</p>
@@ -141,12 +141,12 @@ export default function HospitalPicker({ value, onChange, lang }) {
       {/* Nearby results */}
       {hospitals.length > 0 && (
         <div className="bg-white rounded-[16px] border border-[#E5E5E5] overflow-hidden shadow-card">
-          <p className="px-4 py-2 text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] border-b border-[#F5F5F7]">
+          <p className="px-4 py-2 text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] border-b border-[#F4F6F8]">
             {lang === 'sw' ? 'HOSPITALI KARIBU NAWE' : 'NEARBY HOSPITALS'}
           </p>
           {hospitals.map((h, i) => (
             <button key={i} onClick={() => selectHospital(h.name || h.display_name.split(',')[0])}
-              className="w-full px-4 py-3 text-left hover:bg-[#F5F5F7] flex items-center gap-3 border-b border-[#F5F5F7] last:border-0 active:bg-[#F5F5F7]">
+              className="w-full px-4 py-3 text-left hover:bg-[#F4F6F8] flex items-center gap-3 border-b border-[#F4F6F8] last:border-0 active:bg-[#F4F6F8]">
               <div className="w-8 h-8 rounded-full bg-[#0047FF]/10 flex items-center justify-center flex-shrink-0">
                 <MapPin size={13} className="text-[#0047FF]" />
               </div>

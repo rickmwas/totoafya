@@ -8,16 +8,16 @@ export default function HealthMetricCard({
   icon: Icon,
   trend,
   status = 'normal',
-  color = '#0047FF',
+  color = '#2E5B47',
   className,
   onClick,
 }) {
   const statusColors = {
-    normal: '#2E7A5D',
-    good: '#2E7A5D',
+    normal: '#2E5B47',
+    good: '#2E5B47',
     warning: '#F9A825',
     danger: '#E51010',
-    info: '#0047FF',
+    info: '#2E5B47',
   };
   const resolvedColor = statusColors[status] || color;
 

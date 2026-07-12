@@ -77,7 +77,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
           {children.map(c => (
             <button key={c.id} onClick={() => setSelectedChild(c)}
               className={cn('px-4 py-2 rounded-full text-[13px] font-semibold border-2 transition-all',
-                selectedChild?.id === c.id ? 'bg-[#0047FF] text-white border-[#0047FF]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
+                selectedChild?.id === c.id ? 'bg-[#2E5B47] text-white border-[#2E5B47]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
               {c.full_name}
             </button>
           ))}
@@ -103,7 +103,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
           <div key={key} className="flex flex-col gap-1.5">
             <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0]">{label}</label>
             <input type={type} value={form[key]} onChange={e => setF(key, e.target.value)} placeholder={placeholder}
-              className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] transition-colors" />
+              className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] transition-colors" />
           </div>
         ))}
       </div>
@@ -112,7 +112,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
         <div className={cn('rounded-[14px] px-4 py-3 text-[13px] font-bold',
           parseFloat(form.muac_cm) < 11.5 ? 'bg-[#E51010]/10 text-[#E51010]' :
           parseFloat(form.muac_cm) < 12.5 ? 'bg-[#F9A825]/10 text-[#F9A825]' :
-          'bg-[#2E7A5D]/10 text-[#2E7A5D]'
+          'bg-[#2E5B47]/10 text-[#2E5B47]'
         )}>
           MUAC Status: {parseFloat(form.muac_cm) < 11.5 ? '⚠️ SAM — Refer immediately' :
             parseFloat(form.muac_cm) < 12.5 ? '⚠️ MAM — Monitor closely' : '✓ Normal'}
@@ -123,7 +123,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
         <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0]">Notes</label>
         <textarea value={form.notes} onChange={e => setF('notes', e.target.value)} placeholder="Clinical notes..."
           rows={2}
-          className="px-4 py-3 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] resize-none transition-colors" />
+          className="px-4 py-3 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] resize-none transition-colors" />
       </div>
 
       <button
@@ -131,7 +131,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
         disabled={saving || !form.recorded_date}
         className={cn(
           'h-14 rounded-full text-[15px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.97]',
-          'bg-[#0047FF] text-white shadow-teal-glow disabled:opacity-50'
+          'bg-[#2E5B47] text-white shadow-teal-glow disabled:opacity-50'
         )}
       >
         {saved ? <><Check size={18} /> Saved!</> : saving ? 'Saving...' : 'Save Growth Record'}

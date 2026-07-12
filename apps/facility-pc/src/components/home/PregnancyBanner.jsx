@@ -25,7 +25,7 @@ export default function PregnancyBanner({ mother }) {
       <div
         className="rounded-[28px] p-5 overflow-hidden relative"
         style={{
-          background: 'linear-gradient(135deg, #0047FF 0%, #0033CC 100%)',
+          background: 'linear-gradient(135deg, #2E5B47 0%, #0033CC 100%)',
         }}
       >
         {/* Decorative circles */}

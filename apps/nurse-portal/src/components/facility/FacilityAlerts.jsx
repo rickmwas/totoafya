@@ -63,7 +63,7 @@ export default function FacilityAlerts({ alerts, onRefresh }) {
               <button
                 onClick={() => resolve(alert.id)}
                 disabled={resolving === alert.id}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5E5] rounded-[10px] text-[12px] font-semibold text-[#666666] hover:bg-[#F5F5F7] transition-colors flex-shrink-0 disabled:opacity-50">
+                className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5E5] rounded-[10px] text-[12px] font-semibold text-[#666666] hover:bg-[#F4F6F8] transition-colors flex-shrink-0 disabled:opacity-50">
                 <Check size={13} />
                 {resolving === alert.id ? 'Resolving...' : 'Resolve'}
               </button>

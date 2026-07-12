@@ -36,7 +36,7 @@ export default function FacilityOverview({ data }) {
       {/* Stat grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 mb-8">
         <StatCard icon={Users} label="Registered Caregivers" value={mothers.length} sub={`${pregnant} pregnant`} color="#0047FF" bg="bg-[#0047FF]/10" />
-        <StatCard icon={Baby} label="Registered Children" value={children.length} sub="active profiles" color="#2E7A5D" bg="bg-[#2E7A5D]/10" />
+        <StatCard icon={Baby} label="Registered Children" value={children.length} sub="active profiles" color="#0F4C81" bg="bg-[#0F4C81]/10" />
         <StatCard icon={AlertTriangle} label="High Risk Caregivers" value={highRisk} sub="need attention" color="#E51010" bg="bg-[#E51010]/10" />
         <StatCard icon={Shield} label="Overdue Vaccines" value={overdueVax} sub={`${dueVax} due soon`} color="#F9A825" bg="bg-[#F9A825]/10" />
         <StatCard icon={Heart} label="SAM Cases" value={samChildren} sub="severe malnutrition" color="#E51010" bg="bg-[#E51010]/10" />
@@ -48,7 +48,7 @@ export default function FacilityOverview({ data }) {
         <h2 className="text-[16px] font-bold text-[#0A0A0A] mb-4">Recent Registrations</h2>
         <table className="w-full min-w-[500px]">
           <thead>
-            <tr className="border-b border-[#F5F5F7]">
+            <tr className="border-b border-[#F4F6F8]">
               {['Name', 'Status', 'Risk Level', 'County', 'Registered'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] pb-3 pr-4">{h}</th>
               ))}
@@ -56,18 +56,18 @@ export default function FacilityOverview({ data }) {
           </thead>
           <tbody>
             {recentMothers.map(m => (
-              <tr key={m.id} className="border-b border-[#F5F5F7] last:border-0">
+              <tr key={m.id} className="border-b border-[#F4F6F8] last:border-0">
                 <td className="py-3 pr-4 text-[13px] font-semibold text-[#0A0A0A]">{m.full_name}</td>
                 <td className="py-3 pr-4">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
                     m.pregnancy_status === 'pregnant' ? 'bg-[#0047FF]/10 text-[#0047FF]' :
-                    m.pregnancy_status === 'postpartum' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' : 'bg-[#F5F5F7] text-[#666666]'
+                    m.pregnancy_status === 'postpartum' ? 'bg-[#0F4C81]/10 text-[#0F4C81]' : 'bg-[#F4F6F8] text-[#666666]'
                   }`}>{m.pregnancy_status}</span>
                 </td>
                 <td className="py-3 pr-4">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
                     m.risk_level === 'critical' ? 'bg-[#E51010]/10 text-[#E51010]' :
-                    m.risk_level === 'high' ? 'bg-[#F9A825]/10 text-[#F9A825]' : 'bg-[#2E7A5D]/10 text-[#2E7A5D]'
+                    m.risk_level === 'high' ? 'bg-[#F9A825]/10 text-[#F9A825]' : 'bg-[#0F4C81]/10 text-[#0F4C81]'
                   }`}>{m.risk_level || 'low'}</span>
                 </td>
                 <td className="py-3 pr-4 text-[13px] text-[#666666]">{m.county || '—'}</td>

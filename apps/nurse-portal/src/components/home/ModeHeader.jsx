@@ -21,9 +21,9 @@ export default function ModeHeader({ mother, childCount, lang }) {
           </span>
         </div>
         {childCount > 0 && (
-          <div className="flex items-center gap-1.5 bg-[#2E7A5D]/8 border border-[#2E7A5D]/15 rounded-full px-3 py-1.5">
+          <div className="flex items-center gap-1.5 bg-[#0F4C81]/8 border border-[#0F4C81]/15 rounded-full px-3 py-1.5">
             <span className="text-[13px]">👶</span>
-            <span className="text-[10px] font-bold text-[#2E7A5D] tracking-wide uppercase">
+            <span className="text-[10px] font-bold text-[#0F4C81] tracking-wide uppercase">
               {childCount} {lang === 'sw' ? 'Mtoto' : childCount === 1 ? 'Child' : 'Children'}
             </span>
           </div>
@@ -35,15 +35,15 @@ export default function ModeHeader({ mother, childCount, lang }) {
   if (isPregnant && childCount > 0) {
     return (
       <div className="mx-4 mb-4 flex gap-2">
-        <div className="flex items-center gap-1.5 bg-[#1B6B5A]/8 border border-[#1B6B5A]/15 rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-[#0F4C81]/8 border border-[#0F4C81]/15 rounded-full px-3 py-1.5">
           <span className="text-[13px]">🤰</span>
-          <span className="text-[10px] font-bold text-[#1B6B5A] tracking-wide uppercase">
+          <span className="text-[10px] font-bold text-[#0F4C81] tracking-wide uppercase">
             {lang === 'sw' ? 'Mjamzito' : 'Pregnant'}
           </span>
         </div>
-        <div className="flex items-center gap-1.5 bg-[#2E7A5D]/8 border border-[#2E7A5D]/15 rounded-full px-3 py-1.5">
+        <div className="flex items-center gap-1.5 bg-[#0F4C81]/8 border border-[#0F4C81]/15 rounded-full px-3 py-1.5">
           <span className="text-[13px]">👶</span>
-          <span className="text-[10px] font-bold text-[#2E7A5D] tracking-wide uppercase">
+          <span className="text-[10px] font-bold text-[#0F4C81] tracking-wide uppercase">
             {childCount} {lang === 'sw' ? 'Mtoto' : childCount === 1 ? 'Child' : 'Children'}
           </span>
         </div>
@@ -54,9 +54,9 @@ export default function ModeHeader({ mother, childCount, lang }) {
   if (isPregnant) {
     return (
       <div className="mx-4 mb-4">
-        <div className="flex items-center gap-2 bg-[#1B6B5A]/6 border border-[#1B6B5A]/15 rounded-full px-4 py-2 w-fit">
+        <div className="flex items-center gap-2 bg-[#0F4C81]/6 border border-[#0F4C81]/15 rounded-full px-4 py-2 w-fit">
           <span className="text-[15px]">🤰</span>
-          <span className="text-[11px] font-bold text-[#1B6B5A] tracking-wide uppercase">
+          <span className="text-[11px] font-bold text-[#0F4C81] tracking-wide uppercase">
             {lang === 'sw' ? 'Hali ya Ujauzito' : 'Maternal Mode'}
           </span>
         </div>
@@ -67,9 +67,9 @@ export default function ModeHeader({ mother, childCount, lang }) {
   if (childCount > 0) {
     return (
       <div className="mx-4 mb-4">
-        <div className="flex items-center gap-2 bg-[#2E7A5D]/6 border border-[#2E7A5D]/15 rounded-full px-4 py-2 w-fit">
+        <div className="flex items-center gap-2 bg-[#0F4C81]/6 border border-[#0F4C81]/15 rounded-full px-4 py-2 w-fit">
           <span className="text-[15px]">👶</span>
-          <span className="text-[11px] font-bold text-[#2E7A5D] tracking-wide uppercase">
+          <span className="text-[11px] font-bold text-[#0F4C81] tracking-wide uppercase">
             {lang === 'sw' ? 'Hali ya Mtoto' : 'Child Care Mode'}
           </span>
         </div>

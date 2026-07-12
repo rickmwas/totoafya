@@ -91,7 +91,7 @@ export default function LockScreen() {
                 <div
                   key={i}
                   className={`w-3.5 h-3.5 rounded-full border border-slate-700 transition-all duration-150 ${
-                    pin.length >= i ? 'bg-emerald-500 border-emerald-500 scale-110 shadow-[0_0_8px_#10b981]' : 'bg-transparent'
+                    pin.length >= i ? 'bg-blue-500 border-emerald-500 scale-110 shadow-[0_0_8px_#10b981]' : 'bg-transparent'
                   }`}
                 />
               ))}
@@ -135,7 +135,7 @@ export default function LockScreen() {
             <button
               onClick={handleUnlock}
               disabled={pin.length < 4 || loading}
-              className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30 transition-all"
+              className="w-full h-12 bg-emerald-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30 transition-all"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -175,7 +175,7 @@ export default function LockScreen() {
               <button
                 type="submit"
                 disabled={!badgeToken || loading}
-                className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg transition-all"
+                className="flex-1 h-12 bg-emerald-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg transition-all"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

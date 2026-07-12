@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PageHeader({ title, subtitle, children, accentColor = '#1B6B5A' }) {
+export default function PageHeader({ title, subtitle, children, accentColor = '#0F4C81' }) {
   return (
     <div className="relative px-4 pt-14 pb-6 overflow-hidden">
       {/* Decorative blobs */}

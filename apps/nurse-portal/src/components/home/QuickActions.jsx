@@ -13,20 +13,20 @@ const PHOTOS = {
 
 const ACTIONS = {
   pregnant: [
-    { to: '/anc',      photo: PHOTOS.anc,      Icon: HeartHandshake, color: '#1B6B5A', en: 'ANC Visits',  sw: 'Ziara za ANC',  sub_en: 'Track your clinic',  sub_sw: 'Fuatilia kliniki' },
+    { to: '/anc',      photo: PHOTOS.anc,      Icon: HeartHandshake, color: '#0F4C81', en: 'ANC Visits',  sw: 'Ziara za ANC',  sub_en: 'Track your clinic',  sub_sw: 'Fuatilia kliniki' },
     { to: '/learn',    photo: PHOTOS.learn,    Icon: BookOpen,       color: '#7C3AED', en: 'Learn',       sw: 'Jifunze',       sub_en: 'Pregnancy videos', sub_sw: 'Video za ujauzito' },
     { to: '/ai-health',photo: PHOTOS.ai,       Icon: Sparkles,       color: '#C8813A', en: 'AI Health',   sw: 'Afya AI',       sub_en: 'Risk analysis',   sub_sw: 'Tathmini hatari' },
-    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#2E7A5D', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'Weight records',  sub_sw: 'Rekodi za uzito' },
+    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#0F4C81', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'Weight records',  sub_sw: 'Rekodi za uzito' },
   ],
   child: [
-    { to: '/vaccines', photo: PHOTOS.vaccines, Icon: Shield,         color: '#1B6B5A', en: 'Vaccines',    sw: 'Chanjo',        sub_en: 'Full schedule',   sub_sw: 'Ratiba kamili' },
-    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#2E7A5D', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'WHO charts',      sub_sw: 'Grafu ya WHO' },
+    { to: '/vaccines', photo: PHOTOS.vaccines, Icon: Shield,         color: '#0F4C81', en: 'Vaccines',    sw: 'Chanjo',        sub_en: 'Full schedule',   sub_sw: 'Ratiba kamili' },
+    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#0F4C81', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'WHO charts',      sub_sw: 'Grafu ya WHO' },
     { to: '/learn',    photo: PHOTOS.learn,    Icon: BookOpen,       color: '#7C3AED', en: 'Learn',       sw: 'Jifunze',       sub_en: 'Health videos',   sub_sw: 'Video za afya' },
     { to: '/ai-health',photo: PHOTOS.ai,       Icon: Sparkles,       color: '#C8813A', en: 'AI Health',   sw: 'Afya AI',       sub_en: 'AI insights',     sub_sw: 'Ushauri wa AI' },
   ],
   caregiver: [
-    { to: '/vaccines', photo: PHOTOS.vaccines, Icon: Shield,         color: '#1B6B5A', en: 'Vaccines',    sw: 'Chanjo',        sub_en: 'Vaccine schedule',sub_sw: 'Ratiba ya chanjo' },
-    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#2E7A5D', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'Track growth',    sub_sw: 'Fuatilia ukuaji' },
+    { to: '/vaccines', photo: PHOTOS.vaccines, Icon: Shield,         color: '#0F4C81', en: 'Vaccines',    sw: 'Chanjo',        sub_en: 'Vaccine schedule',sub_sw: 'Ratiba ya chanjo' },
+    { to: '/growth',   photo: PHOTOS.growth,   Icon: TrendingUp,     color: '#0F4C81', en: 'Growth',      sw: 'Ukuaji',        sub_en: 'Track growth',    sub_sw: 'Fuatilia ukuaji' },
     { to: '/add-child',photo: PHOTOS.baby,     Icon: Baby,           color: '#F9A825', en: 'Add Child',   sw: 'Ongeza Mtoto',  sub_en: 'Register child',  sub_sw: 'Sajili mtoto' },
     { to: '/learn',    photo: PHOTOS.learn,    Icon: BookOpen,       color: '#7C3AED', en: 'Learn',       sw: 'Jifunze',       sub_en: 'Parenting guide', sub_sw: 'Mwongozo' },
   ],

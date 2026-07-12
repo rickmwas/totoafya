@@ -18,7 +18,7 @@ const Input = ({ value, onChange, type = 'text', placeholder }) => (
     value={value}
     onChange={e => onChange(e.target.value)}
     placeholder={placeholder}
-    className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E7A5D] transition-colors"
+    className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] transition-colors"
   />
 );
 
@@ -111,13 +111,13 @@ export default function NurseANCForm({ patient, onSaved }) {
       <div className="grid grid-cols-2 gap-4">
         <Field label="Urine Protein">
           <select value={form.urine_protein} onChange={e => setF('urine_protein', e.target.value)}
-            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] outline-none focus:border-[#2E7A5D]">
+            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] outline-none focus:border-[#2E5B47]">
             {['negative','trace','1+','2+','3+'].map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </Field>
         <Field label="HIV Status">
           <select value={form.hiv_status} onChange={e => setF('hiv_status', e.target.value)}
-            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] outline-none focus:border-[#2E7A5D]">
+            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] outline-none focus:border-[#2E5B47]">
             {['negative','positive','not_tested','declined'].map(v => <option key={v} value={v}>{v.replace('_',' ')}</option>)}
           </select>
         </Field>
@@ -129,7 +129,7 @@ export default function NurseANCForm({ patient, onSaved }) {
           {[{ key: 'ttv_given', label: 'TTV' }, { key: 'ifas_given', label: 'IFAs' }, { key: 'llin_given', label: 'LLIN' }].map(({ key, label }) => (
             <button key={key} onClick={() => setF(key, !form[key])}
               className={cn('px-4 py-2.5 rounded-full text-[13px] font-semibold border-2 transition-all active:scale-[0.96]',
-                form[key] ? 'bg-[#2E7A5D] text-white border-[#2E7A5D]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
+                form[key] ? 'bg-[#2E5B47] text-white border-[#2E5B47]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
               {label}
             </button>
           ))}
@@ -158,7 +158,7 @@ export default function NurseANCForm({ patient, onSaved }) {
       <Field label="Notes">
         <textarea value={form.notes} onChange={e => setF('notes', e.target.value)} placeholder="Additional clinical notes..."
           rows={3}
-          className="px-4 py-3 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E7A5D] transition-colors resize-none" />
+          className="px-4 py-3 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] transition-colors resize-none" />
       </Field>
 
       <button
@@ -166,7 +166,7 @@ export default function NurseANCForm({ patient, onSaved }) {
         disabled={saving || !form.visit_date}
         className={cn(
           'h-14 rounded-full text-[15px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.97]',
-          saved ? 'bg-[#2E7A5D] text-white' : 'bg-[#2E7A5D] text-white shadow-green-glow disabled:opacity-50'
+          saved ? 'bg-[#2E5B47] text-white' : 'bg-[#2E5B47] text-white shadow-green-glow disabled:opacity-50'
         )}
       >
         {saved ? <><Check size={18} /> Saved to patient record</> : saving ? 'Saving...' : 'Save ANC Visit'}

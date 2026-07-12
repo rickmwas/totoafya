@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 
 const STATUS_STYLE = {
-  given:     'bg-[#2E7A5D]/10 text-[#2E7A5D]',
+  given:     'bg-[#0F4C81]/10 text-[#0F4C81]',
   scheduled: 'bg-[#0047FF]/10 text-[#0047FF]',
   due:       'bg-[#F9A825]/10 text-[#F9A825]',
   overdue:   'bg-[#E51010]/10 text-[#E51010]',
@@ -64,7 +64,7 @@ export default function FacilityVaccines({ immunizations, children }) {
 
       <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-x-auto">
         <table className="w-full min-w-[700px]">
-          <thead className="bg-[#F5F5F7]">
+          <thead className="bg-[#F4F6F8]">
             <tr>
               {['Child', 'Vaccine', 'Dose', 'Status', 'Scheduled', 'Given Date', 'Facility', 'Administered By'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-4 py-3">{h}</th>
@@ -73,7 +73,7 @@ export default function FacilityVaccines({ immunizations, children }) {
           </thead>
           <tbody>
             {filtered.map(i => (
-              <tr key={i.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
+              <tr key={i.id} className="border-t border-[#F4F6F8] hover:bg-[#F4F6F8]/50 transition-colors">
                 <td className="px-4 py-3 text-[13px] font-semibold text-[#0A0A0A]">{childMap[i.child_id] || '—'}</td>
                 <td className="px-4 py-3 text-[13px] text-[#0A0A0A]">{i.vaccine_name}</td>
                 <td className="px-4 py-3 text-[12px] text-[#666666]">{i.dose_number ? `Dose ${i.dose_number}` : '—'}</td>

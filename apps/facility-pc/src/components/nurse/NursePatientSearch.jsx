@@ -38,7 +38,7 @@ export default function NursePatientSearch({ onSelect }) {
   return (
     <div>
       <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#2E7A5D] transition-colors">
+        <div className="flex-1 flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#2E5B47] transition-colors">
           <Search size={17} className="text-[#A0A0A0] flex-shrink-0" />
           <input
             value={query}
@@ -56,7 +56,7 @@ export default function NursePatientSearch({ onSelect }) {
         <button
           onClick={handleSearch}
           disabled={loading || !query.trim()}
-          className="h-12 px-5 bg-[#2E7A5D] text-white text-[13px] font-bold rounded-[16px] disabled:opacity-50 active:scale-[0.97] transition-all shadow-green-glow"
+          className="h-12 px-5 bg-[#2E5B47] text-white text-[13px] font-bold rounded-[16px] disabled:opacity-50 active:scale-[0.97] transition-all shadow-green-glow"
         >
           {loading ? '...' : 'Search'}
         </button>
@@ -75,10 +75,10 @@ export default function NursePatientSearch({ onSelect }) {
                 <button
                   key={p.id}
                   onClick={() => onSelect(p)}
-                  className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-all shadow-card hover:border-[#2E7A5D]/40"
+                  className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-all shadow-card hover:border-[#2E5B47]/40"
                 >
-                  <div className="w-10 h-10 rounded-[12px] bg-[#0047FF]/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-[13px] font-extrabold text-[#0047FF]">
+                  <div className="w-10 h-10 rounded-[12px] bg-[#2E5B47]/10 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[13px] font-extrabold text-[#2E5B47]">
                       {p.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)}
                     </span>
                   </div>
@@ -88,7 +88,7 @@ export default function NursePatientSearch({ onSelect }) {
                       {[p.anc_number, p.phone, p.county].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2.5 py-1 rounded-full flex-shrink-0">
+                  <span className="text-[11px] font-semibold text-[#2E5B47] bg-[#2E5B47]/10 px-2.5 py-1 rounded-full flex-shrink-0">
                     Open →
                   </span>
                 </button>

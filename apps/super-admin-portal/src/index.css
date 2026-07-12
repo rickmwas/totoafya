@@ -6,15 +6,16 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 240 10% 98%; /* #FAFAFA */
+    --foreground: 240 10% 3.9%;
     --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    --primary: 243 75% 59%; /* #4F46E5 */
   }
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #F5F5F7;
+  background-color: #FAFAFA;
   color: #0A0A0A;
   margin: 0;
   -webkit-font-smoothing: antialiased;

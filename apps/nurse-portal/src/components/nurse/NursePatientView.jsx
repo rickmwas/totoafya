@@ -39,7 +39,7 @@ export default function NursePatientView({ patient, onBack }) {
   };
 
   const riskColor = patient.risk_level === 'critical' ? '#E51010' :
-    patient.risk_level === 'high' ? '#F9A825' : '#2E7A5D';
+    patient.risk_level === 'high' ? '#F9A825' : '#0F4C81';
 
   return (
     <div>
@@ -69,7 +69,7 @@ export default function NursePatientView({ patient, onBack }) {
             {patient.risk_level || 'low'} risk
           </div>
         </div>
-        <div className="mt-4 pt-4 border-t border-[#F5F5F7] grid grid-cols-3 gap-3 text-center">
+        <div className="mt-4 pt-4 border-t border-[#F4F6F8] grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-[10px] uppercase tracking-wide text-[#A0A0A0] font-bold">Status</p>
             <p className="text-[13px] font-bold text-[#0A0A0A] mt-0.5 capitalize">{patient.pregnancy_status?.replace('_', ' ') || '—'}</p>
@@ -93,7 +93,7 @@ export default function NursePatientView({ patient, onBack }) {
             onClick={() => setTab(t.key)}
             className={cn(
               'flex-1 py-2.5 rounded-[12px] text-[12px] font-bold transition-all',
-              tab === t.key ? 'bg-[#2E7A5D] text-white shadow-green-glow' : 'text-[#666666]'
+              tab === t.key ? 'bg-[#0F4C81] text-white shadow-green-glow' : 'text-[#666666]'
             )}
           >
             {t.label}
@@ -126,7 +126,7 @@ export default function NursePatientView({ patient, onBack }) {
                 <div className="bg-white rounded-[20px] border border-[#E5E5E5] p-4">
                   <p className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] mb-3">Recent ANC Visits</p>
                   {ancVisits.slice(0, 3).map(v => (
-                    <div key={v.id} className="flex items-center justify-between py-2 border-b border-[#F5F5F7] last:border-0">
+                    <div key={v.id} className="flex items-center justify-between py-2 border-b border-[#F4F6F8] last:border-0">
                       <div>
                         <p className="text-[13px] font-bold text-[#0A0A0A]">Visit #{v.visit_number || '—'}</p>
                         <p className="text-[11px] text-[#A0A0A0]">{v.visit_date} · {v.facility || '—'}</p>

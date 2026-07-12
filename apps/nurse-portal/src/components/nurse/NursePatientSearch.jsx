@@ -203,7 +203,7 @@ export default function NursePatientSearch({ onSelect }) {
   return (
     <div>
       <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#2E7A5D] transition-colors">
+        <div className="flex-1 flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#0F4C81] transition-colors">
           <Search size={17} className="text-[#A0A0A0] flex-shrink-0" />
           <input
             value={query}
@@ -221,7 +221,7 @@ export default function NursePatientSearch({ onSelect }) {
         <button
           onClick={handleSearch}
           disabled={loading || !query.trim()}
-          className="h-12 px-5 bg-[#2E7A5D] text-white text-[13px] font-bold rounded-[16px] disabled:opacity-50 active:scale-[0.97] transition-all shadow-green-glow"
+          className="h-12 px-5 bg-[#0F4C81] text-white text-[13px] font-bold rounded-[16px] disabled:opacity-50 active:scale-[0.97] transition-all shadow-green-glow"
         >
           {loading ? '...' : 'Search'}
         </button>
@@ -247,7 +247,7 @@ export default function NursePatientSearch({ onSelect }) {
                 <button
                   key={p.id}
                   onClick={() => onSelect(p)}
-                  className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-all shadow-card hover:border-[#2E7A5D]/40"
+                  className="bg-white rounded-[20px] border border-[#E5E5E5] p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-all shadow-card hover:border-[#0F4C81]/40"
                 >
                   <div className="w-10 h-10 rounded-[12px] bg-[#006B5F]/10 flex items-center justify-center flex-shrink-0">
                     <span className="text-[13px] font-extrabold text-[#006B5F]">
@@ -260,7 +260,7 @@ export default function NursePatientSearch({ onSelect }) {
                       {[p.anc_number, p.phone, p.county].filter(Boolean).join(' · ')}
                     </p>
                   </div>
-                  <span className="text-[11px] font-semibold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2.5 py-1 rounded-full flex-shrink-0">
+                  <span className="text-[11px] font-semibold text-[#0F4C81] bg-[#0F4C81]/10 px-2.5 py-1 rounded-full flex-shrink-0">
                     Open →
                   </span>
                 </button>
@@ -281,7 +281,7 @@ export default function NursePatientSearch({ onSelect }) {
               {onboardingStep === 'form' && (
                 <button
                   onClick={() => { setShowOnboard(false); setError(''); }}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F5F5F7] text-[#666666] hover:bg-[#E5E5E5]"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F4F6F8] text-[#666666] hover:bg-[#E5E5E5]"
                 >
                   <X size={15} />
                 </button>
@@ -300,7 +300,7 @@ export default function NursePatientSearch({ onSelect }) {
 
                   {/* Section 1: Caregiver Details */}
                   <div>
-                    <h3 className="text-[12px] font-extrabold text-[#2E7A5D] uppercase tracking-wider border-b border-[#E5E5E5] pb-1.5 mb-4">1. Caregiver Profile</h3>
+                    <h3 className="text-[12px] font-extrabold text-[#0F4C81] uppercase tracking-wider border-b border-[#E5E5E5] pb-1.5 mb-4">1. Caregiver Profile</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
@@ -311,7 +311,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.full_name}
                           onChange={e => setCaregiver(c => ({ ...c, full_name: e.target.value }))}
                           placeholder="Mother / Caregiver Name"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -322,7 +322,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.phone}
                           onChange={e => setCaregiver(c => ({ ...c, phone: e.target.value }))}
                           placeholder="e.g. 0712345678"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -333,7 +333,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.national_id}
                           onChange={e => setCaregiver(c => ({ ...c, national_id: e.target.value }))}
                           placeholder="ID Number (Required if no ANC)"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -344,7 +344,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.anc_number}
                           onChange={e => setCaregiver(c => ({ ...c, anc_number: e.target.value }))}
                           placeholder="ANC-XXXX (Required if no ID)"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -353,7 +353,7 @@ export default function NursePatientSearch({ onSelect }) {
                         <select
                           value={caregiver.caregiver_type}
                           onChange={e => setCaregiver(c => ({ ...c, caregiver_type: e.target.value }))}
-                          className="h-11 px-3 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         >
                           <option value="mother">Mother</option>
                           <option value="father">Father</option>
@@ -366,7 +366,7 @@ export default function NursePatientSearch({ onSelect }) {
                         <select
                           value={caregiver.blood_group}
                           onChange={e => setCaregiver(c => ({ ...c, blood_group: e.target.value }))}
-                          className="h-11 px-3 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         >
                           <option value="Unknown">Unknown</option>
                           <option value="A+">A+</option>
@@ -387,7 +387,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.county}
                           onChange={e => setCaregiver(c => ({ ...c, county: e.target.value }))}
                           placeholder="e.g. Nairobi"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -396,7 +396,7 @@ export default function NursePatientSearch({ onSelect }) {
                         <select
                           value={caregiver.pregnancy_status}
                           onChange={e => setCaregiver(c => ({ ...c, pregnancy_status: e.target.value, lmp: e.target.value !== 'pregnant' ? '' : c.lmp }))}
-                          className="h-11 px-3 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         >
                           <option value="pregnant">Pregnant</option>
                           <option value="postpartum">Postpartum</option>
@@ -411,7 +411,7 @@ export default function NursePatientSearch({ onSelect }) {
                             type="date"
                             value={caregiver.lmp}
                             onChange={e => setCaregiver(c => ({ ...c, lmp: e.target.value }))}
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
                       )}
@@ -425,7 +425,7 @@ export default function NursePatientSearch({ onSelect }) {
                           value={caregiver.pin_code}
                           onChange={e => setCaregiver(c => ({ ...c, pin_code: e.target.value.replace(/\D/g, '') }))}
                           placeholder="e.g. 1234"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] font-mono text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] font-mono text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                         />
                       </div>
                     </div>
@@ -439,15 +439,15 @@ export default function NursePatientSearch({ onSelect }) {
                         id="addChildCheckbox"
                         checked={addChild}
                         onChange={e => setAddChild(e.target.checked)}
-                        className="w-4.5 h-4.5 accent-[#2E7A5D] rounded cursor-pointer"
+                        className="w-4.5 h-4.5 accent-[#0F4C81] rounded cursor-pointer"
                       />
-                      <label htmlFor="addChildCheckbox" className="text-[13px] font-extrabold text-[#2E7A5D] uppercase tracking-wider cursor-pointer">
+                      <label htmlFor="addChildCheckbox" className="text-[13px] font-extrabold text-[#0F4C81] uppercase tracking-wider cursor-pointer">
                         2. Onboard Child Profile (Optional)
                       </label>
                     </div>
 
                     {addChild && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-[#E5E5E5] p-4 rounded-[16px] bg-[#F5F5F7]/30 animate-in fade-in duration-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-[#E5E5E5] p-4 rounded-[16px] bg-[#F4F6F8]/30 animate-in fade-in duration-200">
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Child Name *</label>
                           <input
@@ -456,7 +456,7 @@ export default function NursePatientSearch({ onSelect }) {
                             value={child.full_name}
                             onChange={e => setChild(c => ({ ...c, full_name: e.target.value }))}
                             placeholder="Child Full Name"
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
 
@@ -467,7 +467,7 @@ export default function NursePatientSearch({ onSelect }) {
                             required={addChild}
                             value={child.date_of_birth}
                             onChange={e => setChild(c => ({ ...c, date_of_birth: e.target.value }))}
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
 
@@ -476,7 +476,7 @@ export default function NursePatientSearch({ onSelect }) {
                           <select
                             value={child.gender}
                             onChange={e => setChild(c => ({ ...c, gender: e.target.value }))}
-                            className="h-11 px-3 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           >
                             <option value="female">Female</option>
                             <option value="male">Male</option>
@@ -491,7 +491,7 @@ export default function NursePatientSearch({ onSelect }) {
                             value={child.birth_weight_kg}
                             onChange={e => setChild(c => ({ ...c, birth_weight_kg: e.target.value }))}
                             placeholder="e.g. 3.2"
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
 
@@ -503,7 +503,7 @@ export default function NursePatientSearch({ onSelect }) {
                             value={child.birth_height_cm}
                             onChange={e => setChild(c => ({ ...c, birth_height_cm: e.target.value }))}
                             placeholder="e.g. 50"
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
 
@@ -514,7 +514,7 @@ export default function NursePatientSearch({ onSelect }) {
                             value={child.gestational_age_weeks}
                             onChange={e => setChild(c => ({ ...c, gestational_age_weeks: e.target.value }))}
                             placeholder="e.g. 40"
-                            className="h-11 px-3.5 bg-[#F5F5F7] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E7A5D] focus:bg-white transition-all"
+                            className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
                           />
                         </div>
                       </div>
@@ -525,14 +525,14 @@ export default function NursePatientSearch({ onSelect }) {
                     <button
                       type="button"
                       onClick={() => setShowOnboard(false)}
-                      className="px-5 h-11 border border-[#E5E5E5] text-[#666666] text-[13px] font-semibold rounded-[12px] hover:bg-[#F5F5F7] active:scale-[0.98] transition-all"
+                      className="px-5 h-11 border border-[#E5E5E5] text-[#666666] text-[13px] font-semibold rounded-[12px] hover:bg-[#F4F6F8] active:scale-[0.98] transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="px-6 h-11 bg-[#2E7A5D] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#235C45] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-green-glow"
+                      className="px-6 h-11 bg-[#0F4C81] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#235C45] disabled:opacity-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 shadow-green-glow"
                     >
                       {submitting ? 'Registering...' : 'Register Family Unit'}
                     </button>
@@ -540,7 +540,7 @@ export default function NursePatientSearch({ onSelect }) {
                 </form>
               ) : (
                 <div className="flex flex-col items-center py-6 text-center">
-                  <div className="w-16 h-16 bg-[#2E7A5D]/10 text-[#2E7A5D] rounded-full flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 bg-[#0F4C81]/10 text-[#0F4C81] rounded-full flex items-center justify-center mb-6">
                     <CheckCircle2 size={36} />
                   </div>
                   
@@ -549,8 +549,8 @@ export default function NursePatientSearch({ onSelect }) {
                     The caregiver has been successfully registered. Share the credentials below for PWA/Native mobile sign-in.
                   </p>
 
-                  <div className="w-full max-w-md bg-[#F7F5F0] border border-[#2E7A5D]/20 rounded-[20px] p-6 shadow-sm mb-8 flex flex-col gap-4 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-[#2E7A5D]/10 text-[#2E7A5D] text-[9px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-bl-[12px]">
+                  <div className="w-full max-w-md bg-[#F7F5F0] border border-[#0F4C81]/20 rounded-[20px] p-6 shadow-sm mb-8 flex flex-col gap-4 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-[#0F4C81]/10 text-[#0F4C81] text-[9px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-bl-[12px]">
                       Security Pass
                     </div>
                     
@@ -569,13 +569,13 @@ export default function NursePatientSearch({ onSelect }) {
                     <div className="grid grid-cols-2 gap-4 border-t border-[#E5E5E5]/50 pt-4">
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Sign-in ID</p>
-                        <p className="text-[16px] font-extrabold text-[#2E7A5D] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
+                        <p className="text-[16px] font-extrabold text-[#0F4C81] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
                           {credentials?.identifier}
                         </p>
                       </div>
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Security PIN</p>
-                        <p className="text-[16px] font-extrabold text-[#2E7A5D] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
+                        <p className="text-[16px] font-extrabold text-[#0F4C81] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
                           {credentials?.pin}
                         </p>
                       </div>
@@ -585,18 +585,18 @@ export default function NursePatientSearch({ onSelect }) {
                   <div className="w-full max-w-md text-left bg-white border border-[#E5E5E5] rounded-[16px] p-4 text-[12px] text-[#555555] flex flex-col gap-2.5">
                     <p className="font-bold text-[#0A0A0A]">Sign-in Guide / Maelezo ya Kuingia:</p>
                     <div className="flex gap-2">
-                      <ArrowRight size={13} className="text-[#2E7A5D] flex-shrink-0 mt-0.5" />
+                      <ArrowRight size={13} className="text-[#0F4C81] flex-shrink-0 mt-0.5" />
                       <p><strong>EN:</strong> Open the PWA, enter the Sign-in ID above (National ID or ANC Number) and the Security PIN to activate your profile.</p>
                     </div>
                     <div className="flex gap-2">
-                      <ArrowRight size={13} className="text-[#2E7A5D] flex-shrink-0 mt-0.5" />
+                      <ArrowRight size={13} className="text-[#0F4C81] flex-shrink-0 mt-0.5" />
                       <p><strong>SW:</strong> Fungua PWA, weka Kitambulisho cha Kuingia hapo juu (Kitambulisho cha Taifa au Nambari ya ANC) na PIN ya Usalama ili kuwezesha wasifu wako.</p>
                     </div>
                   </div>
 
                   <button
                     onClick={closeOnboarding}
-                    className="mt-8 px-8 h-12 bg-[#2E7A5D] text-white text-[14px] font-bold rounded-[14px] hover:bg-[#235C45] active:scale-[0.98] transition-all shadow-green-glow"
+                    className="mt-8 px-8 h-12 bg-[#0F4C81] text-white text-[14px] font-bold rounded-[14px] hover:bg-[#235C45] active:scale-[0.98] transition-all shadow-green-glow"
                   >
                     Finish & Close
                   </button>

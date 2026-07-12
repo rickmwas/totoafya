@@ -35,8 +35,8 @@ export default function FacilityBilling({ data }) {
         {/* Current Usage Card */}
         <div className="col-span-1 lg:col-span-2 bg-white rounded-[24px] border border-[#E5E5E5] p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-[#0047FF]/10 flex items-center justify-center">
-              <CreditCard size={20} className="text-[#0047FF]" />
+            <div className="w-10 h-10 rounded-full bg-[#2E5B47]/10 flex items-center justify-center">
+              <CreditCard size={20} className="text-[#2E5B47]" />
             </div>
             <div>
               <h2 className="text-[18px] font-bold text-[#0A0A0A]">Current Subscription</h2>
@@ -61,7 +61,7 @@ export default function FacilityBilling({ data }) {
               <div 
                 className={cn(
                   "h-full rounded-full transition-all duration-500",
-                  isAtLimit ? "bg-rose-500" : isNearLimit ? "bg-amber-400" : "bg-[#0047FF]"
+                  isAtLimit ? "bg-rose-500" : isNearLimit ? "bg-amber-400" : "bg-[#2E5B47]"
                 )}
                 style={{ width: `${usagePercentage}%` }}
               />
@@ -89,7 +89,7 @@ export default function FacilityBilling({ data }) {
         </div>
 
         {/* Upgrade Card */}
-        <div className="col-span-1 bg-gradient-to-br from-[#0047FF] to-[#002FB3] rounded-[24px] p-6 text-white shadow-xl shadow-blue-900/20 flex flex-col">
+        <div className="col-span-1 bg-gradient-to-br from-[#2E5B47] to-[#002FB3] rounded-[24px] p-6 text-white shadow-xl shadow-blue-900/20 flex flex-col">
           <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6 backdrop-blur-sm">
             <Zap size={24} className="text-white" />
           </div>
@@ -110,7 +110,7 @@ export default function FacilityBilling({ data }) {
             </li>
           </ul>
 
-          <button className="w-full py-3.5 bg-white text-[#0047FF] font-bold text-[14px] rounded-xl hover:bg-blue-50 transition-colors active:scale-95 shadow-lg">
+          <button className="w-full py-3.5 bg-white text-[#2E5B47] font-bold text-[14px] rounded-xl hover:bg-blue-50 transition-colors active:scale-95 shadow-lg">
             Upgrade to Premium
           </button>
         </div>

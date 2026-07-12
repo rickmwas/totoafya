@@ -42,16 +42,16 @@ export default function FacilityChildren({ children, growthRecords }) {
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A0A0A0]" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search by name..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF]" />
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47]" />
         </div>
         <select value={filterGender} onChange={e => setFilterGender(e.target.value)}
-          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF]">
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47]">
           <option value="all">All Genders</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
         <select value={filterHealth} onChange={e => setFilterHealth(e.target.value)}
-          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF]">
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47]">
           <option value="all">All Health Status</option>
           <option value="healthy">Healthy</option>
           <option value="monitor">Monitor</option>
@@ -77,13 +77,13 @@ export default function FacilityChildren({ children, growthRecords }) {
                   <td className="px-4 py-3 text-[13px] font-semibold text-[#0A0A0A]">{c.full_name}</td>
                   <td className="px-4 py-3 text-[12px] text-[#666666]">{getAge(c.date_of_birth)}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${c.gender === 'male' ? 'bg-[#0047FF]/10 text-[#0047FF]' : 'bg-[#D946A8]/10 text-[#D946A8]'}`}>
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${c.gender === 'male' ? 'bg-[#2E5B47]/10 text-[#2E5B47]' : 'bg-[#D946A8]/10 text-[#D946A8]'}`}>
                       {c.gender}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                      c.health_status === 'healthy' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' :
+                      c.health_status === 'healthy' ? 'bg-[#2E5B47]/10 text-[#2E5B47]' :
                       c.health_status === 'critical' ? 'bg-[#E51010]/10 text-[#E51010]' :
                       c.health_status === 'at_risk' ? 'bg-[#E51010]/10 text-[#E51010]' : 'bg-[#F9A825]/10 text-[#F9A825]'
                     }`}>{c.health_status || 'healthy'}</span>
@@ -93,7 +93,7 @@ export default function FacilityChildren({ children, growthRecords }) {
                   <td className="px-4 py-3">
                     {g?.nutrition_status ? (
                       <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                        g.nutrition_status === 'normal' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' :
+                        g.nutrition_status === 'normal' ? 'bg-[#2E5B47]/10 text-[#2E5B47]' :
                         g.nutrition_status === 'sam' ? 'bg-[#E51010]/10 text-[#E51010]' : 'bg-[#F9A825]/10 text-[#F9A825]'
                       }`}>{g.nutrition_status}</span>
                     ) : '—'}

@@ -85,7 +85,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
       )}
 
       {selectedChild && (
-        <div className="bg-[#F5F5F7] rounded-[14px] px-4 py-3 text-[12px] text-[#666666]">
+        <div className="bg-[#F4F6F8] rounded-[14px] px-4 py-3 text-[12px] text-[#666666]">
           <span className="font-bold text-[#0A0A0A]">{selectedChild.full_name}</span>
           {selectedChild.date_of_birth && ` · ${calcAgeWeeks(selectedChild.date_of_birth)} weeks old`}
         </div>
@@ -112,7 +112,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
         <div className={cn('rounded-[14px] px-4 py-3 text-[13px] font-bold',
           parseFloat(form.muac_cm) < 11.5 ? 'bg-[#E51010]/10 text-[#E51010]' :
           parseFloat(form.muac_cm) < 12.5 ? 'bg-[#F9A825]/10 text-[#F9A825]' :
-          'bg-[#2E7A5D]/10 text-[#2E7A5D]'
+          'bg-[#0F4C81]/10 text-[#0F4C81]'
         )}>
           MUAC Status: {parseFloat(form.muac_cm) < 11.5 ? '⚠️ SAM — Refer immediately' :
             parseFloat(form.muac_cm) < 12.5 ? '⚠️ MAM — Monitor closely' : '✓ Normal'}

@@ -10,6 +10,22 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// Disable browser context menus (except inside input fields/textareas)
+window.addEventListener('contextmenu', (e) => {
+  const target = e.target;
+  const isInput = target.tagName === 'INPUT' || 
+                  target.tagName === 'TEXTAREA' || 
+                  target.isContentEditable;
+  if (!isInput) {
+    e.preventDefault();
+  }
+});
+
+// Prevent gesture zoom (pinch-to-zoom) on mobile Safari
+document.addEventListener('gesturestart', (e) => {
+  e.preventDefault();
+});
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <App />
 )

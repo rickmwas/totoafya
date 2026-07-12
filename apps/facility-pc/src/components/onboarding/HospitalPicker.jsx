@@ -82,7 +82,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
 
       {/* Main input */}
       <div className="relative">
-        <div className="flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#0047FF] transition-colors">
+        <div className="flex items-center gap-2 bg-white border border-[#E5E5E5] rounded-[16px] px-4 focus-within:border-[#2E5B47] transition-colors">
           <MapPin size={15} className="text-[#A0A0A0] flex-shrink-0" />
           <input
             type="text"
@@ -105,7 +105,7 @@ export default function HospitalPicker({ value, onChange, lang }) {
             {searchResults.map((h, i) => (
               <button key={i} onClick={() => selectHospital(h.name || h.display_name.split(',')[0])}
                 className="w-full px-4 py-3 text-left hover:bg-[#F5F5F7] flex items-center gap-3 border-b border-[#F5F5F7] last:border-0">
-                <MapPin size={13} className="text-[#0047FF] flex-shrink-0" />
+                <MapPin size={13} className="text-[#2E5B47] flex-shrink-0" />
                 <div>
                   <p className="text-[13px] font-semibold text-[#0A0A0A]">{h.name || h.display_name.split(',')[0]}</p>
                   <p className="text-[11px] text-[#A0A0A0] truncate max-w-[260px]">
@@ -122,15 +122,15 @@ export default function HospitalPicker({ value, onChange, lang }) {
       <button
         type="button"
         onClick={getNearbyHospitals}
-        className="flex items-center gap-2 self-start px-4 py-2 rounded-full bg-[#0047FF]/8 border border-[#0047FF]/20 active:scale-[0.97] transition-all"
+        className="flex items-center gap-2 self-start px-4 py-2 rounded-full bg-[#2E5B47]/8 border border-[#2E5B47]/20 active:scale-[0.97] transition-all"
       >
-        <Navigation size={13} className="text-[#0047FF]" />
-        <span className="text-[12px] font-bold text-[#0047FF]">
+        <Navigation size={13} className="text-[#2E5B47]" />
+        <span className="text-[12px] font-bold text-[#2E5B47]">
           {loading
             ? (lang === 'sw' ? 'Inatafuta...' : 'Finding nearby...')
             : (lang === 'sw' ? 'Tumia Eneo Langu' : 'Use My Location')}
         </span>
-        {loading && <Loader2 size={12} className="animate-spin text-[#0047FF]" />}
+        {loading && <Loader2 size={12} className="animate-spin text-[#2E5B47]" />}
       </button>
 
       {/* Location error */}
@@ -147,8 +147,8 @@ export default function HospitalPicker({ value, onChange, lang }) {
           {hospitals.map((h, i) => (
             <button key={i} onClick={() => selectHospital(h.name || h.display_name.split(',')[0])}
               className="w-full px-4 py-3 text-left hover:bg-[#F5F5F7] flex items-center gap-3 border-b border-[#F5F5F7] last:border-0 active:bg-[#F5F5F7]">
-              <div className="w-8 h-8 rounded-full bg-[#0047FF]/10 flex items-center justify-center flex-shrink-0">
-                <MapPin size={13} className="text-[#0047FF]" />
+              <div className="w-8 h-8 rounded-full bg-[#2E5B47]/10 flex items-center justify-center flex-shrink-0">
+                <MapPin size={13} className="text-[#2E5B47]" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-semibold text-[#0A0A0A]">{h.name || h.display_name.split(',')[0]}</p>

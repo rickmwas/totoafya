@@ -103,7 +103,7 @@ export default function NurseVaccineForm({ patient, children, onSaved }) {
           {children.map(c => (
             <button key={c.id} onClick={() => setSelectedChild(c)}
               className={cn('px-4 py-2 rounded-full text-[13px] font-semibold border-2 transition-all',
-                selectedChild?.id === c.id ? 'bg-[#2E7A5D] text-white border-[#2E7A5D]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
+                selectedChild?.id === c.id ? 'bg-[#2E5B47] text-white border-[#2E5B47]' : 'bg-white border-[#E5E5E5] text-[#666666]')}>
               {c.full_name}
             </button>
           ))}
@@ -114,12 +114,12 @@ export default function NurseVaccineForm({ patient, children, onSaved }) {
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0]">Date Given</label>
           <input type="date" value={givenDate} onChange={e => setGivenDate(e.target.value)}
-            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#2E7A5D]" />
+            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#2E5B47]" />
         </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0]">Facility</label>
           <input value={facility} onChange={e => setFacility(e.target.value)} placeholder="Facility name"
-            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#2E7A5D]" />
+            className="h-12 px-4 bg-white border border-[#E5E5E5] rounded-[14px] text-[14px] font-medium outline-none focus:border-[#2E5B47]" />
         </div>
       </div>
 
@@ -136,21 +136,21 @@ export default function NurseVaccineForm({ patient, children, onSaved }) {
                 disabled={given}
                 className={cn(
                   'flex items-center gap-3 p-3 rounded-[14px] border-2 text-left transition-all',
-                  given ? 'bg-[#2E7A5D]/5 border-[#2E7A5D]/30 opacity-60 cursor-default' :
-                  isSelected ? 'bg-[#2E7A5D]/8 border-[#2E7A5D]' :
+                  given ? 'bg-[#2E5B47]/5 border-[#2E5B47]/30 opacity-60 cursor-default' :
+                  isSelected ? 'bg-[#2E5B47]/8 border-[#2E5B47]' :
                   'bg-white border-[#E5E5E5] active:scale-[0.98]'
                 )}
               >
                 <div className={cn('w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2',
-                  given ? 'bg-[#2E7A5D] border-[#2E7A5D]' :
-                  isSelected ? 'bg-[#2E7A5D] border-[#2E7A5D]' : 'border-[#D0D0D0]')}>
+                  given ? 'bg-[#2E5B47] border-[#2E5B47]' :
+                  isSelected ? 'bg-[#2E5B47] border-[#2E5B47]' : 'border-[#D0D0D0]')}>
                   {(given || isSelected) && <Check size={12} className="text-white" strokeWidth={3} />}
                 </div>
                 <div className="flex-1">
-                  <p className={cn('text-[13px] font-bold', given ? 'text-[#2E7A5D]' : 'text-[#0A0A0A]')}>{v.name}</p>
+                  <p className={cn('text-[13px] font-bold', given ? 'text-[#2E5B47]' : 'text-[#0A0A0A]')}>{v.name}</p>
                   <p className="text-[10px] text-[#A0A0A0]">Week {v.age_weeks}</p>
                 </div>
-                {given && <span className="text-[10px] font-bold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2 py-0.5 rounded-full">Given</span>}
+                {given && <span className="text-[10px] font-bold text-[#2E5B47] bg-[#2E5B47]/10 px-2 py-0.5 rounded-full">Given</span>}
               </button>
             );
           })}
@@ -162,7 +162,7 @@ export default function NurseVaccineForm({ patient, children, onSaved }) {
         disabled={saving || selected.length === 0}
         className={cn(
           'h-14 rounded-full text-[15px] font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.97]',
-          saved ? 'bg-[#2E7A5D] text-white' : 'bg-[#2E7A5D] text-white shadow-green-glow disabled:opacity-50'
+          saved ? 'bg-[#2E5B47] text-white' : 'bg-[#2E5B47] text-white shadow-green-glow disabled:opacity-50'
         )}
       >
         {saved ? <><Check size={18} /> Saved!</> : saving ? 'Saving...' : `Mark ${selected.length || ''} Vaccine${selected.length !== 1 ? 's' : ''} Given`}

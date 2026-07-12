@@ -12,7 +12,7 @@ const ROLE_LABELS = {
 const ROLE_COLORS = {
   admin: 'bg-purple-50 text-purple-700 border-purple-200',
   charge_nurse: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  nurse: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  nurse: 'bg-teal-50 text-teal-700 border-emerald-200',
 };
 
 export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
@@ -103,7 +103,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#0047FF] hover:bg-[#003CE5] active:scale-95 text-white text-[13px] font-bold rounded-[12px] shadow-sm transition-all"
+          className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#2E5B47] hover:bg-[#003CE5] active:scale-95 text-white text-[13px] font-bold rounded-[12px] shadow-sm transition-all"
         >
           <UserPlus size={15} />
           Register Nurse
@@ -118,7 +118,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search nurses by name, email or badge..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] transition-all"
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] transition-all"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
               <tr key={n.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
                 <td className="px-6 py-4 text-[13px] font-semibold text-[#0A0A0A] whitespace-nowrap">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#0047FF]/10 text-[#0047FF] flex items-center justify-center font-bold text-[13px]">
+                    <div className="w-8 h-8 rounded-full bg-[#2E5B47]/10 text-[#2E5B47] flex items-center justify-center font-bold text-[13px]">
                       {n.full_name?.charAt(0)}
                     </div>
                     {n.full_name}
@@ -157,7 +157,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                 </td>
                 <td className="px-6 py-4">
                   {n.badge_token ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2.5 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2E5B47] bg-[#2E5B47]/10 px-2.5 py-0.5 rounded-full">
                       <BadgeCheck size={11} /> {n.badge_token}
                     </span>
                   ) : (
@@ -203,7 +203,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   placeholder="e.g. Nurse Jane Doe"
-                  className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                  className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                 />
               </div>
 
@@ -217,7 +217,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="e.g. jane.doe@totoafya.org"
-                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -227,7 +227,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                 <select
                   value={role}
                   onChange={e => setRole(e.target.value)}
-                  className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                  className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                 >
                   <option value="nurse">Staff Nurse</option>
                   <option value="charge_nurse">Charge Nurse</option>
@@ -246,7 +246,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                     value={pinCode}
                     onChange={e => setPinCode(e.target.value)}
                     placeholder="Used for clinic check-ins"
-                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                   />
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                     value={badgeToken}
                     onChange={e => setBadgeToken(e.target.value)}
                     placeholder="e.g. BDG-7749"
-                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                    className="w-full h-11 pl-10 pr-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                   />
                 </div>
                 <p className="text-[10px] text-[#A0A0A0]">Physical token ID for scanner integrations.</p>
@@ -270,7 +270,7 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 bg-[#0047FF] hover:bg-[#003CE5] disabled:opacity-50 active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px] flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[#2E5B47] hover:bg-[#003CE5] disabled:opacity-50 active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px] flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

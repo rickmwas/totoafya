@@ -29,7 +29,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
       <div className="px-5 py-5 border-b border-[#E5E5E5] flex items-center justify-between">
         <div className="flex flex-col gap-1.5 min-w-0 flex-1">
           <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-8 object-contain self-start" />
-          <p className="text-[9.5px] text-[#1B6B5A] font-bold truncate uppercase tracking-wider pl-0.5">{facilityName || 'Facility Portal'}</p>
+          <p className="text-[9.5px] text-[#2E5B47] font-bold truncate uppercase tracking-wider pl-0.5">{facilityName || 'Facility Portal'}</p>
         </div>
         {/* Close button on mobile */}
         <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] transition-colors">
@@ -47,14 +47,14 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
               onClick={() => setActiveTab(key)}
               className={cn(
                 'flex items-center gap-3 px-3 py-3 rounded-[12px] w-full text-left transition-all duration-150 min-h-[44px]',
-                active ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F5F5F7]'
+                active ? 'bg-[#2E5B47] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F5F5F7]'
               )}
             >
               <Icon size={17} strokeWidth={active ? 2.5 : 1.8} />
               <span className="text-[13px] font-semibold">{label}</span>
               {key === 'alerts' && alertCount > 0 && (
                 <span className={cn('ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                  active ? 'bg-white text-[#0047FF]' : 'bg-[#E51010] text-white')}>
+                  active ? 'bg-white text-[#2E5B47]' : 'bg-[#E51010] text-white')}>
                   {alertCount}
                 </span>
               )}

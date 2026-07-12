@@ -174,7 +174,7 @@ export default function SplashScreen({ onDone }) {
             className="w-2 h-2 rounded-full animate-pulse-dot" 
             style={{ 
               animationDelay: '0.4s',
-              background: 'radial-gradient(circle, #FFFFFF 0%, #1B6B5A 60%, rgba(27, 107, 90, 0) 100%)',
+              background: 'radial-gradient(circle, #FFFFFF 0%, #2E5B47 60%, rgba(27, 107, 90, 0) 100%)',
               boxShadow: '0 0 8px rgba(27, 107, 90, 0.8), 0 0 16px rgba(27, 107, 90, 0.4)',
               mixBlendMode: 'screen'
             }} 

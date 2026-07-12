@@ -13,8 +13,8 @@ export default function HealthMetricCard({
   onClick,
 }) {
   const statusColors = {
-    normal: '#2E7A5D',
-    good: '#2E7A5D',
+    normal: '#0F4C81',
+    good: '#0F4C81',
     warning: '#F9A825',
     danger: '#E51010',
     info: '#0047FF',

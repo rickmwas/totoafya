@@ -4,7 +4,7 @@ import db from '@/api/totoafyaClient';
 import { useToast } from '@/components/ui/use-toast';
 
 const SEVERITY_METRICS = {
-  low: { label: 'Low', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: HelpCircle },
+  low: { label: 'Low', color: 'bg-teal-50 text-teal-700 border-emerald-200', icon: HelpCircle },
   medium: { label: 'Medium', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: AlertCircle },
   high: { label: 'High', color: 'bg-orange-50 text-orange-700 border-orange-200', icon: AlertCircle },
   critical: { label: 'Critical', color: 'bg-rose-50 text-rose-700 border-rose-200', icon: AlertOctagon },
@@ -13,7 +13,7 @@ const SEVERITY_METRICS = {
 const STATUS_METRICS = {
   open: { label: 'Open', color: 'bg-slate-100 text-slate-700 border-slate-200', icon: Clock },
   in_progress: { label: 'Investigating', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Clock },
-  resolved: { label: 'Resolved', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+  resolved: { label: 'Resolved', color: 'bg-teal-50 text-teal-700 border-emerald-200', icon: CheckCircle2 },
 };
 
 export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh }) {
@@ -140,7 +140,7 @@ export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh 
         <div className="lg:col-span-5 order-1 lg:order-2">
           <div className="bg-white rounded-[20px] border border-[#E5E5E5] p-5 shadow-card sticky top-6">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-[#0047FF]/10 text-[#0047FF] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#2E5B47]/10 text-[#2E5B47] flex items-center justify-center">
                 <AlertCircle size={16} />
               </div>
               <h2 className="text-[16px] font-bold text-[#0A0A0A]">Raise a Concern</h2>
@@ -155,7 +155,7 @@ export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh 
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Immunization reports fail to download as PDF"
-                  className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                  className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                 />
               </div>
 
@@ -167,7 +167,7 @@ export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Provide step-by-step description of what happened, error messages, and context so the developers can resolve it quickly."
-                  className="p-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] focus:bg-white resize-none transition-all leading-relaxed"
+                  className="p-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] focus:bg-white resize-none transition-all leading-relaxed"
                 />
               </div>
 
@@ -178,7 +178,7 @@ export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh 
                     const active = severity === s;
                     const sevColor = active
                       ? s === 'low'
-                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                        ? 'bg-teal-500 text-white border-emerald-500 shadow-sm'
                         : s === 'medium'
                         ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
                         : s === 'high'
@@ -202,7 +202,7 @@ export default function FacilityDeveloperDesk({ concerns, facilityId, onRefresh 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 mt-2 bg-[#0047FF] hover:bg-[#003CE5] disabled:opacity-50 active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[12px] flex items-center justify-center gap-2 shadow-sm"
+                className="w-full h-12 mt-2 bg-[#2E5B47] hover:bg-[#003CE5] disabled:opacity-50 active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[12px] flex items-center justify-center gap-2 shadow-sm"
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

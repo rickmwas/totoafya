@@ -5,12 +5,12 @@ import { ChevronRight, AlertTriangle } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
 const GENDER = {
-  male:   { accent: '#1B6B5A', bg: '#E6F4F1', initial: 'bg-[#1B6B5A]', bar: 'bg-[#1B6B5A]' },
+  male:   { accent: '#2E5B47', bg: '#E6F4F1', initial: 'bg-[#2E5B47]', bar: 'bg-[#2E5B47]' },
   female: { accent: '#D946A8', bg: '#FFF0F9', initial: 'bg-[#D946A8]', bar: 'bg-[#D946A8]' },
 };
 
 const STATUS = {
-  healthy:  { label: 'Healthy', label_sw: 'Mzima', color: '#2E7A5D', bg: '#f0faf5' },
+  healthy:  { label: 'Healthy', label_sw: 'Mzima', color: '#2E5B47', bg: '#f0faf5' },
   monitor:  { label: 'Monitor', label_sw: 'Fuatilia', color: '#F9A825', bg: '#fffbeb' },
   at_risk:  { label: 'At Risk', label_sw: 'Hatarini', color: '#E51010', bg: '#fff5f5' },
   critical: { label: 'Critical', label_sw: 'Hali Mbaya', color: '#E51010', bg: '#fff5f5' },
@@ -74,7 +74,7 @@ export default function ChildCard({ child, nextVaccine, lastGrowth }) {
                 </div>
               )}
               {nextVaccine && (
-                <div className="flex-1 rounded-[12px] px-3 py-2 bg-[#F7F5F0]">
+                <div className="flex-1 rounded-[12px] px-3 py-2 bg-[#FAFBFB]">
                   <p className="text-[9px] tracking-[0.1em] uppercase font-bold text-[#A0A0A0] mb-0.5">
                     {lang === 'sw' ? 'Chanjo' : 'Vaccine'}
                   </p>

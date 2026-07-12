@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 const variants = {
   primary: 'bg-[#0047FF] text-white shadow-[0_8px_30px_rgba(0,71,255,0.25)] hover:shadow-[0_12px_40px_rgba(0,71,255,0.35)] hover:bg-[#0038CC]',
   secondary: 'bg-[#0A0A0A] text-white shadow-[0_4px_16px_rgba(0,0,0,0.12)] hover:bg-[#222222]',
-  ghost: 'bg-white text-[#0A0A0A] border border-[#E5E5E5] hover:bg-[#F5F5F7]',
+  ghost: 'bg-white text-[#0A0A0A] border border-[#E5E5E5] hover:bg-[#F4F6F8]',
   danger: 'bg-[#E51010] text-white shadow-[0_8px_30px_rgba(229,16,16,0.2)] hover:bg-[#CC0E0E]',
-  success: 'bg-[#2E7A5D] text-white shadow-[0_8px_30px_rgba(46,122,93,0.2)] hover:bg-[#266A4F]',
+  success: 'bg-[#0F4C81] text-white shadow-[0_8px_30px_rgba(46,122,93,0.2)] hover:bg-[#266A4F]',
   amber: 'bg-[#F9A825] text-[#0A0A0A] hover:bg-[#E09820]',
   outline: 'bg-transparent text-[#0047FF] border border-[#0047FF] hover:bg-[#0047FF]/5',
 };

@@ -5,12 +5,12 @@ import { ChevronRight, AlertTriangle } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
 const GENDER = {
-  male:   { accent: '#1B6B5A', bg: '#E6F4F1', initial: 'bg-[#1B6B5A]', bar: 'bg-[#1B6B5A]' },
+  male:   { accent: '#0F4C81', bg: '#E6F4F1', initial: 'bg-[#0F4C81]', bar: 'bg-[#0F4C81]' },
   female: { accent: '#D946A8', bg: '#FFF0F9', initial: 'bg-[#D946A8]', bar: 'bg-[#D946A8]' },
 };
 
 const STATUS = {
-  healthy:  { label: 'Healthy', label_sw: 'Mzima', color: '#2E7A5D', bg: '#f0faf5' },
+  healthy:  { label: 'Healthy', label_sw: 'Mzima', color: '#0F4C81', bg: '#f0faf5' },
   monitor:  { label: 'Monitor', label_sw: 'Fuatilia', color: '#F9A825', bg: '#fffbeb' },
   at_risk:  { label: 'At Risk', label_sw: 'Hatarini', color: '#E51010', bg: '#fff5f5' },
   critical: { label: 'Critical', label_sw: 'Hali Mbaya', color: '#E51010', bg: '#fff5f5' },

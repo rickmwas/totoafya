@@ -3,7 +3,7 @@ import { Search, UserPlus, X, Key, Shield, Mail, ArrowRight, CheckCircle2, Alert
 import db from '@/api/totoafyaClient';
 
 const RISK_COLORS = {
-  low: 'bg-[#2E7A5D]/10 text-[#2E7A5D]',
+  low: 'bg-[#2E5B47]/10 text-[#2E5B47]',
   medium: 'bg-[#F9A825]/10 text-[#F9A825]',
   high: 'bg-[#E51010]/10 text-[#E51010]',
   critical: 'bg-[#E51010]/10 text-[#E51010]',
@@ -188,7 +188,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#0047FF] hover:bg-[#003CE5] active:scale-95 text-white text-[13px] font-bold rounded-[12px] shadow-sm transition-all"
+          className="inline-flex items-center justify-center gap-2 h-10 px-4 bg-[#2E5B47] hover:bg-[#003CE5] active:scale-95 text-white text-[13px] font-bold rounded-[12px] shadow-sm transition-all"
         >
           <UserPlus size={15} />
           Onboard Caregiver
@@ -203,25 +203,25 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, ID or phone..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF] transition-all"
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#2E5B47] transition-all"
           />
         </div>
         <select value={filterRole} onChange={e => setFilterRole(e.target.value)}
-          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] cursor-pointer">
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] cursor-pointer">
           <option value="all">All Roles</option>
           <option value="mother">Mother</option>
           <option value="father">Father</option>
           <option value="guardian">Guardian</option>
         </select>
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] cursor-pointer">
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] cursor-pointer">
           <option value="all">All Status</option>
           <option value="pregnant">Pregnant</option>
           <option value="postpartum">Postpartum</option>
           <option value="not_pregnant">Not Pregnant</option>
         </select>
         <select value={filterRisk} onChange={e => setFilterRisk(e.target.value)}
-          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] cursor-pointer">
+          className="h-10 px-3 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] cursor-pointer">
           <option value="all">All Risk Levels</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -249,8 +249,8 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                 <td className="px-4 py-3 text-[12px] text-[#666666]">{m.phone || '—'}</td>
                 <td className="px-4 py-3">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
-                    m.pregnancy_status === 'pregnant' ? 'bg-[#0047FF]/10 text-[#0047FF]' :
-                    m.pregnancy_status === 'postpartum' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' : 'bg-[#F5F5F7] text-[#666666]'
+                    m.pregnancy_status === 'pregnant' ? 'bg-[#2E5B47]/10 text-[#2E5B47]' :
+                    m.pregnancy_status === 'postpartum' ? 'bg-[#2E5B47]/10 text-[#2E5B47]' : 'bg-[#F5F5F7] text-[#666666]'
                   }`}>{m.pregnancy_status}</span>
                 </td>
                 <td className="px-4 py-3">
@@ -300,7 +300,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
 
                 {/* Section 1: Caregiver */}
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[11px] tracking-[0.1em] font-extrabold text-[#0047FF] uppercase border-b border-[#F5F5F7] pb-1">1. Caregiver Details</h3>
+                  <h3 className="text-[11px] tracking-[0.1em] font-extrabold text-[#2E5B47] uppercase border-b border-[#F5F5F7] pb-1">1. Caregiver Details</h3>
                   
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-bold text-[#A0A0A0] uppercase tracking-wider px-0.5">Full Name *</label>
@@ -310,7 +310,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                       value={caregiver.full_name}
                       onChange={e => setCaregiver(c => ({ ...c, full_name: e.target.value }))}
                       placeholder="e.g. Mary Atieno"
-                      className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                      className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                     />
                   </div>
 
@@ -322,7 +322,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         value={caregiver.national_id}
                         onChange={e => setCaregiver(c => ({ ...c, national_id: e.target.value }))}
                         placeholder="ID number"
-                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -332,7 +332,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         value={caregiver.anc_number}
                         onChange={e => setCaregiver(c => ({ ...c, anc_number: e.target.value }))}
                         placeholder="ANC number"
-                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                       />
                     </div>
                   </div>
@@ -343,7 +343,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                       <select
                         value={caregiver.caregiver_type}
                         onChange={e => setCaregiver(c => ({ ...c, caregiver_type: e.target.value }))}
-                        className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all cursor-pointer"
+                        className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all cursor-pointer"
                       >
                         <option value="mother">Mother</option>
                         <option value="father">Father</option>
@@ -357,7 +357,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         value={caregiver.phone}
                         onChange={e => setCaregiver(c => ({ ...c, phone: e.target.value }))}
                         placeholder="e.g. 0712345678"
-                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                       />
                     </div>
                   </div>
@@ -368,7 +368,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                       <select
                         value={caregiver.pregnancy_status}
                         onChange={e => setCaregiver(c => ({ ...c, pregnancy_status: e.target.value, lmp: e.target.value !== 'pregnant' ? '' : c.lmp }))}
-                        className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all cursor-pointer"
+                        className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all cursor-pointer"
                       >
                         <option value="pregnant">Pregnant</option>
                         <option value="postpartum">Postpartum</option>
@@ -382,7 +382,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                           type="date"
                           value={caregiver.lmp}
                           onChange={e => setCaregiver(c => ({ ...c, lmp: e.target.value }))}
-                          className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                          className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                         />
                       </div>
                     ) : (
@@ -391,7 +391,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         <select
                           value={caregiver.blood_group}
                           onChange={e => setCaregiver(c => ({ ...c, blood_group: e.target.value }))}
-                          className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all cursor-pointer"
+                          className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all cursor-pointer"
                         >
                           <option value="Unknown">Unknown</option>
                           <option value="A+">A+</option>
@@ -414,7 +414,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         type="text"
                         value={caregiver.county}
                         onChange={e => setCaregiver(c => ({ ...c, county: e.target.value }))}
-                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -426,7 +426,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                         value={caregiver.pin_code}
                         onChange={e => setCaregiver(c => ({ ...c, pin_code: e.target.value.replace(/\D/g, '') }))}
                         placeholder="e.g. 1234"
-                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] font-mono text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                        className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] font-mono text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                       />
                     </div>
                   </div>
@@ -440,9 +440,9 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                       id="addChildCheckbox"
                       checked={addChild}
                       onChange={e => setAddChild(e.target.checked)}
-                      className="w-4 h-4 accent-[#0047FF] rounded cursor-pointer"
+                      className="w-4 h-4 accent-[#2E5B47] rounded cursor-pointer"
                     />
-                    <label htmlFor="addChildCheckbox" className="text-[11px] tracking-[0.1em] font-extrabold text-[#0047FF] uppercase cursor-pointer select-none">
+                    <label htmlFor="addChildCheckbox" className="text-[11px] tracking-[0.1em] font-extrabold text-[#2E5B47] uppercase cursor-pointer select-none">
                       2. Add Child Profile (Optional)
                     </label>
                   </div>
@@ -457,7 +457,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                           value={child.full_name}
                           onChange={e => setChild(c => ({ ...c, full_name: e.target.value }))}
                           placeholder="e.g. Imani Atieno"
-                          className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                          className="h-11 px-3.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                         />
                       </div>
 
@@ -469,7 +469,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                             required={addChild}
                             value={child.date_of_birth}
                             onChange={e => setChild(c => ({ ...c, date_of_birth: e.target.value }))}
-                            className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                            className="h-11 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -477,7 +477,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                           <select
                             value={child.gender}
                             onChange={e => setChild(c => ({ ...c, gender: e.target.value }))}
-                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all cursor-pointer"
+                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all cursor-pointer"
                           >
                             <option value="female">Female</option>
                             <option value="male">Male</option>
@@ -494,7 +494,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                             value={child.birth_weight_kg}
                             onChange={e => setChild(c => ({ ...c, birth_weight_kg: e.target.value }))}
                             placeholder="3.2"
-                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -505,7 +505,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                             value={child.birth_height_cm}
                             onChange={e => setChild(c => ({ ...c, birth_height_cm: e.target.value }))}
                             placeholder="50"
-                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -515,7 +515,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                             value={child.gestational_age_weeks}
                             onChange={e => setChild(c => ({ ...c, gestational_age_weeks: e.target.value }))}
                             placeholder="40"
-                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#0047FF] focus:bg-white transition-all"
+                            className="h-11 px-2.5 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] outline-none focus:border-[#2E5B47] focus:bg-white transition-all"
                           />
                         </div>
                       </div>
@@ -527,7 +527,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full h-12 bg-[#0047FF] hover:bg-[#003CE5] active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
+                    className="w-full h-12 bg-[#2E5B47] hover:bg-[#003CE5] active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px] flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                   >
                     {submitting ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -546,7 +546,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
               </form>
             ) : (
               <div className="flex-grow flex flex-col items-center justify-center text-center py-8">
-                <div className="w-16 h-16 bg-[#0047FF]/10 text-[#0047FF] rounded-full flex items-center justify-center mb-6">
+                <div className="w-16 h-16 bg-[#2E5B47]/10 text-[#2E5B47] rounded-full flex items-center justify-center mb-6">
                   <CheckCircle2 size={36} />
                 </div>
                 
@@ -555,8 +555,8 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                   Caregiver is registered under facility records. Copy credentials below for their first-time login activation.
                 </p>
 
-                <div className="w-full max-w-sm bg-[#F7F5F0] border border-[#0047FF]/20 rounded-[20px] p-6 shadow-sm mb-8 flex flex-col gap-4 relative overflow-hidden text-left">
-                  <div className="absolute top-0 right-0 bg-[#0047FF]/10 text-[#0047FF] text-[9px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-bl-[12px]">
+                <div className="w-full max-w-sm bg-[#FAFBFB] border border-[#2E5B47]/20 rounded-[20px] p-6 shadow-sm mb-8 flex flex-col gap-4 relative overflow-hidden text-left">
+                  <div className="absolute top-0 right-0 bg-[#2E5B47]/10 text-[#2E5B47] text-[9px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-bl-[12px]">
                     Security Pass
                   </div>
                   
@@ -575,13 +575,13 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                   <div className="grid grid-cols-2 gap-4 border-t border-[#E5E5E5]/50 pt-4">
                     <div className="flex flex-col gap-0.5">
                       <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Login ID</p>
-                      <p className="text-[15px] font-extrabold text-[#0047FF] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5] w-fit">
+                      <p className="text-[15px] font-extrabold text-[#2E5B47] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5] w-fit">
                         {credentials?.identifier}
                       </p>
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">PIN Code</p>
-                      <p className="text-[15px] font-extrabold text-[#0047FF] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5] w-fit">
+                      <p className="text-[15px] font-extrabold text-[#2E5B47] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5] w-fit">
                         {credentials?.pin}
                       </p>
                     </div>
@@ -591,18 +591,18 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
                 <div className="w-full max-w-sm text-left bg-white border border-[#E5E5E5] rounded-[16px] p-4 text-[12px] text-[#555555] flex flex-col gap-2">
                   <p className="font-bold text-[#0A0A0A]">How to Sign-in / Jinsi ya Kuingia:</p>
                   <div className="flex gap-2 text-[11px] leading-relaxed">
-                    <ArrowRight size={13} className="text-[#0047FF] flex-shrink-0 mt-0.5" />
+                    <ArrowRight size={13} className="text-[#2E5B47] flex-shrink-0 mt-0.5" />
                     <p><strong>EN:</strong> Log into the mother portal PWA or app using the login ID and PIN code above to finalize profile linking.</p>
                   </div>
                   <div className="flex gap-2 text-[11px] leading-relaxed">
-                    <ArrowRight size={13} className="text-[#0047FF] flex-shrink-0 mt-0.5" />
+                    <ArrowRight size={13} className="text-[#2E5B47] flex-shrink-0 mt-0.5" />
                     <p><strong>SW:</strong> Ingia kwenye PWA ya mama au app ukitumia kitambulisho cha kuingia na PIN hapo juu ili kuunganisha wasifu.</p>
                   </div>
                 </div>
 
                 <button
                   onClick={closeDrawer}
-                  className="mt-8 w-full max-w-sm h-12 bg-[#0047FF] hover:bg-[#003CE5] active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px]"
+                  className="mt-8 w-full max-w-sm h-12 bg-[#2E5B47] hover:bg-[#003CE5] active:scale-[0.98] transition-all text-white text-[14px] font-bold rounded-[14px]"
                 >
                   Finish & Close
                 </button>

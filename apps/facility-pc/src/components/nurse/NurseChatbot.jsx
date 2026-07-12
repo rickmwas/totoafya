@@ -86,8 +86,8 @@ AI:`;
     <div className="flex flex-col h-[500px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 flex-shrink-0">
-        <div className="w-7 h-7 rounded-full bg-[#2E7A5D]/10 flex items-center justify-center">
-          <Bot size={14} className="text-[#2E7A5D]" />
+        <div className="w-7 h-7 rounded-full bg-[#2E5B47]/10 flex items-center justify-center">
+          <Bot size={14} className="text-[#2E5B47]" />
         </div>
         <div>
           <p className="text-[13px] font-bold text-[#0A0A0A] leading-none">Clinical AI</p>
@@ -100,14 +100,14 @@ AI:`;
         {messages.map((msg, i) => (
           <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
             {msg.role === 'assistant' && (
-              <div className="w-6 h-6 rounded-full bg-[#2E7A5D]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Bot size={12} className="text-[#2E7A5D]" />
+              <div className="w-6 h-6 rounded-full bg-[#2E5B47]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot size={12} className="text-[#2E5B47]" />
               </div>
             )}
             <div className={cn(
               'max-w-[80%] rounded-[16px] px-4 py-2.5 text-[13px] leading-relaxed',
               msg.role === 'user'
-                ? 'bg-[#2E7A5D] text-white rounded-tr-[4px]'
+                ? 'bg-[#2E5B47] text-white rounded-tr-[4px]'
                 : 'bg-[#F5F5F7] text-[#0A0A0A] rounded-tl-[4px]'
             )}>
               {msg.role === 'assistant' ? (
@@ -121,7 +121,7 @@ AI:`;
               )}
             </div>
             {msg.role === 'user' && (
-              <div className="w-6 h-6 rounded-full bg-[#2E7A5D] flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 mt-0.5">
                 <User size={12} className="text-white" />
               </div>
             )}
@@ -129,8 +129,8 @@ AI:`;
         ))}
         {loading && (
           <div className="flex gap-2 justify-start">
-            <div className="w-6 h-6 rounded-full bg-[#2E7A5D]/10 flex items-center justify-center flex-shrink-0">
-              <Bot size={12} className="text-[#2E7A5D]" />
+            <div className="w-6 h-6 rounded-full bg-[#2E5B47]/10 flex items-center justify-center flex-shrink-0">
+              <Bot size={12} className="text-[#2E5B47]" />
             </div>
             <div className="bg-[#F5F5F7] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
               {[0, 1, 2].map(i => (
@@ -151,13 +151,13 @@ AI:`;
           onKeyDown={handleKey}
           placeholder="Ask about this patient's vitals, risks, next steps..."
           rows={1}
-          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#2E7A5D] max-h-24 leading-relaxed"
+          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#2E5B47] max-h-24 leading-relaxed"
           style={{ fontSize: '16px' }}
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="w-10 h-10 rounded-full bg-[#2E7A5D] flex items-center justify-center flex-shrink-0 shadow-green-glow active:scale-[0.92] transition-all disabled:opacity-30 self-end"
+          className="w-10 h-10 rounded-full bg-[#2E5B47] flex items-center justify-center flex-shrink-0 shadow-green-glow active:scale-[0.92] transition-all disabled:opacity-30 self-end"
         >
           <Send size={15} className="text-white" />
         </button>

@@ -60,7 +60,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
           <div className="bg-white rounded-[24px] border border-[#E5E5E5] w-full max-w-md p-6 relative shadow-[0_12px_40px_rgba(0,0,0,0.12)] animate-in fade-in zoom-in duration-150">
             <button
               onClick={() => { setShowAddForm(false); setError(''); }}
-              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-[#F5F5F7] text-[#666666] hover:bg-[#E5E5E5]"
+              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAFAFA] text-[#666666] hover:bg-[#E5E5E5]"
             >
               <X size={15} />
             </button>
@@ -74,7 +74,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
               
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Facility Name</label>
-                <div className="flex items-center gap-2 px-3.5 bg-[#F5F5F7] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
                   <Building size={14} className="text-[#A0A0A0]" />
                   <input
                     type="text"
@@ -89,7 +89,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Location</label>
-                <div className="flex items-center gap-2 px-3.5 bg-[#F5F5F7] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
                   <MapPin size={14} className="text-[#A0A0A0]" />
                   <input
                     type="text"
@@ -103,7 +103,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Facility Code</label>
-                <div className="flex items-center gap-2 px-3.5 bg-[#F5F5F7] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
                   <Key size={14} className="text-[#A0A0A0]" />
                   <input
                     type="text"
@@ -144,7 +144,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
       {/* Table */}
       <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow- premium overflow-x-auto">
         <table className="w-full min-w-[600px]">
-          <thead className="bg-[#F5F5F7]">
+          <thead className="bg-[#FAFAFA]">
             <tr>
               {['Facility Name', 'Facility Code', 'Location', 'Registered Date'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-6 py-3.5">{h}</th>
@@ -153,7 +153,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
           </thead>
           <tbody>
             {filtered.map(f => (
-              <tr key={f.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
+              <tr key={f.id} className="border-t border-[#FAFAFA] hover:bg-[#FAFAFA]/50 transition-colors">
                 <td className="px-6 py-4 text-[13px] font-semibold text-[#0A0A0A] whitespace-nowrap">{f.name}</td>
                 <td className="px-6 py-4 text-[12px] font-bold text-[#0047FF]">{f.facility_code}</td>
                 <td className="px-6 py-4 text-[12px] text-[#666666]">{f.location || '—'}</td>

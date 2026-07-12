@@ -1,12 +1,12 @@
 {
-  "name": "TotoAfya — Kenya MCH",
-  "short_name": "TotoAfya",
-  "description": "Your trusted companion for maternal & child health in Kenya",
+  "name": "TotoAfya — Facility Admin",
+  "short_name": "TotoAdmin",
+  "description": "Facility management and clinical oversight dashboard for TotoAfya",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F7F5F0",
-  "theme_color": "#1B6B5A",
+  "background_color": "#FAFBFB",
+  "theme_color": "#2E5B47",
   "categories": ["health", "medical"],
   "lang": "en",
   "icons": [
@@ -21,21 +21,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [],
-  "shortcuts": [
-    {
-      "name": "Vaccine Schedule",
-      "short_name": "Vaccines",
-      "url": "/vaccines",
-      "description": "Check your child's vaccine schedule"
-    },
-    {
-      "name": "ANC Visits",
-      "short_name": "ANC",
-      "url": "/anc",
-      "description": "Track antenatal care visits"
     }
   ]
 }

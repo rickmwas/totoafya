@@ -6,10 +6,10 @@ import { useLang } from '@/context/LanguageContext';
 const severityConfig = {
   info: {
     bg: '#F0F4FF',
-    border: '#0047FF',
+    border: '#2E5B47',
     icon: Info,
-    iconColor: '#0047FF',
-    iconBg: '#0047FF15',
+    iconColor: '#2E5B47',
+    iconBg: '#2E5B4715',
   },
   warning: {
     bg: '#FFFBEB',

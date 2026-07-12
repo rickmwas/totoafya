@@ -2,10 +2,10 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 const configs = {
-  healthy:   { bg: 'bg-[#2E7A5D]/10', text: 'text-[#2E7A5D]', dot: 'bg-[#2E7A5D]', label: 'Healthy' },
-  given:     { bg: 'bg-[#2E7A5D]/10', text: 'text-[#2E7A5D]', dot: 'bg-[#2E7A5D]', label: 'Given' },
-  normal:    { bg: 'bg-[#2E7A5D]/10', text: 'text-[#2E7A5D]', dot: 'bg-[#2E7A5D]', label: 'Normal' },
-  achieved:  { bg: 'bg-[#2E7A5D]/10', text: 'text-[#2E7A5D]', dot: 'bg-[#2E7A5D]', label: 'Achieved' },
+  healthy:   { bg: 'bg-[#0F4C81]/10', text: 'text-[#0F4C81]', dot: 'bg-[#0F4C81]', label: 'Healthy' },
+  given:     { bg: 'bg-[#0F4C81]/10', text: 'text-[#0F4C81]', dot: 'bg-[#0F4C81]', label: 'Given' },
+  normal:    { bg: 'bg-[#0F4C81]/10', text: 'text-[#0F4C81]', dot: 'bg-[#0F4C81]', label: 'Normal' },
+  achieved:  { bg: 'bg-[#0F4C81]/10', text: 'text-[#0F4C81]', dot: 'bg-[#0F4C81]', label: 'Achieved' },
   monitor:   { bg: 'bg-[#F9A825]/10', text: 'text-[#F9A825]', dot: 'bg-[#F9A825]', label: 'Monitor' },
   due:       { bg: 'bg-[#F9A825]/10', text: 'text-[#F9A825]', dot: 'bg-[#F9A825]', label: 'Due' },
   due_soon:  { bg: 'bg-[#F9A825]/10', text: 'text-[#F9A825]', dot: 'bg-[#F9A825]', label: 'Due Soon' },
@@ -20,7 +20,7 @@ const configs = {
   sam:       { bg: 'bg-[#E51010]/10', text: 'text-[#E51010]', dot: 'bg-[#E51010]', label: 'SAM' },
   info:      { bg: 'bg-[#0047FF]/10', text: 'text-[#0047FF]', dot: 'bg-[#0047FF]', label: 'Info' },
   warning:   { bg: 'bg-[#F9A825]/10', text: 'text-[#F9A825]', dot: 'bg-[#F9A825]', label: 'Warning' },
-  low:       { bg: 'bg-[#2E7A5D]/10', text: 'text-[#2E7A5D]', dot: 'bg-[#2E7A5D]', label: 'Low Risk' },
+  low:       { bg: 'bg-[#0F4C81]/10', text: 'text-[#0F4C81]', dot: 'bg-[#0F4C81]', label: 'Low Risk' },
   medium:    { bg: 'bg-[#F9A825]/10', text: 'text-[#F9A825]', dot: 'bg-[#F9A825]', label: 'Medium Risk' },
   high:      { bg: 'bg-[#E51010]/10', text: 'text-[#E51010]', dot: 'bg-[#E51010]', label: 'High Risk' },
 };

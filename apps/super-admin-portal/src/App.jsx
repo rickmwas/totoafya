@@ -112,7 +112,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F5F5F7] font-inter text-[#0A0A0A]">
+    <div className="flex min-h-screen bg-[#FAFAFA] font-inter text-[#0A0A0A]">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-[#E5E5E5] flex flex-col h-screen sticky top-0">
         {/* Brand */}
@@ -131,7 +131,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab('overview')}
             className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
-              activeTab === 'overview' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#F5F5F7] font-semibold'
+              activeTab === 'overview' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
             }`}
           >
             <LayoutDashboard size={18} />
@@ -141,7 +141,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab('facilities')}
             className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
-              activeTab === 'facilities' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#F5F5F7] font-semibold'
+              activeTab === 'facilities' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
             }`}
           >
             <Building size={18} />
@@ -151,7 +151,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab('nurses')}
             className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
-              activeTab === 'nurses' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#F5F5F7] font-semibold'
+              activeTab === 'nurses' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
             }`}
           >
             <Users size={18} />
@@ -161,7 +161,7 @@ export default function App() {
           <button
             onClick={() => setActiveTab('patients')}
             className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
-              activeTab === 'patients' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#F5F5F7] font-semibold'
+              activeTab === 'patients' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
             }`}
           >
             <Baby size={18} />
@@ -171,7 +171,7 @@ export default function App() {
 
         {/* Mock Switches (Demo Mode Only) */}
         {import.meta.env.VITE_DATABASE_PROVIDER !== 'supabase' && (
-          <div className="p-4 border-t border-[#E5E5E5] bg-[#F5F5F7]/50">
+          <div className="p-4 border-t border-[#E5E5E5] bg-[#FAFAFA]/50">
             <p className="text-[10px] font-bold text-[#A0A0A0] uppercase tracking-wider mb-2 px-1">Active Sandbox</p>
             <div className="flex flex-col gap-1">
               <button
@@ -225,7 +225,7 @@ export default function App() {
             <select
               value={selectedFacilityFilter}
               onChange={e => setSelectedFacilityFilter(e.target.value)}
-              className="h-9 px-3 bg-[#F5F5F7] border border-[#E5E5E5] rounded-[10px] text-[12px] font-bold text-[#0A0A0A] outline-none focus:border-[#0047FF] cursor-pointer"
+              className="h-9 px-3 bg-[#FAFAFA] border border-[#E5E5E5] rounded-[10px] text-[12px] font-bold text-[#0A0A0A] outline-none focus:border-[#0047FF] cursor-pointer"
             >
               <option value="">All Facilities & Clinics</option>
               {facilities.map(fac => (
@@ -237,7 +237,7 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button 
               onClick={loadAllData}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F5F5F7] hover:bg-[#E5E5E5] text-[#666666] active:scale-95 transition-all"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[#FAFAFA] hover:bg-[#E5E5E5] text-[#666666] active:scale-95 transition-all"
               title="Refresh Data"
             >
               <RefreshCw size={15} />
@@ -299,7 +299,7 @@ export default function App() {
                         <p className="text-[38px] font-extrabold text-[#0A0A0A] leading-none mt-2">{totalMothersCount}</p>
                         <p className="text-[11px] text-[#A0A0A0] font-medium mt-2">Registered maternal accounts</p>
                       </div>
-                      <div className="w-10 h-10 rounded-[12px] bg-[#2E7A5D]/10 flex items-center justify-center text-[#2E7A5D]">
+                      <div className="w-10 h-10 rounded-[12px] bg-[#4F46E5]/10 flex items-center justify-center text-[#4F46E5]">
                         <Sparkles size={18} />
                       </div>
                     </div>
@@ -323,7 +323,7 @@ export default function App() {
                     <div className="col-span-2 bg-white border border-[#E5E5E5] rounded-[24px] p-6 shadow-premium">
                       <h3 className="text-[16px] font-bold text-[#0A0A0A] mb-4">Quick Facility Operations</h3>
                       <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#F5F5F7] border border-[#E5E5E5]/50">
+                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#FAFAFA] border border-[#E5E5E5]/50">
                           <div className="w-8 h-8 rounded-full bg-[#0047FF] text-white flex items-center justify-center text-[13px] font-bold">1</div>
                           <div>
                             <p className="text-[13px] font-bold text-[#0A0A0A]">Register Facility</p>
@@ -333,7 +333,7 @@ export default function App() {
                             <ArrowRight size={14} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#F5F5F7] border border-[#E5E5E5]/50">
+                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#FAFAFA] border border-[#E5E5E5]/50">
                           <div className="w-8 h-8 rounded-full bg-[#0047FF] text-white flex items-center justify-center text-[13px] font-bold">2</div>
                           <div>
                             <p className="text-[13px] font-bold text-[#0A0A0A]">Register Nurse / Administrator</p>
@@ -343,7 +343,7 @@ export default function App() {
                             <ArrowRight size={14} />
                           </button>
                         </div>
-                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#F5F5F7] border border-[#E5E5E5]/50">
+                        <div className="flex items-center gap-4 p-4 rounded-[16px] bg-[#FAFAFA] border border-[#E5E5E5]/50">
                           <div className="w-8 h-8 rounded-full bg-[#0047FF] text-white flex items-center justify-center text-[13px] font-bold">3</div>
                           <div>
                             <p className="text-[13px] font-bold text-[#0A0A0A]">Onboard Mother / Patient</p>
@@ -407,7 +407,7 @@ export default function App() {
 
                   <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow-premium overflow-x-auto">
                     <table className="w-full min-w-[700px]">
-                      <thead className="bg-[#F5F5F7]">
+                      <thead className="bg-[#FAFAFA]">
                         <tr>
                           {['Mother Name', 'Clinic Number', 'Contact Number', 'Assigned Facility', 'Registered Date'].map(h => (
                             <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-6 py-3.5">{h}</th>
@@ -416,7 +416,7 @@ export default function App() {
                       </thead>
                       <tbody>
                         {filteredMothers.map(m => (
-                          <tr key={m.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
+                          <tr key={m.id} className="border-t border-[#FAFAFA] hover:bg-[#FAFAFA]/50 transition-colors">
                             <td className="px-6 py-4">
                               <p className="text-[13px] font-semibold text-[#0A0A0A]">{m.full_name}</p>
                               <p className="text-[11px] text-[#A0A0A0]">{m.email || 'No email'}</p>

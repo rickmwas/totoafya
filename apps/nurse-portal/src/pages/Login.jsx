@@ -190,7 +190,7 @@ export default function Login() {
             <div className="w-12 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
 
             <div className="mb-6 text-center">
-              <div className="inline-flex items-center bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold mb-2">
+              <div className="inline-flex items-center bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold mb-2">
                 <span>Developer Sandbox</span>
               </div>
               <h3 className="text-lg font-bold text-slate-900">Select a Clinic Mock Profile</h3>
@@ -217,7 +217,7 @@ export default function Login() {
                   <button
                     key={m.role}
                     onClick={() => selectMockRole(m.role)}
-                    className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:border-emerald-600 hover:bg-emerald-50/30 active:scale-[0.99] transition-all flex items-start gap-3"
+                    className="w-full text-left p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:border-emerald-600 hover:bg-blue-50/30 active:scale-[0.99] transition-all flex items-start gap-3"
                   >
                     <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 flex-shrink-0 mt-0.5">
                       <Icon className="w-5 h-5 text-emerald-600" />

@@ -96,7 +96,7 @@ AI:`;
   return (
     <div className="flex flex-col h-[520px] bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[#F5F5F7] flex items-center gap-2 bg-gradient-to-r from-[#0047FF]/5 to-transparent flex-shrink-0">
+      <div className="px-4 py-3 border-b border-[#F4F6F8] flex items-center gap-2 bg-gradient-to-r from-[#0047FF]/5 to-transparent flex-shrink-0">
         <div className="w-8 h-8 rounded-full bg-[#0047FF] flex items-center justify-center shadow-teal-glow-sm">
           <Bot size={15} className="text-white" />
         </div>
@@ -123,7 +123,7 @@ AI:`;
               'max-w-[82%] rounded-[16px] px-4 py-2.5 text-[13px] leading-relaxed',
               msg.role === 'user'
                 ? 'bg-[#0047FF] text-white rounded-tr-[4px]'
-                : 'bg-[#F5F5F7] text-[#0A0A0A] rounded-tl-[4px]'
+                : 'bg-[#F4F6F8] text-[#0A0A0A] rounded-tl-[4px]'
             )}>
               {msg.role === 'assistant' ? (
                 <ReactMarkdown className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-p:text-[13px]">
@@ -146,7 +146,7 @@ AI:`;
             <div className="w-6 h-6 rounded-full bg-[#0047FF] flex items-center justify-center flex-shrink-0 shadow-teal-glow-sm">
               <Bot size={11} className="text-white" />
             </div>
-            <div className="bg-[#F5F5F7] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
+            <div className="bg-[#F4F6F8] rounded-[16px] rounded-tl-[4px] px-4 py-3 flex gap-1 items-center">
               {[0, 1, 2].map(i => (
                 <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#A0A0A0] animate-pulse-dot"
                   style={{ animationDelay: `${i * 0.2}s` }} />
@@ -171,14 +171,14 @@ AI:`;
       </div>
 
       {/* Input */}
-      <div className="px-3 py-3 border-t border-[#F5F5F7] flex gap-2 flex-shrink-0">
+      <div className="px-3 py-3 border-t border-[#F4F6F8] flex gap-2 flex-shrink-0">
         <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKey}
           placeholder={lang === 'sw' ? 'Uliza swali lolote la afya...' : 'Ask any health question...'}
           rows={1}
-          className="flex-1 resize-none px-4 py-2.5 bg-[#F5F5F7] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#0047FF] max-h-24 leading-relaxed"
+          className="flex-1 resize-none px-4 py-2.5 bg-[#F4F6F8] rounded-[14px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:ring-1 focus:ring-[#0047FF] max-h-24 leading-relaxed"
           style={{ fontSize: '16px' }}
         />
         <button

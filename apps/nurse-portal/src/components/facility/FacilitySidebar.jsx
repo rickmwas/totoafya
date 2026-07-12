@@ -34,7 +34,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
           </div>
         </div>
         {/* Close button on mobile */}
-        <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F5F7] transition-colors">
+        <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F4F6F8] transition-colors">
           <X size={16} className="text-[#666666]" />
         </button>
       </div>
@@ -49,7 +49,7 @@ export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, i
               onClick={() => setActiveTab(key)}
               className={cn(
                 'flex items-center gap-3 px-3 py-3 rounded-[12px] w-full text-left transition-all duration-150 min-h-[44px]',
-                active ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F5F5F7]'
+                active ? 'bg-[#0047FF] text-white shadow-teal-glow-sm' : 'text-[#666666] hover:bg-[#F4F6F8]'
               )}
             >
               <Icon size={17} strokeWidth={active ? 2.5 : 1.8} />

@@ -1,12 +1,12 @@
 {
-  "name": "TotoAfya — Nurse Portal",
-  "short_name": "TotoNurse",
-  "description": "Clinical records and vitals tracking companion for TotoAfya nurses",
+  "name": "TotoAfya — Super Admin",
+  "short_name": "TotoSuper",
+  "description": "Global administration and setup console for TotoAfya",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F4F6F7",
-  "theme_color": "#0F4C81",
+  "background_color": "#FAFAFA",
+  "theme_color": "#4F46E5",
   "categories": ["health", "medical"],
   "lang": "en",
   "icons": [

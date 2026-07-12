@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 
 const RISK_COLORS = {
-  low: 'bg-[#2E7A5D]/10 text-[#2E7A5D]',
+  low: 'bg-[#0F4C81]/10 text-[#0F4C81]',
   medium: 'bg-[#F9A825]/10 text-[#F9A825]',
   high: 'bg-[#E51010]/10 text-[#E51010]',
   critical: 'bg-[#E51010]/10 text-[#E51010]',
@@ -68,7 +68,7 @@ export default function FacilityMothers({ mothers }) {
       {/* Table */}
       <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow-card overflow-x-auto">
         <table className="w-full min-w-[700px]">
-          <thead className="bg-[#F5F5F7]">
+          <thead className="bg-[#F4F6F8]">
             <tr>
               {['Name', 'Role', 'National ID', 'Phone', 'Status', 'Risk', 'EDD', 'County', 'Facility', 'Registered'].map(h => (
                 <th key={h} className="text-left text-[10px] tracking-[0.12em] uppercase font-bold text-[#A0A0A0] px-4 py-3">{h}</th>
@@ -77,7 +77,7 @@ export default function FacilityMothers({ mothers }) {
           </thead>
           <tbody>
             {filtered.map(m => (
-              <tr key={m.id} className="border-t border-[#F5F5F7] hover:bg-[#F5F5F7]/50 transition-colors">
+              <tr key={m.id} className="border-t border-[#F4F6F8] hover:bg-[#F4F6F8]/50 transition-colors">
                 <td className="px-4 py-3 text-[13px] font-semibold text-[#0A0A0A] whitespace-nowrap">{m.full_name}</td>
                 <td className="px-4 py-3 text-[12px] capitalize font-medium text-[#666666]">{m.caregiver_type || 'mother'}</td>
                 <td className="px-4 py-3 text-[12px] text-[#666666]">{m.national_id || '—'}</td>
@@ -85,7 +85,7 @@ export default function FacilityMothers({ mothers }) {
                 <td className="px-4 py-3">
                   <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
                     m.pregnancy_status === 'pregnant' ? 'bg-[#0047FF]/10 text-[#0047FF]' :
-                    m.pregnancy_status === 'postpartum' ? 'bg-[#2E7A5D]/10 text-[#2E7A5D]' : 'bg-[#F5F5F7] text-[#666666]'
+                    m.pregnancy_status === 'postpartum' ? 'bg-[#0F4C81]/10 text-[#0F4C81]' : 'bg-[#F4F6F8] text-[#666666]'
                   }`}>{m.pregnancy_status}</span>
                 </td>
                 <td className="px-4 py-3">

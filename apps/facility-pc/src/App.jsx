@@ -21,15 +21,15 @@ const AuthenticatedApp = () => {
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#F7F5F0]">
+      <div className="fixed inset-0 flex items-center justify-center bg-[#FAFBFB]">
         <div className="flex flex-col items-center gap-5">
           <div
             className="w-16 h-16 rounded-[22px] flex items-center justify-center shadow-[0_8px_32px_rgba(27,107,90,0.28)]"
-            style={{ background: 'linear-gradient(145deg, #1B6B5A 0%, #2E8A74 100%)' }}
+            style={{ background: 'linear-gradient(145deg, #2E5B47 0%, #2E8A74 100%)' }}
           >
             <span className="text-white text-[26px] font-bold" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>T</span>
           </div>
-          <div className="w-6 h-6 border-2 border-[#1B6B5A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#2E5B47] border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );

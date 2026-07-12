@@ -54,7 +54,7 @@ export default function InvitePartner({ mother, lang, onUpdated }) {
                   {lang === 'sw' ? 'Ana ufikiaji kamili wa data' : 'Has full access to family data'}
                 </p>
               </div>
-              <span className="text-[10px] font-bold text-[#2E7A5D] bg-[#2E7A5D]/10 px-2 py-1 rounded-full">Active</span>
+              <span className="text-[10px] font-bold text-[#2E5B47] bg-[#2E5B47]/10 px-2 py-1 rounded-full">Active</span>
             </div>
             <button
               onClick={handleRemove}
@@ -84,7 +84,7 @@ export default function InvitePartner({ mother, lang, onUpdated }) {
                 disabled={saving || !email.trim()}
                 className={cn(
                   'h-12 px-4 rounded-[14px] text-[13px] font-bold flex items-center gap-1.5 transition-all active:scale-[0.97] disabled:opacity-50',
-                  saved ? 'bg-[#2E7A5D] text-white' : 'bg-[#7C3AED] text-white'
+                  saved ? 'bg-[#2E5B47] text-white' : 'bg-[#7C3AED] text-white'
                 )}
               >
                 {saved ? <Check size={15} /> : <Send size={15} />}
