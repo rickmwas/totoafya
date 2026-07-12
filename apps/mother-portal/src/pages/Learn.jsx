@@ -16,6 +16,8 @@ import {
   Check, 
   ArrowRight, 
   ChevronRight, 
+  ChevronLeft,
+  MoreVertical,
   X, 
   Volume2, 
   Search,

@@ -133,7 +133,7 @@ export default function FacilityDashboard() {
 
   const tabs = {
     overview: <FacilityOverview data={data} />,
-    mothers: <FacilityMothers mothers={data.mothers} onRefresh={loadAll} />,
+    mothers: <FacilityMothers mothers={data.mothers} facilityId={user?.facility_id} onRefresh={loadAll} />,
     children: <FacilityChildren children={data.children} growthRecords={data.growthRecords} />,
     vaccines: <FacilityVaccines immunizations={data.immunizations} children={data.children} />,
     nurses: <FacilityNurses nurses={data.nurses} facilityId={user?.facility_id} onRefresh={loadAll} />,

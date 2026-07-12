@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
 
-export default function PatientChatbot({ mother, children, lang }) {
+export default function PatientChatbot({ mother, children, lang, className, initialInput }) {
   const caregiverType = mother?.caregiver_type || 'mother';
   const roleLabel = caregiverType === 'father' ? (lang === 'sw' ? 'baba' : 'Dad') 
                   : caregiverType === 'guardian' ? (lang === 'sw' ? 'mlezi' : 'Guardian')
@@ -16,7 +16,13 @@ export default function PatientChatbot({ mother, children, lang }) {
     : `Hi${mother?.full_name ? ` ${mother.full_name.split(' ')[0]}` : ''}! I'm your personal health AI assistant. I have your full health profile and can answer questions about ${caregiverType === 'mother' ? 'your pregnancy, ' : ''}your children's health, upcoming vaccines, danger signs, and more as their ${roleLabel}. What would you like to know?`;
 
   const [messages, setMessages] = useState([{ role: 'assistant', content: greeting }]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialInput || '');
+
+  useEffect(() => {
+    if (initialInput) {
+      setInput(initialInput);
+    }
+  }, [initialInput]);
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef(null);
 
@@ -91,7 +97,7 @@ AI:`;
         : ['What are danger signs?', 'What vaccine is due next?', 'What is a balanced diet for a child?']);
 
   return (
-    <div className="flex flex-col h-[520px] bg-white rounded-[32px] border border-[#e5e7eb] shadow-sm overflow-hidden animate-slide-up">
+    <div className={cn("flex flex-col h-[520px] bg-white rounded-[32px] border border-[#e5e7eb] shadow-sm overflow-hidden animate-slide-up", className)}>
       {/* Mini Info Header */}
       <div className="px-5 py-4 border-b border-[#e5e7eb] flex items-center gap-3 bg-gradient-to-r from-toto-teal/5 to-transparent flex-shrink-0">
         <div className="w-9 h-9 rounded-full bg-toto-teal flex items-center justify-center shadow-sm">

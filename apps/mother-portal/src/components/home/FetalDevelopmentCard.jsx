@@ -61,24 +61,24 @@ export default function FetalDevelopmentCard({ mother, lang }) {
 
   return (
     <Link to="/care" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-300">
-      <div className="rounded-[28px] bg-gradient-to-br from-[#fff2ef] to-[#fffaf8] border border-[#fcdacf]/60 p-5 shadow-[0_8px_24px_rgba(224,123,102,0.04)] flex items-center justify-between gap-4">
+      <div className="rounded-[28px] bg-white border border-[#e5e7eb] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex items-center justify-between gap-4">
         
         {/* Left Side Info */}
         <div className="flex-1 flex flex-col justify-between min-w-0">
           <div>
-            <span className="text-[12px] font-bold text-toto-gray tracking-wide">
+            <span className="text-[12px] font-bold text-toto-gray tracking-wide uppercase">
               {lang === 'sw' ? 'Ujauzito Wako' : 'Your Pregnancy'}
             </span>
-            <h4 className="text-[22px] font-extrabold text-toto-black leading-tight mt-0.5 tracking-tight">
+            <h4 className="text-[24px] font-extrabold text-toto-black leading-tight mt-1 tracking-tight">
               {weeksPregnant} {lang === 'sw' ? 'wiki' : 'weeks'} + {daysPregnantPart} {lang === 'sw' ? 'siku' : 'days'}
             </h4>
           </div>
 
           {/* Progress bar slider */}
           <div className="mt-5 w-full">
-            <div className="h-2.5 w-full bg-white rounded-full p-0.5 border border-[#fcdacf]/40 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
+            <div className="h-1.5 w-full bg-[#EBEBEB] rounded-full overflow-hidden">
               <div 
-                className="h-full rounded-full bg-gradient-to-r from-[#ff8266] to-[#e0583a] transition-all duration-1000"
+                className="h-full rounded-full bg-[#E68A00] transition-all duration-1000"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -90,10 +90,8 @@ export default function FetalDevelopmentCard({ mother, lang }) {
         </div>
 
         {/* Right Side Illustration */}
-        <div className="w-22 h-22 rounded-full bg-white border border-[#fcdacf]/40 flex items-center justify-center shadow-sm flex-shrink-0">
-          <svg className="w-14 h-14 text-[#e07b66]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="40" fill="#fffdfc" />
-            <circle cx="50" cy="50" r="39" stroke="#fff1ee" strokeWidth="2" />
+        <div className="w-18 h-18 rounded-full bg-[#FFF0EB] flex items-center justify-center shadow-[0_2px_10px_rgba(255,130,102,0.08)] flex-shrink-0">
+          <svg className="w-11 h-11 text-[#FF8266]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path 
               d="M50 25C40 25 32 32 32 45C32 55 42 62 48 65C52 66.5 56 68 56 72C56 76 50 78 45 78" 
               stroke="currentColor" 

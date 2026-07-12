@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react()],
   envDir: '../../',
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@/api/totoafyaClient': '@totoafya/api-client',
       '@': path.resolve(__dirname, './src'),
