@@ -11,30 +11,48 @@ export default function LoginScreen() {
   const [authType, setAuthType] = useState<'national_id' | 'anc_number'>('national_id');
   const [identifier, setIdentifier] = useState('');
   const [pin, setPin] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [confirmPin, setConfirmPin] = useState('');
+  const [activationCode, setActivationCode] = useState('');
+  const [isActivating, setIsActivating] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const isSupabase = (process.env.EXPO_PUBLIC_DATABASE_PROVIDER === 'supabase' || 
                      process.env.VITE_DATABASE_PROVIDER === 'supabase');
 
   const handleAuth = async () => {
-    if (!identifier || !pin) {
-      Alert.alert(t('error') || 'Error', language === 'sw' ? 'Tafadhali jaza sehemu zote' : 'Please fill in all fields');
+    if (!identifier) {
+      Alert.alert(t('error') || 'Error', language === 'sw' ? 'Tafadhali jaza nambari' : 'Please enter your ID/ANC number');
       return;
     }
-    if (pin.trim().length !== 4) {
-      Alert.alert(t('error') || 'Error', language === 'sw' ? 'PIN lazima iwe nambari 4' : 'PIN must be exactly 4 digits');
-      return;
+
+    if (isActivating) {
+      if (!activationCode || !pin || !confirmPin) {
+        Alert.alert(t('error') || 'Error', language === 'sw' ? 'Tafadhali jaza sehemu zote' : 'Please fill in all activation fields');
+        return;
+      }
+      if (pin.trim().length !== 6) {
+        Alert.alert(t('error') || 'Error', language === 'sw' ? 'PIN mpya lazima iwe nambari 6' : 'New PIN must be exactly 6 digits');
+        return;
+      }
+      if (pin !== confirmPin) {
+        Alert.alert(t('error') || 'Error', language === 'sw' ? 'PIN hazilingani' : 'PIN codes do not match');
+        return;
+      }
+    } else {
+      if (!pin) {
+        Alert.alert(t('error') || 'Error', language === 'sw' ? 'Tafadhali jaza PIN yako' : 'Please enter your Security PIN');
+        return;
+      }
+      if (pin.trim().length !== 6) {
+        Alert.alert(t('error') || 'Error', language === 'sw' ? 'PIN lazima iwe nambari 6' : 'PIN must be exactly 6 digits');
+        return;
+      }
     }
     
     setLoading(true);
     try {
-      if (isRegistering) {
-        const mockUser = await db.auth.signUpMother(identifier, pin, {
-          full_name: fullName || `${authType === 'national_id' ? 'ID' : 'ANC'}-${identifier}`,
-          facility_id: 'fac-a-id',
-        });
+      if (isActivating) {
+        const mockUser = await db.auth.signInWithNationalIdOrAnc(identifier, pin, activationCode);
         await login({
           id: mockUser.id,
           email: mockUser.email || '',
@@ -42,7 +60,7 @@ export default function LoginScreen() {
           role: 'user',
           facility_id: mockUser.facility_id,
           mother_id: mockUser.mother_id,
-          profile_complete: false,
+          profile_complete: true,
         }, pin);
       } else {
         const mockUser = await db.auth.signInWithNationalIdOrAnc(identifier, pin);
@@ -67,7 +85,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       if (role === 'new_mother') {
-        const mockUser = await db.auth.signUpMother(`anc-9988-mock`, '1234', {
+        const mockUser = await db.auth.signUpMother(`anc-9988-mock`, '123456', {
           full_name: 'New Mother',
           facility_id: 'fac-a-id',
         });
@@ -82,8 +100,8 @@ export default function LoginScreen() {
         });
       } else {
         // Normal mother
-        const mockUser = await db.auth.signInWithNationalIdOrAnc('mother-a', '1234').catch(async () => {
-          return await db.auth.signUpMother('mother-a', '1234', {
+        const mockUser = await db.auth.signInWithNationalIdOrAnc('mother-a', '123456').catch(async () => {
+          return await db.auth.signUpMother('mother-a', '123456', {
             full_name: 'Jane Doe',
             facility_id: 'fac-a-id',
           });
@@ -151,7 +169,7 @@ export default function LoginScreen() {
 
       {/* Header */}
       <View className="items-center mb-8 mt-8">
-        <Text className="text-emerald-850 text-4xl font-bold tracking-tight" style={{ fontFamily: 'Inter' }}>
+        <Text className="text-emerald-800 text-4xl font-bold tracking-tight" style={{ fontFamily: 'Inter' }}>
           TotoAfya
         </Text>
         <Text className="text-slate-500 text-sm mt-1 text-center leading-relaxed">
@@ -162,8 +180,8 @@ export default function LoginScreen() {
       {/* Auth Card */}
       <View className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200 border border-slate-100">
         <Text className="text-slate-800 text-xl font-bold mb-4">
-          {isRegistering 
-            ? (language === 'sw' ? 'Jisajili Kadi ya Mgonjwa' : 'Register Patient Card') 
+          {isActivating 
+            ? (language === 'sw' ? 'Wezesha Wasifu' : 'Activate Profile') 
             : (language === 'sw' ? 'Ingia Kwenye Portal' : 'Patient Portal Sign In')
           }
         </Text>
@@ -188,20 +206,6 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        {isRegistering && (
-          <View className="mb-4">
-            <Text className="text-slate-600 text-xs font-semibold mb-1">
-              {language === 'sw' ? 'Majina Kamili' : 'Full Name'}
-            </Text>
-            <TextInput
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="e.g. Jane Doe"
-              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800"
-            />
-          </View>
-        )}
-
         <View className="mb-4">
           <Text className="text-slate-600 text-xs font-semibold mb-1">
             {authType === 'national_id' 
@@ -218,20 +222,56 @@ export default function LoginScreen() {
           />
         </View>
 
+        {isActivating && (
+          <View className="mb-4">
+            <Text className="text-slate-600 text-xs font-semibold mb-1">
+              {language === 'sw' ? 'Msimbo wa Uanzishaji' : 'Activation PIN Code'}
+            </Text>
+            <TextInput
+              value={activationCode}
+              onChangeText={setActivationCode}
+              keyboardType="numeric"
+              maxLength={6}
+              placeholder="e.g. 982104"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800"
+            />
+          </View>
+        )}
+
         <View className="mb-6">
           <Text className="text-slate-600 text-xs font-semibold mb-1">
-            {language === 'sw' ? 'PIN Nambari 4 ya Usalama' : '4-Digit Security PIN'}
+            {isActivating
+              ? (language === 'sw' ? 'Unda PIN mpya (Nambari 6)' : 'Create 6-Digit Security PIN')
+              : (language === 'sw' ? 'PIN ya Siri (Nambari 6)' : '6-Digit Security PIN')
+            }
           </Text>
           <TextInput
             value={pin}
             onChangeText={setPin}
             secureTextEntry
             keyboardType="numeric"
-            maxLength={4}
-            placeholder="••••"
+            maxLength={6}
+            placeholder="••••••"
             className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 tracking-widest text-lg"
           />
         </View>
+
+        {isActivating && (
+          <View className="mb-6">
+            <Text className="text-slate-600 text-xs font-semibold mb-1">
+              {language === 'sw' ? 'Thibitisha PIN mpya' : 'Confirm New PIN'}
+            </Text>
+            <TextInput
+              value={confirmPin}
+              onChangeText={setConfirmPin}
+              secureTextEntry
+              keyboardType="numeric"
+              maxLength={6}
+              placeholder="••••••"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 tracking-widest text-lg"
+            />
+          </View>
+        )}
 
         <Pressable
           onPress={handleAuth}
@@ -239,11 +279,11 @@ export default function LoginScreen() {
           className="bg-emerald-700 rounded-xl py-4 items-center justify-center active:bg-emerald-800"
         >
           {loading ? (
-            <ActivityIndicator color="#white" />
+            <ActivityIndicator color="white" />
           ) : (
             <Text className="text-white font-bold text-base">
-              {isRegistering 
-                ? (language === 'sw' ? 'Jisajili' : 'Register') 
+              {isActivating 
+                ? (language === 'sw' ? 'Wezesha' : 'Activate Profile') 
                 : (language === 'sw' ? 'Thibitisha na Uingie' : 'Verify & Sign In')
               }
             </Text>
@@ -251,13 +291,13 @@ export default function LoginScreen() {
         </Pressable>
 
         <Pressable
-          onPress={() => setIsRegistering(!isRegistering)}
+          onPress={() => setIsActivating(!isActivating)}
           className="mt-4 items-center"
         >
           <Text className="text-emerald-700 text-xs font-semibold">
-            {isRegistering 
+            {isActivating 
               ? (language === 'sw' ? 'Tayari una akaunti? Ingia' : 'Already have an account? Sign In') 
-              : (language === 'sw' ? 'Hujajisajili bado? Tengeneza Akaunti' : "Don't have an account? Register")
+              : (language === 'sw' ? 'Hujajisajili bado? Wezesha wasifu' : "First time using TotoAfya? Activate profile")
             }
           </Text>
         </Pressable>
@@ -274,7 +314,7 @@ export default function LoginScreen() {
             disabled={loading}
             className="flex-1 min-w-[45%] bg-emerald-50 border border-emerald-100 rounded-xl py-3 px-2 items-center justify-center mb-3 active:bg-emerald-100"
           >
-            <Text className="text-emerald-850 font-bold text-xs text-center">Jane Doe (Pregnant)</Text>
+            <Text className="text-emerald-800 font-bold text-xs text-center">Jane Doe (Pregnant)</Text>
             <Text className="text-[10px] text-emerald-600 text-center mt-1">Jane Doe Profile</Text>
           </Pressable>
 

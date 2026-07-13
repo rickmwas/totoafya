@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import db from '@/api/totoafyaClient';
 import { useAuth } from '../lib/AuthContext';
-import { Shield, Lock, CreditCard, ArrowRight, UserPlus, Baby, Fingerprint, Eye, EyeOff } from 'lucide-react';
+import { Shield, Lock, CreditCard, ArrowRight, UserPlus, Baby, Fingerprint, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { useLang } from '@/context/LanguageContext';
 
 export default function Login() {
@@ -11,40 +11,63 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [identifier, setIdentifier] = useState('');
   const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [activationCode, setActivationCode] = useState('');
   const [authType, setAuthType] = useState('national_id'); // 'national_id' | 'anc_number'
   const [showPin, setShowPin] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
 
-  const isSupabase = import.meta.env.VITE_DATABASE_PROVIDER === 'supabase';
-
-  const handleLogin = async (e) => {
+  const handleAction = async (e) => {
     e.preventDefault();
-    if (!identifier || !pin) {
-      setError(lang === 'sw' ? 'Tafadhali jaza nambari na PIN yako.' : 'Please enter your ID and PIN.');
+    if (!identifier) {
+      setError(lang === 'sw' ? 'Tafadhali jaza nambari ya kitambulisho.' : 'Please enter your identifier.');
       return;
     }
-    if (pin.trim().length !== 4) {
-      setError(lang === 'sw' ? 'PIN lazima iwe nambari 4.' : 'PIN must be exactly 4 digits.');
-      return;
+
+    if (isActivating) {
+      if (!activationCode || !pin || !confirmPin) {
+        setError(lang === 'sw' ? 'Tafadhali jaza sehemu zote.' : 'Please fill in all activation fields.');
+        return;
+      }
+      if (pin.trim().length !== 6) {
+        setError(lang === 'sw' ? 'PIN mpya lazima iwe nambari 6.' : 'New PIN must be exactly 6 digits.');
+        return;
+      }
+      if (pin !== confirmPin) {
+        setError(lang === 'sw' ? 'PIN hazilingani.' : 'PIN codes do not match.');
+        return;
+      }
+    } else {
+      if (!pin) {
+        setError(lang === 'sw' ? 'Tafadhali jaza PIN yako.' : 'Please enter your Security PIN.');
+        return;
+      }
+      if (pin.trim().length !== 6) {
+        setError(lang === 'sw' ? 'PIN lazima iwe nambari 6.' : 'PIN must be exactly 6 digits.');
+        return;
+      }
     }
 
     setLoading(true);
     setError(null);
 
     try {
-      if (isSupabase) {
-        await db.auth.signInWithNationalIdOrAnc(identifier, pin);
+      if (isActivating) {
+        // Activate mother profile by passing activation code
+        await db.auth.signInWithNationalIdOrAnc(identifier, pin, activationCode);
       } else {
+        // Regular sign in
         await db.auth.signInWithNationalIdOrAnc(identifier, pin);
       }
       await checkAppState();
       window.location.href = '/';
     } catch (err) {
       console.error(err);
-      setError(
+      setError(err.message || (
         lang === 'sw' 
           ? 'Uthibitishaji umeshindwa. Tafadhali angalia nambari yako ya kitambulisho na PIN.' 
-          : 'Authentication failed. Please check your identifier and PIN.'
-      );
+          : 'Authentication failed. Please check your inputs.'
+      ));
       setLoading(false);
     }
   };
@@ -60,11 +83,17 @@ export default function Login() {
             <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain" />
           </div>
           
-          <h1 className="text-[28px] font-extrabold text-[#131714] leading-tight">
-            {lang === 'sw' ? 'Karibu tena' : 'Welcome back'}
+          <h1 className="text-[26px] font-extrabold text-[#131714] leading-tight">
+            {isActivating 
+              ? (lang === 'sw' ? 'Wezesha Wasifu' : 'Activate Profile')
+              : (lang === 'sw' ? 'Karibu tena' : 'Welcome back')
+            }
           </h1>
-          <p className="text-[13.5px] text-[#6e7772] mt-1 font-medium leading-relaxed">
-            {lang === 'sw' ? 'Weka maelezo yako kuendelea na safari' : 'Sign in to continue your health journey'}
+          <p className="text-[13px] text-[#6e7772] mt-1 font-medium leading-relaxed">
+            {isActivating
+              ? (lang === 'sw' ? 'Weka nambari ya kitambulisho na msimbo wa kliniki kuwezesha' : 'Enter your registered details and clinic activation code')
+              : (lang === 'sw' ? 'Weka maelezo yako kuendelea na safari' : 'Sign in to continue your health journey')
+            }
           </p>
         </div>
 
@@ -104,7 +133,7 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="w-full flex flex-col gap-4">
+        <form onSubmit={handleAction} className="w-full flex flex-col gap-4">
           <div>
             <label className="block text-[12px] font-bold text-[#131714] mb-1.5 px-1">
               {authType === 'national_id' 
@@ -121,45 +150,53 @@ export default function Login() {
                 className="w-full h-12 px-4 rounded-[12px] bg-[#f7f9f7] border border-[#e5e7eb] text-[14px] font-medium outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all text-toto-black placeholder:text-[#a0aba5]/70"
               />
             </div>
-            {authType === 'anc_number' && (
-              <div className="bg-[#1B6B5A]/5 rounded-[20px] p-3.5 border border-[#1B6B5A]/10 flex gap-3.5 items-center mt-3 animate-fade-in">
-                <div className="w-[50px] h-[70px] rounded-lg overflow-hidden border border-gray-200 shadow-md flex-shrink-0">
-                  <img src="/mch_booklet.jpg" alt="MOH Booklet" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-[12.5px] font-bold text-toto-teal leading-tight">MOH Clinic Booklet</h4>
-                  <p className="text-[11px] text-gray-500 mt-0.5 font-semibold leading-relaxed">
-                    {lang === 'sw'
-                      ? 'Utapata namba ya usajili kwenye jalada la kitabu chako cha kliniki cha MOH216.'
-                      : 'You can find your registration serial printed on the front cover of your MOH216 booklet.'}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
+
+          {isActivating && (
+            <div>
+              <label className="block text-[12px] font-bold text-[#131714] mb-1.5 px-1">
+                {lang === 'sw' ? 'Msimbo wa Uanzishaji wa Kliniki (Nambari 6)' : 'Clinic Activation Code (6 Digits)'}
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="e.g. 982104"
+                  value={activationCode}
+                  onChange={(e) => setActivationCode(e.target.value.replace(/\D/g, ''))}
+                  className="w-full h-12 px-4 rounded-[12px] bg-[#f7f9f7] border border-[#e5e7eb] text-[14px] font-semibold tracking-wider outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all text-toto-black placeholder:text-[#a0aba5]/70"
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <div className="flex justify-between items-center mb-1.5 px-1">
               <label className="text-[12px] font-bold text-[#131714]">
-                {lang === 'sw' ? 'PIN ya Siri' : 'Security PIN'}
+                {isActivating 
+                  ? (lang === 'sw' ? 'Unda PIN mpya (Nambari 6)' : 'Create 6-digit PIN')
+                  : (lang === 'sw' ? 'PIN ya Siri' : 'Security PIN')
+                }
               </label>
-              <button 
-                type="button"
-                className="text-[12px] font-bold text-toto-teal hover:underline"
-                onClick={() => alert(lang === 'sw' ? 'Tafadhali wasiliana na kituo chako cha afya ili kuweka upya PIN.' : 'Please contact your health facility to reset your PIN.')}
-              >
-                {lang === 'sw' ? 'Umesahau?' : 'Forgot?'}
-              </button>
+              {!isActivating && (
+                <button 
+                  type="button"
+                  className="text-[12px] font-bold text-toto-teal hover:underline"
+                  onClick={() => alert(lang === 'sw' ? 'Tafadhali wasiliana na kituo chako cha afya ili kuweka upya PIN.' : 'Please contact your health facility to reset your PIN.')}
+                >
+                  {lang === 'sw' ? 'Umesahau?' : 'Forgot?'}
+                </button>
+              )}
             </div>
             <div className="relative">
               <input
                 type={showPin ? 'text' : 'password'}
-                maxLength={4}
-                pattern="\d{4}"
+                maxLength={6}
+                pattern="\d{6}"
                 inputMode="numeric"
-                placeholder="••••"
+                placeholder="••••••"
                 value={pin}
-                onChange={(e) => setPin(e.target.value)}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                 className="w-full h-12 px-4 pr-10 rounded-[12px] bg-[#f7f9f7] border border-[#e5e7eb] text-[14px] font-medium tracking-widest outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all text-toto-black placeholder:text-[#a0aba5]/70"
               />
               <button
@@ -172,6 +209,26 @@ export default function Login() {
             </div>
           </div>
 
+          {isActivating && (
+            <div>
+              <label className="block text-[12px] font-bold text-[#131714] mb-1.5 px-1">
+                {lang === 'sw' ? 'Thibitisha PIN mpya' : 'Confirm new PIN'}
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  maxLength={6}
+                  pattern="\d{6}"
+                  inputMode="numeric"
+                  placeholder="••••••"
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                  className="w-full h-12 px-4 rounded-[12px] bg-[#f7f9f7] border border-[#e5e7eb] text-[14px] font-medium tracking-widest outline-none focus:border-toto-teal focus:ring-1 focus:ring-toto-teal transition-all text-toto-black placeholder:text-[#a0aba5]/70"
+                />
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
@@ -180,21 +237,41 @@ export default function Login() {
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <span>{lang === 'sw' ? 'Ingia' : 'Sign In'}</span>
+              <span>
+                {isActivating 
+                  ? (lang === 'sw' ? 'Wezesha Wasifu Sasa' : 'Activate Profile Now')
+                  : (lang === 'sw' ? 'Ingia' : 'Sign In')
+                }
+              </span>
             )}
           </button>
         </form>
 
-        {/* Don't have account info */}
+        {/* Toggle Mode */}
         <p className="text-center text-[13px] text-[#6e7772] font-semibold mt-8">
-          {lang === 'sw' ? 'Huna akaunti bado? ' : "Don't have an account? "}
-          <button 
-            type="button"
-            className="text-toto-teal hover:underline font-bold"
-            onClick={() => alert(lang === 'sw' ? 'Wasiliana na kituo chako cha afya ili kuunda wasifu.' : 'Please visit your nearest health facility to register.')}
-          >
-            {lang === 'sw' ? 'Jisajili' : 'Sign up'}
-          </button>
+          {isActivating ? (
+            <>
+              {lang === 'sw' ? 'Tayari una wasifu uliowezeshwa? ' : 'Already activated your profile? '}
+              <button 
+                type="button"
+                className="text-toto-teal hover:underline font-bold"
+                onClick={() => { setIsActivating(false); setError(null); setPin(''); }}
+              >
+                {lang === 'sw' ? 'Ingia hapa' : 'Sign in here'}
+              </button>
+            </>
+          ) : (
+            <>
+              {lang === 'sw' ? 'Kwanza kutumia TotoAfya? ' : 'First time using TotoAfya? '}
+              <button 
+                type="button"
+                className="text-toto-teal hover:underline font-bold"
+                onClick={() => { setIsActivating(true); setError(null); setPin(''); }}
+              >
+                {lang === 'sw' ? 'Wezesha wasifu wako' : 'Activate your profile'}
+              </button>
+            </>
+          )}
         </p>
 
       </div>

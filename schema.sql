@@ -60,7 +60,9 @@ CREATE TABLE IF NOT EXISTS mothers (
     national_id TEXT UNIQUE,
     anc_number TEXT UNIQUE,
     full_name TEXT NOT NULL,
-    pin_code TEXT, -- 4-digit security PIN for device unlock/auth
+    pin_code TEXT, -- 6-digit security PIN for device unlock/auth
+    activation_code TEXT, -- Hashed or clear 6-digit activation code
+    activation_expires_at TIMESTAMPTZ,
     phone TEXT,
     county TEXT,
     sub_county TEXT,
@@ -306,7 +308,7 @@ BEGIN
     SELECT email INTO v_email FROM auth.users WHERE id = auth.uid();
     
     -- Super Admin check
-    IF v_email = 'super@totoafya.org' THEN
+    IF v_email = 'cto@terraseptsolutions.com' THEN
         RETURN 'super_admin';
     END IF;
 
@@ -386,8 +388,17 @@ CREATE POLICY "Allow nurses to view other nurses at same facility"
     USING (facility_id = get_user_facility_id());
 
 -- C. MOTHERS policies
-CREATE POLICY "Super admins full access to mothers"
-    ON mothers FOR ALL TO authenticated USING (get_user_role() = 'super_admin');
+CREATE POLICY "Super admins break-glass access to mothers"
+    ON mothers FOR ALL TO authenticated 
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = mothers.id 
+              AND expires_at > NOW()
+        )
+    );
 
 CREATE POLICY "Facility staff manage facility mothers"
     ON mothers FOR ALL TO authenticated
@@ -400,15 +411,24 @@ CREATE POLICY "Mothers select and update own profile"
         OR (
             user_id IS NULL 
             AND (
-                replace(lower(national_id), ' ', '') = split_part(auth.jwt() ->> 'email', '@', 1)
-                OR replace(lower(anc_number), ' ', '') = split_part(auth.jwt() ->> 'email', '@', 1)
+                auth.jwt() ->> 'email' = concat(replace(lower(national_id), ' ', ''), '@totoafya.org')
+                OR auth.jwt() ->> 'email' = concat(replace(lower(anc_number), ' ', ''), '@totoafya.org')
             )
         )
     );
 
 -- D. CHILDREN policies
-CREATE POLICY "Super admins full access to children"
-    ON children FOR ALL TO authenticated USING (get_user_role() = 'super_admin');
+CREATE POLICY "Super admins break-glass access to children"
+    ON children FOR ALL TO authenticated 
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = mother_id 
+              AND expires_at > NOW()
+        )
+    );
 
 CREATE POLICY "Facility staff manage facility children"
     ON children FOR ALL TO authenticated
@@ -419,6 +439,18 @@ CREATE POLICY "Mothers full access to own children"
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- E. ANC VISITS policies
+CREATE POLICY "Super admins break-glass access to visits"
+    ON anc_visits FOR ALL TO authenticated
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = mother_id 
+              AND expires_at > NOW()
+        )
+    );
+
 CREATE POLICY "Facility staff manage visits"
     ON anc_visits FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
@@ -428,6 +460,18 @@ CREATE POLICY "Mothers view own visits"
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- F. GROWTH RECORDS policies
+CREATE POLICY "Super admins break-glass access to growth records"
+    ON growth_records FOR ALL TO authenticated
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = (SELECT mother_id FROM children WHERE id = child_id) 
+              AND expires_at > NOW()
+        )
+    );
+
 CREATE POLICY "Facility staff manage growth records"
     ON growth_records FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
@@ -437,6 +481,18 @@ CREATE POLICY "Mothers view own child growth records"
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- G. IMMUNIZATIONS policies
+CREATE POLICY "Super admins break-glass access to immunizations"
+    ON immunizations FOR ALL TO authenticated
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = (SELECT mother_id FROM children WHERE id = child_id) 
+              AND expires_at > NOW()
+        )
+    );
+
 CREATE POLICY "Facility staff manage immunizations"
     ON immunizations FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
@@ -446,6 +502,18 @@ CREATE POLICY "Mothers manage child immunizations"
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- H. MILESTONES policies
+CREATE POLICY "Super admins break-glass access to milestones"
+    ON milestones FOR ALL TO authenticated
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = (SELECT mother_id FROM children WHERE id = child_id) 
+              AND expires_at > NOW()
+        )
+    );
+
 CREATE POLICY "Facility staff manage milestones"
     ON milestones FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
@@ -455,6 +523,18 @@ CREATE POLICY "Mothers manage child milestones"
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- I. AI ALERTS policies
+CREATE POLICY "Super admins break-glass access to alerts"
+    ON ai_alerts FOR ALL TO authenticated
+    USING (
+        get_user_role() = 'super_admin' 
+        AND EXISTS (
+            SELECT 1 FROM temporary_grants 
+            WHERE user_id = auth.uid() 
+              AND record_id = mother_id 
+              AND expires_at > NOW()
+        )
+    );
+
 CREATE POLICY "Facility staff manage alerts"
     ON ai_alerts FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
@@ -500,5 +580,123 @@ CREATE POLICY "Allow facility staff to manage facility concerns"
 CREATE POLICY "Allow super admins full access to concerns"
     ON developer_concerns FOR ALL TO authenticated
     USING (get_user_role() = 'super_admin');
+
+-- L. AUDITING AND TEMPORARY GRANTS SCHEMA (Break-Glass)
+CREATE TABLE IF NOT EXISTS temporary_grants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    record_id UUID NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    reason TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    operator_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    operator_role TEXT NOT NULL,
+    facility_id UUID REFERENCES facilities(id) ON DELETE SET NULL,
+    action TEXT NOT NULL,
+    affected_record_id UUID NOT NULL,
+    old_value JSONB,
+    new_value JSONB,
+    ip_address TEXT,
+    device_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE OR REPLACE FUNCTION prevent_audit_log_modification()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Audit logs are immutable and cannot be updated or deleted.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER block_audit_log_changes
+    BEFORE UPDATE OR DELETE ON audit_logs
+    FOR EACH ROW
+    EXECUTE FUNCTION prevent_audit_log_modification();
+
+CREATE OR REPLACE FUNCTION request_emergency_access(p_record_id UUID, p_reason TEXT)
+RETURNS VOID AS $$
+DECLARE
+    v_role TEXT;
+BEGIN
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Not authenticated';
+    END IF;
+
+    v_role := get_user_role();
+    
+    IF v_role NOT IN ('super_admin', 'admin') THEN
+        RAISE EXCEPTION 'Only administrators can request emergency break-glass access';
+    END IF;
+
+    -- Write immutable audit
+    INSERT INTO audit_logs (operator_id, operator_role, action, affected_record_id, new_value)
+    VALUES (auth.uid(), v_role, 'BREAK_GLASS_ACCESS_REQUESTED', p_record_id, jsonb_build_object('reason', p_reason));
+
+    -- Assign temporary grant (1 hour duration)
+    INSERT INTO temporary_grants (user_id, record_id, expires_at, reason)
+    VALUES (auth.uid(), p_record_id, NOW() + INTERVAL '1 hour', p_reason);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION verify_and_activate_mother(
+    p_identifier TEXT,
+    p_activation_code TEXT,
+    p_user_id UUID,
+    p_pin_code TEXT
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_mother_id UUID;
+    v_db_code TEXT;
+    v_db_expiry TIMESTAMPTZ;
+BEGIN
+    -- Find mother by national_id or anc_number where user_id is NULL (unactivated)
+    SELECT id, activation_code, activation_expires_at 
+    INTO v_mother_id, v_db_code, v_db_expiry
+    FROM mothers 
+    WHERE (replace(lower(national_id), ' ', '') = replace(lower(p_identifier), ' ', '')
+       OR replace(lower(anc_number), ' ', '') = replace(lower(p_identifier), ' ', ''))
+      AND user_id IS NULL
+    LIMIT 1;
+
+    IF v_mother_id IS NULL THEN
+        -- Check if already activated
+        IF EXISTS (
+            SELECT 1 FROM mothers 
+            WHERE (replace(lower(national_id), ' ', '') = replace(lower(p_identifier), ' ', '')
+               OR replace(lower(anc_number), ' ', '') = replace(lower(p_identifier), ' ', ''))
+              AND user_id IS NOT NULL
+        ) THEN
+            RAISE EXCEPTION 'Profile is already activated. Please sign in directly.';
+        ELSE
+            RAISE EXCEPTION 'Profile record not found. Please contact your health facility.';
+        END IF;
+    END IF;
+
+    -- Verify activation code (if expiry is set and past, or doesn't match)
+    IF v_db_expiry IS NOT NULL AND v_db_expiry < NOW() THEN
+        RAISE EXCEPTION 'Activation code has expired. Please request a new one at the facility.';
+    END IF;
+
+    IF v_db_code IS NULL OR v_db_code <> p_activation_code THEN
+        RAISE EXCEPTION 'Invalid activation code.';
+    END IF;
+
+    -- Activation code matches. Update profile with user_id, pin_code, complete profile, and clear code
+    UPDATE mothers 
+    SET user_id = p_user_id,
+        pin_code = p_pin_code,
+        profile_complete = TRUE,
+        activation_code = NULL,
+        activation_expires_at = NULL
+    WHERE id = v_mother_id;
+
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 

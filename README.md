@@ -28,7 +28,7 @@ TotoAfya Digital is a multi-portal digital health system designed to support mat
 +---------------+  +---------------+  +---------------+  +---------------+  +---------------+
 |  apps/mother  |  | apps/mother-  |  |  apps/nurse   |  | apps/facility |  |  apps/super-  |
 |    -portal    |  |    native     |  |    -portal    |  |     -pc       |  |  admin-portal |
-|  - Mobile PWA |  |  - Expo/React |  |  - Tablet/Web |  | - Tauri PC    |  | - Web Admin   |
+|  - Mobile PWA |  |  - Expo/React |  |  - Tablet/Web/PWA |  | - Tauri PC/PWA   |  | - Web Admin/PWA   |
 |  - Mother UI  |  |    Native App |  |  - Nurse UI   |  | - Admin UI    |  | - System UI   |
 +---------------+  +---------------+  +---------------+  +---------------+  +---------------+
 ```
@@ -40,9 +40,9 @@ TotoAfya Digital is a multi-portal digital health system designed to support mat
 ### Applications (`/apps`)
 * **`mother-portal`**: A mobile-first, installable Progressive Web App (PWA) tailored for mothers. Includes growth tracking, vaccination schedules, AI-assisted health chat, and antenatal care (ANC) logs.
 * **`mother-native`**: A cross-platform mobile application for mothers built with **Expo & React Native** (using NativeWind for styling), providing a native mobile experience.
-* **`nurse-portal`**: A tablet/web application designed for clinical nurses to register patient details, log growth metrics, record vaccinations, and record ANC visit logs.
-* **`facility-pc`**: A desktop dashboard for administrators to monitor facility-wide metrics and system alerts, packaged as a **Tauri** desktop app.
-* **`super-admin-portal`**: A system administration dashboard for managing facilities, nurses, learning resources, and system-wide configurations.
+* **`nurse-portal`**: A tablet/web application/PWA designed for clinical nurses to register patient details, log growth metrics, record vaccinations, and record ANC visit logs.
+* **`facility-pc`**: A desktop/PWA dashboard for administrators to monitor facility-wide metrics and system alerts, packaged as a **Tauri** desktop app.
+* **`super-admin-portal`**: A system administration dashboard/PWA for managing facilities, nurses, learning resources, and system-wide configurations.
 
 ### Shared Packages (`/packages`)
 * **`api-client`**: Central client managing requests. Supports dual-mode: local `localStorage` mock database (for offline development) and cloud **Supabase** (for production).

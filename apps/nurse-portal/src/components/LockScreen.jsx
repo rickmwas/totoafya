@@ -87,7 +87,7 @@ export default function LockScreen() {
           <div className="w-full flex flex-col items-center">
             {/* Dots */}
             <div className="flex gap-4 mb-8">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div
                   key={i}
                   className={`w-3.5 h-3.5 rounded-full border border-slate-700 transition-all duration-150 ${

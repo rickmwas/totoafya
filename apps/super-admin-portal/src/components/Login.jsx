@@ -66,7 +66,7 @@ export default function Login({ onLoginSuccess }) {
             <div className="relative">
               <input
                 type="email"
-                placeholder="super@totoafya.org"
+                placeholder="cto@terraseptsolutions.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-800 border border-slate-700 text-sm focus:outline-none focus:border-indigo-500 focus:bg-slate-800/80 transition-all text-slate-100"

@@ -183,7 +183,7 @@ const entities = Object.fromEntries(
 const MOCK_USERS = {
   super_admin: {
     id: 'mock-super-admin',
-    email: 'super@totoafya.org',
+    email: 'cto@terraseptsolutions.com',
     full_name: 'Super Admin',
     role: 'super_admin',
   },
@@ -232,7 +232,7 @@ const getActiveMockUser = () => {
 };
 
 const auth = {
-  signInWithNationalIdOrAnc: async (identifier, pin) => {
+  signInWithNationalIdOrAnc: async (identifier, pin, activationCode = null) => {
     if (!supabase) throw new Error('Supabase client not initialized.');
     const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
     const securePin = `toto_${pin}`;
@@ -245,7 +245,14 @@ const auth = {
       });
 
       if (error) {
-        // 2. If sign in fails, let's try to register them on the fly
+        // If signIn fails, check if the error is "Invalid login credentials" (user might not exist or wrong PIN)
+        // If they don't have an auth user yet, we need to activate their pre-registered profile.
+        
+        if (!activationCode) {
+          throw new Error('Profile activation required. Please enter the 6-digit Activation Code from your clinic booklet.');
+        }
+
+        // 2. Register the user in Supabase Auth
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password: securePin,
@@ -258,64 +265,22 @@ const auth = {
         });
 
         if (signUpError) {
-          // If sign up fails too, throw the original sign in error
-          throw error;
+          throw signUpError;
         }
 
-        // SignUp succeeded. Create or link mother profile record
-        let motherId = null;
-        let profileComplete = false;
-        let facilityId = null;
-        let subscriptionStatus = 'trial';
-        
-        try {
-          const { data: motherData, error: motherError } = await supabase
-            .from('mothers')
-            .insert([{
-              user_id: signUpData.user.id,
-              full_name: identifier,
-              pin_code: pin,
-              national_id: identifier.includes('ANC') ? null : identifier,
-              anc_number: identifier.includes('ANC') ? identifier : null,
-              profile_complete: false,
-            }])
-            .select()
-            .single();
+        // 3. Call the secure verify_and_activate_mother RPC function to link profile
+        const { data: activateSuccess, error: activateError } = await supabase.rpc(
+          'verify_and_activate_mother',
+          {
+            p_identifier: identifier,
+            p_activation_code: activationCode,
+            p_user_id: signUpData.user.id,
+            p_pin_code: pin
+          }
+        );
 
-          if (!motherError && motherData) {
-            motherId = motherData.id;
-            profileComplete = motherData.profile_complete;
-            facilityId = motherData.facility_id;
-            subscriptionStatus = motherData.subscription_status || 'trial';
-          }
-        } catch (dbErr) {
-          console.error("Database insert failed during on-the-fly registration:", dbErr);
-          // Try to link existing pre-registered record
-          try {
-            const { data: existingMother } = await supabase
-              .from('mothers')
-              .select('*')
-              .or(`national_id.eq.${identifier},anc_number.eq.${identifier}`)
-              .maybeSingle();
-              
-            if (existingMother) {
-              const { data: updatedMother } = await supabase
-                .from('mothers')
-                .update({ user_id: signUpData.user.id })
-                .eq('id', existingMother.id)
-                .select()
-                .single();
-                
-              if (updatedMother) {
-                motherId = updatedMother.id;
-                profileComplete = updatedMother.profile_complete;
-                facilityId = updatedMother.facility_id;
-                subscriptionStatus = updatedMother.subscription_status || 'trial';
-              }
-            }
-          } catch (linkErr) {
-            console.error("Failed to link existing mother record:", linkErr);
-          }
+        if (activateError || !activateSuccess) {
+          throw activateError || new Error('Verification failed. Invalid activation code.');
         }
 
         return {
@@ -323,10 +288,10 @@ const auth = {
           email: signUpData.user.email,
           full_name: identifier,
           role: 'user',
-          facility_id: facilityId,
-          mother_id: motherId,
-          profile_complete: profileComplete,
-          subscription_status: subscriptionStatus,
+          facility_id: null, // Will fetch details next time or dynamically
+          mother_id: null,
+          profile_complete: true,
+          subscription_status: 'trial',
           trial_end_date: null,
         };
       }
@@ -452,7 +417,7 @@ const auth = {
     
     const emailStr = data.user.email || '';
     
-    if (emailStr.toLowerCase() === 'super@totoafya.org' || emailStr.toLowerCase() === 'rickmwasswiz@gmail.com' || data.user.user_metadata?.role === 'super_admin') {
+    if (emailStr.toLowerCase() === 'cto@terraseptsolutions.com' || emailStr.toLowerCase() === 'rickmwasswiz@gmail.com' || data.user.user_metadata?.role === 'super_admin') {
       return {
         id: data.user.id,
         email: data.user.email,
@@ -536,7 +501,7 @@ const auth = {
       const email = user.email || '';
       
       // 1. Super Admin check
-      if (email.toLowerCase() === 'super@totoafya.org' || email.toLowerCase() === 'rickmwasswiz@gmail.com' || user.user_metadata?.role === 'super_admin') {
+      if (email.toLowerCase() === 'cto@terraseptsolutions.com' || email.toLowerCase() === 'rickmwasswiz@gmail.com' || user.user_metadata?.role === 'super_admin') {
         return {
           id: user.id,
           email: user.email,

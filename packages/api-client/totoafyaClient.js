@@ -129,7 +129,7 @@ const entities = Object.fromEntries(
 const MOCK_USERS = {
   super_admin: {
     id: 'mock-super-admin',
-    email: 'super@totoafya.org',
+    email: 'cto@terraseptsolutions.com',
     full_name: 'Super Admin',
     role: 'super_admin',
   },
@@ -178,19 +178,46 @@ const getActiveMockUser = () => {
 };
 
 const auth = {
-  signInWithNationalIdOrAnc: async (identifier, pin) => {
+  signInWithNationalIdOrAnc: async (identifier, pin, activationCode = null) => {
     const mothers = getStore('Mother');
-    const mother = mothers.find(m => 
-      (m.national_id === identifier || m.anc_number === identifier) && 
-      m.pin_code === pin
-    );
     
+    // 1. Try to find an already activated mother with matching PIN
+    let mother = mothers.find(m => 
+      (m.national_id === identifier || m.anc_number === identifier) && 
+      m.pin_code === pin &&
+      m.user_id !== null
+    );
+
     if (!mother) {
-      throw new Error('Invalid identifier or PIN');
+      // 2. If not found, check if it's an activation attempt
+      const unactivatedMother = mothers.find(m => 
+        (m.national_id === identifier || m.anc_number === identifier) && 
+        m.user_id === null
+      );
+
+      if (unactivatedMother) {
+        if (!activationCode) {
+          throw new Error('Profile activation required. Please enter the 6-digit Activation Code from your clinic booklet.');
+        }
+
+        if (unactivatedMother.activation_code !== activationCode) {
+          throw new Error('Invalid activation code.');
+        }
+
+        // Activate profile
+        unactivatedMother.user_id = 'mock-user-' + generateId();
+        unactivatedMother.pin_code = pin;
+        unactivatedMother.profile_complete = true;
+        unactivatedMother.activation_code = null;
+        saveStore('Mother', mothers);
+        mother = unactivatedMother;
+      } else {
+        throw new Error('Invalid identifier or PIN. If activating for the first time, check your details.');
+      }
     }
 
     const mockUser = {
-      id: mother.user_id || 'mock-user-' + mother.id,
+      id: mother.user_id,
       email: `${identifier}@local.app`,
       full_name: mother.full_name,
       role: 'user',

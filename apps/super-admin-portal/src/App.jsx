@@ -354,7 +354,7 @@ export default function App() {
                   {user?.full_name ? user.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'SA'}
                 </span>
               </div>
-              <p className="text-[12px] font-bold text-[#0A0A0A]">{user?.email || 'super@totoafya.org'}</p>
+              <p className="text-[12px] font-bold text-[#0A0A0A]">{user?.email || 'cto@terraseptsolutions.com'}</p>
             </div>
           </div>
         </header>

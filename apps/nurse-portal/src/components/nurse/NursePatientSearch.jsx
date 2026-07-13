@@ -91,16 +91,12 @@ export default function NursePatientSearch({ onSelect }) {
 
   const handleOnboardSubmit = async (e) => {
     e.preventDefault();
-    if (!caregiver.full_name || !caregiver.pin_code) {
-      setError('Caregiver Full Name and 4-Digit Security PIN are required.');
+    if (!caregiver.full_name) {
+      setError('Caregiver Full Name is required.');
       return;
     }
     if (!caregiver.national_id && !caregiver.anc_number) {
       setError('Please provide at least a National ID or an ANC Number.');
-      return;
-    }
-    if (!/^\d{4}$/.test(caregiver.pin_code.trim())) {
-      setError('Security PIN must be a 4-digit number.');
       return;
     }
 
@@ -111,6 +107,9 @@ export default function NursePatientSearch({ onSelect }) {
       const currentUser = await db.auth.me();
       const facilityId = currentUser?.facility_id || null;
 
+      // Generate activation code
+      const actCode = Math.floor(100000 + Math.random() * 900000).toString();
+
       // 1. Create caregiver profile
       const newMother = await db.entities.Mother.create({
         ...caregiver,
@@ -118,7 +117,10 @@ export default function NursePatientSearch({ onSelect }) {
         national_id: caregiver.national_id || null,
         anc_number: caregiver.anc_number || null,
         edd: caregiver.lmp ? new Date(new Date(caregiver.lmp).getTime() + 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null,
-        profile_complete: true,
+        profile_complete: false,
+        activation_code: actCode,
+        activation_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        pin_code: null, // Left null until mother activates
       });
 
       let childRegistered = false;
@@ -154,7 +156,7 @@ export default function NursePatientSearch({ onSelect }) {
 
       setCredentials({
         identifier: caregiver.national_id || caregiver.anc_number,
-        pin: caregiver.pin_code,
+        activationCode: actCode,
         caregiverName: caregiver.full_name,
         childName: childRegistered ? child.full_name : null,
       });
@@ -187,7 +189,6 @@ export default function NursePatientSearch({ onSelect }) {
       caregiver_type: 'mother',
       language_preference: 'en',
     });
-    setAddChild(false);
     setChild({
       full_name: '',
       date_of_birth: new Date().toISOString().split('T')[0],
@@ -417,7 +418,6 @@ export default function NursePatientSearch({ onSelect }) {
                           <option value="not_pregnant">Not Pregnant</option>
                         </select>
                       </div>
-
                       {caregiver.pregnancy_status === 'pregnant' && (
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Last Menstrual Period (LMP)</label>
@@ -429,19 +429,6 @@ export default function NursePatientSearch({ onSelect }) {
                           />
                         </div>
                       )}
-
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Security PIN (4 Digits) *</label>
-                        <input
-                          type="password"
-                          required
-                          maxLength={4}
-                          value={caregiver.pin_code}
-                          onChange={e => setCaregiver(c => ({ ...c, pin_code: e.target.value.replace(/\D/g, '') }))}
-                          placeholder="e.g. 1234"
-                          className="h-11 px-3.5 bg-[#F4F6F8] border border-transparent rounded-[12px] text-[13px] font-mono text-[#0A0A0A] outline-none focus:border-[#0F4C81] focus:bg-white transition-all"
-                        />
-                      </div>
                     </div>
                   </div>
 
@@ -578,9 +565,7 @@ export default function NursePatientSearch({ onSelect }) {
                         <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Child Profile</p>
                         <p className="text-[14px] font-bold text-[#0A0A0A]">{credentials.childName}</p>
                       </div>
-                    )}
-
-                    <div className="grid grid-cols-2 gap-4 border-t border-[#E5E5E5]/50 pt-4">
+                    )}                    <div className="grid grid-cols-2 gap-4 border-t border-[#E5E5E5]/50 pt-4">
                       <div className="flex flex-col items-start gap-1">
                         <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Sign-in ID</p>
                         <p className="text-[16px] font-extrabold text-[#0F4C81] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
@@ -588,23 +573,23 @@ export default function NursePatientSearch({ onSelect }) {
                         </p>
                       </div>
                       <div className="flex flex-col items-start gap-1">
-                        <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Security PIN</p>
+                        <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0]">Activation PIN</p>
                         <p className="text-[16px] font-extrabold text-[#0F4C81] font-mono select-all bg-white px-2 py-0.5 rounded border border-[#E5E5E5]">
-                          {credentials?.pin}
+                          {credentials?.activationCode}
                         </p>
                       </div>
                     </div>
                   </div>
-
+ 
                   <div className="w-full max-w-md text-left bg-white border border-[#E5E5E5] rounded-[16px] p-4 text-[12px] text-[#555555] flex flex-col gap-2.5">
                     <p className="font-bold text-[#0A0A0A]">Sign-in Guide / Maelezo ya Kuingia:</p>
                     <div className="flex gap-2">
                       <ArrowRight size={13} className="text-[#0F4C81] flex-shrink-0 mt-0.5" />
-                      <p><strong>EN:</strong> Open the PWA, enter the Sign-in ID above (National ID or ANC Number) and the Security PIN to activate your profile.</p>
+                      <p><strong>EN:</strong> Open the PWA, select "Activate your profile", and enter the Sign-in ID and the Activation PIN code above to claim and activate your profile.</p>
                     </div>
                     <div className="flex gap-2">
                       <ArrowRight size={13} className="text-[#0F4C81] flex-shrink-0 mt-0.5" />
-                      <p><strong>SW:</strong> Fungua PWA, weka Kitambulisho cha Kuingia hapo juu (Kitambulisho cha Taifa au Nambari ya ANC) na PIN ya Usalama ili kuwezesha wasifu wako.</p>
+                      <p><strong>SW:</strong> Fungua PWA, chagua "Wezesha wasifu wako", kisha weka Kitambulisho cha Kuingia na PIN ya Uanzishaji hapo juu ili kudai na kuwezesha wasifu wako.</p>
                     </div>
                   </div>
 
