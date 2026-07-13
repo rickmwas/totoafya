@@ -692,6 +692,7 @@ CREATE TABLE IF NOT EXISTS developer_concerns (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_developer_concerns_updated_at ON developer_concerns;
 CREATE TRIGGER update_developer_concerns_updated_at
     BEFORE UPDATE ON developer_concerns
     FOR EACH ROW
@@ -742,6 +743,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS block_audit_log_changes ON audit_logs;
 CREATE TRIGGER block_audit_log_changes
     BEFORE UPDATE OR DELETE ON audit_logs
     FOR EACH ROW
@@ -830,7 +832,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- K. FEATURE FLAGS CONFIGURATION
-CREATE TABLE feature_flags (
+CREATE TABLE IF NOT EXISTS feature_flags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     flag_key TEXT UNIQUE NOT NULL,
     is_enabled BOOLEAN DEFAULT FALSE,
@@ -851,7 +853,7 @@ CREATE POLICY "Allow super admins to manage feature flags"
     USING (get_user_role() = 'super_admin');
 
 -- L. SYSTEM EXCEPTIONS & APPLICATION LOGS
-CREATE TABLE system_errors (
+CREATE TABLE IF NOT EXISTS system_errors (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
     user_role TEXT,
@@ -873,7 +875,7 @@ CREATE POLICY "Allow administrators to read errors"
     ON system_errors FOR SELECT TO authenticated
     USING (get_user_role() IN ('super_admin', 'admin'));
 
-CREATE TABLE system_logs (
+CREATE TABLE IF NOT EXISTS system_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
     user_role TEXT,
