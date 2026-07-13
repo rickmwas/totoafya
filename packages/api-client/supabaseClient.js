@@ -382,7 +382,8 @@ const auth = {
       full_name: nurse.full_name,
       role: nurse.role || 'nurse',
       facility_id: nurse.facility_id,
-      nurse_id: nurse.id
+      nurse_id: nurse.id,
+      status: nurse.status
     };
   },
   verifyNursePin: async (email, pin) => {
@@ -403,7 +404,8 @@ const auth = {
       full_name: nurse.full_name,
       role: nurse.role || 'nurse',
       facility_id: nurse.facility_id,
-      nurse_id: nurse.id
+      nurse_id: nurse.id,
+      status: nurse.status
     };
   },
   login: async (email, password) => {
@@ -439,7 +441,8 @@ const auth = {
         full_name: nurse.full_name,
         role: nurse.role || 'nurse',
         facility_id: nurse.facility_id,
-        nurse_id: nurse.id
+        nurse_id: nurse.id,
+        status: nurse.status
       };
     }
 
@@ -524,7 +527,8 @@ const auth = {
           full_name: nurse.full_name,
           role: nurse.role || 'nurse', // 'nurse' or 'admin'
           facility_id: nurse.facility_id,
-          nurse_id: nurse.id
+          nurse_id: nurse.id,
+          status: nurse.status
         };
       }
 

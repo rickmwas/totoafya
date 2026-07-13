@@ -112,6 +112,18 @@ export default function App() {
 
 
 
+  const handleLoginSuccess = async () => {
+    try {
+      const activeUser = await db.auth.me();
+      setUser(activeUser);
+      if (activeUser && activeUser.role === 'super_admin') {
+        await loadAllData();
+      }
+    } catch (err) {
+      console.error('Failed to resolve authenticated user', err);
+    }
+  };
+
   // Filter lists based on selected facility
   const filteredMothers = mothers.filter(m => {
     const matchesFac = selectedFacilityFilter ? m.facility_id === selectedFacilityFilter : true;
@@ -154,7 +166,7 @@ export default function App() {
   }
 
   if (!user || user.role !== 'super_admin') {
-    return <Login onLoginSuccess={loadAllData} />;
+    return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (

@@ -19,10 +19,16 @@ CREATE TABLE IF NOT EXISTS facilities (
     name TEXT NOT NULL,
     location TEXT,
     facility_code TEXT UNIQUE,
+    level TEXT,
+    county TEXT,
+    sub_county TEXT,
+    phone TEXT,
+    address TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_facilities_updated_at ON facilities;
 CREATE TRIGGER update_facilities_updated_at
     BEFORE UPDATE ON facilities
     FOR EACH ROW
@@ -44,10 +50,15 @@ CREATE TABLE IF NOT EXISTS nurses (
     county TEXT, -- Optional county assignment for county admins
     pin_code TEXT, -- 4-6 digit clinical access PIN
     badge_token TEXT UNIQUE, -- Badge tag identifier (NFC/RFID)
+    employee_id TEXT,
+    phone TEXT,
+    designation TEXT,
+    status TEXT DEFAULT 'pending_activation',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_nurses_updated_at ON nurses;
 CREATE TRIGGER update_nurses_updated_at
     BEFORE UPDATE ON nurses
     FOR EACH ROW
@@ -99,6 +110,7 @@ CREATE TABLE IF NOT EXISTS mothers (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_mothers_updated_at ON mothers;
 CREATE TRIGGER update_mothers_updated_at
     BEFORE UPDATE ON mothers
     FOR EACH ROW
@@ -125,6 +137,7 @@ CREATE TABLE IF NOT EXISTS children (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_children_updated_at ON children;
 CREATE TRIGGER update_children_updated_at
     BEFORE UPDATE ON children
     FOR EACH ROW
@@ -157,6 +170,7 @@ CREATE TABLE IF NOT EXISTS anc_visits (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_anc_visits_updated_at ON anc_visits;
 CREATE TRIGGER update_anc_visits_updated_at
     BEFORE UPDATE ON anc_visits
     FOR EACH ROW
@@ -184,6 +198,7 @@ CREATE TABLE IF NOT EXISTS growth_records (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_growth_records_updated_at ON growth_records;
 CREATE TRIGGER update_growth_records_updated_at
     BEFORE UPDATE ON growth_records
     FOR EACH ROW
@@ -208,6 +223,7 @@ CREATE TABLE IF NOT EXISTS immunizations (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_immunizations_updated_at ON immunizations;
 CREATE TRIGGER update_immunizations_updated_at
     BEFORE UPDATE ON immunizations
     FOR EACH ROW
@@ -229,6 +245,7 @@ CREATE TABLE IF NOT EXISTS milestones (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_milestones_updated_at ON milestones;
 CREATE TRIGGER update_milestones_updated_at
     BEFORE UPDATE ON milestones
     FOR EACH ROW
@@ -256,6 +273,7 @@ CREATE TABLE IF NOT EXISTS learning_contents (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_learning_contents_updated_at ON learning_contents;
 CREATE TRIGGER update_learning_contents_updated_at
     BEFORE UPDATE ON learning_contents
     FOR EACH ROW
@@ -282,6 +300,7 @@ CREATE TABLE IF NOT EXISTS ai_alerts (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+DROP TRIGGER IF EXISTS update_ai_alerts_updated_at ON ai_alerts;
 CREATE TRIGGER update_ai_alerts_updated_at
     BEFORE UPDATE ON ai_alerts
     FOR EACH ROW
@@ -380,32 +399,45 @@ ALTER TABLE learning_contents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_alerts ENABLE ROW LEVEL SECURITY;
 
 -- A. FACILITIES policies
+DROP POLICY IF EXISTS "Allow read access to authenticated users" ON facilities;
 CREATE POLICY "Allow read access to authenticated users" 
     ON facilities FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Super admin facilities write access" ON facilities;
 CREATE POLICY "Super admin facilities write access" 
     ON facilities FOR ALL TO authenticated 
     USING (get_user_role() = 'super_admin');
 
 -- B. NURSES policies
+DROP POLICY IF EXISTS "Allow super admins full access to nurses" ON nurses;
 CREATE POLICY "Allow super admins full access to nurses"
     ON nurses FOR ALL TO authenticated
     USING (get_user_role() = 'super_admin');
 
+DROP POLICY IF EXISTS "Allow facility admins to manage facility nurses" ON nurses;
 CREATE POLICY "Allow facility admins to manage facility nurses"
     ON nurses FOR ALL TO authenticated
     USING (get_user_role() = 'admin' AND facility_id = get_user_facility_id());
 
+DROP POLICY IF EXISTS "Allow nurses to view other nurses at same facility" ON nurses;
 CREATE POLICY "Allow nurses to view other nurses at same facility"
     ON nurses FOR SELECT TO authenticated
     USING (facility_id = get_user_facility_id());
 
+DROP POLICY IF EXISTS "Allow nurses to update their own profile" ON nurses;
+CREATE POLICY "Allow nurses to update their own profile"
+    ON nurses FOR UPDATE TO authenticated
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
+
 -- B.1 TEMPORARY GRANTS policies
+DROP POLICY IF EXISTS "Allow super admins full access to temporary grants" ON temporary_grants;
 CREATE POLICY "Allow super admins full access to temporary grants"
     ON temporary_grants FOR ALL TO authenticated
     USING (get_user_role() = 'super_admin');
 
 -- C. MOTHERS policies
+DROP POLICY IF EXISTS "Super admins break-glass access to mothers" ON mothers;
 CREATE POLICY "Super admins break-glass access to mothers"
     ON mothers FOR ALL TO authenticated 
     USING (
@@ -418,10 +450,12 @@ CREATE POLICY "Super admins break-glass access to mothers"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage facility mothers" ON mothers;
 CREATE POLICY "Facility staff manage facility mothers"
     ON mothers FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND facility_id = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view mothers in county" ON mothers;
 CREATE POLICY "County admins view mothers in county"
     ON mothers FOR SELECT TO authenticated
     USING (
@@ -429,6 +463,7 @@ CREATE POLICY "County admins view mothers in county"
         AND county = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers select and update own profile" ON mothers;
 CREATE POLICY "Mothers select and update own profile"
     ON mothers FOR ALL TO authenticated
     USING (
@@ -443,6 +478,7 @@ CREATE POLICY "Mothers select and update own profile"
     );
 
 -- D. CHILDREN policies
+DROP POLICY IF EXISTS "Super admins break-glass access to children" ON children;
 CREATE POLICY "Super admins break-glass access to children"
     ON children FOR ALL TO authenticated 
     USING (
@@ -455,10 +491,12 @@ CREATE POLICY "Super admins break-glass access to children"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage facility children" ON children;
 CREATE POLICY "Facility staff manage facility children"
     ON children FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view children in county" ON children;
 CREATE POLICY "County admins view children in county"
     ON children FOR SELECT TO authenticated
     USING (
@@ -466,11 +504,13 @@ CREATE POLICY "County admins view children in county"
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers full access to own children" ON children;
 CREATE POLICY "Mothers full access to own children"
     ON children FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- E. ANC VISITS policies
+DROP POLICY IF EXISTS "Super admins break-glass access to visits" ON anc_visits;
 CREATE POLICY "Super admins break-glass access to visits"
     ON anc_visits FOR ALL TO authenticated
     USING (
@@ -483,10 +523,12 @@ CREATE POLICY "Super admins break-glass access to visits"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage visits" ON anc_visits;
 CREATE POLICY "Facility staff manage visits"
     ON anc_visits FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view visits in county" ON anc_visits;
 CREATE POLICY "County admins view visits in county"
     ON anc_visits FOR SELECT TO authenticated
     USING (
@@ -494,11 +536,13 @@ CREATE POLICY "County admins view visits in county"
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers view own visits" ON anc_visits;
 CREATE POLICY "Mothers view own visits"
     ON anc_visits FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- F. GROWTH RECORDS policies
+DROP POLICY IF EXISTS "Super admins break-glass access to growth records" ON growth_records;
 CREATE POLICY "Super admins break-glass access to growth records"
     ON growth_records FOR ALL TO authenticated
     USING (
@@ -511,10 +555,12 @@ CREATE POLICY "Super admins break-glass access to growth records"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage growth records" ON growth_records;
 CREATE POLICY "Facility staff manage growth records"
     ON growth_records FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view growth records in county" ON growth_records;
 CREATE POLICY "County admins view growth records in county"
     ON growth_records FOR SELECT TO authenticated
     USING (
@@ -522,11 +568,13 @@ CREATE POLICY "County admins view growth records in county"
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers view own child growth records" ON growth_records;
 CREATE POLICY "Mothers view own child growth records"
     ON growth_records FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- G. IMMUNIZATIONS policies
+DROP POLICY IF EXISTS "Super admins break-glass access to immunizations" ON immunizations;
 CREATE POLICY "Super admins break-glass access to immunizations"
     ON immunizations FOR ALL TO authenticated
     USING (
@@ -539,10 +587,12 @@ CREATE POLICY "Super admins break-glass access to immunizations"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage immunizations" ON immunizations;
 CREATE POLICY "Facility staff manage immunizations"
     ON immunizations FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view immunizations in county" ON immunizations;
 CREATE POLICY "County admins view immunizations in county"
     ON immunizations FOR SELECT TO authenticated
     USING (
@@ -550,11 +600,13 @@ CREATE POLICY "County admins view immunizations in county"
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers manage child immunizations" ON immunizations;
 CREATE POLICY "Mothers manage child immunizations"
     ON immunizations FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- H. MILESTONES policies
+DROP POLICY IF EXISTS "Super admins break-glass access to milestones" ON milestones;
 CREATE POLICY "Super admins break-glass access to milestones"
     ON milestones FOR ALL TO authenticated
     USING (
@@ -567,10 +619,12 @@ CREATE POLICY "Super admins break-glass access to milestones"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage milestones" ON milestones;
 CREATE POLICY "Facility staff manage milestones"
     ON milestones FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view milestones in county" ON milestones;
 CREATE POLICY "County admins view milestones in county"
     ON milestones FOR SELECT TO authenticated
     USING (
@@ -578,11 +632,13 @@ CREATE POLICY "County admins view milestones in county"
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers manage child milestones" ON milestones;
 CREATE POLICY "Mothers manage child milestones"
     ON milestones FOR ALL TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- I. AI ALERTS policies
+DROP POLICY IF EXISTS "Super admins break-glass access to alerts" ON ai_alerts;
 CREATE POLICY "Super admins break-glass access to alerts"
     ON ai_alerts FOR ALL TO authenticated
     USING (
@@ -595,10 +651,12 @@ CREATE POLICY "Super admins break-glass access to alerts"
         )
     );
 
+DROP POLICY IF EXISTS "Facility staff manage alerts" ON ai_alerts;
 CREATE POLICY "Facility staff manage alerts"
     ON ai_alerts FOR ALL TO authenticated
     USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
+DROP POLICY IF EXISTS "County admins view alerts in county" ON ai_alerts;
 CREATE POLICY "County admins view alerts in county"
     ON ai_alerts FOR SELECT TO authenticated
     USING (
@@ -606,14 +664,17 @@ CREATE POLICY "County admins view alerts in county"
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
+DROP POLICY IF EXISTS "Mothers view own alerts" ON ai_alerts;
 CREATE POLICY "Mothers view own alerts"
     ON ai_alerts FOR ALL TO authenticated
     USING (mother_id = (SELECT id FROM mothers WHERE user_id = auth.uid()));
 
 -- J. LEARNING CONTENTS policies
+DROP POLICY IF EXISTS "Allow all authenticated users to read learning content" ON learning_contents;
 CREATE POLICY "Allow all authenticated users to read learning content"
     ON learning_contents FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Allow super admins and content admins to manage content" ON learning_contents;
 CREATE POLICY "Allow super admins and content admins to manage content"
     ON learning_contents FOR ALL TO authenticated
     USING (get_user_role() IN ('super_admin', 'admin'));
@@ -640,10 +701,12 @@ CREATE INDEX IF NOT EXISTS idx_developer_concerns_facility ON developer_concerns
 
 ALTER TABLE developer_concerns ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow facility staff to manage facility concerns" ON developer_concerns;
 CREATE POLICY "Allow facility staff to manage facility concerns"
     ON developer_concerns FOR ALL TO authenticated
     USING (facility_id = get_user_facility_id());
 
+DROP POLICY IF EXISTS "Allow super admins full access to concerns" ON developer_concerns;
 CREATE POLICY "Allow super admins full access to concerns"
     ON developer_concerns FOR ALL TO authenticated
     USING (get_user_role() = 'super_admin');
@@ -778,9 +841,11 @@ CREATE TABLE feature_flags (
 
 ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow all authenticated users to read flags" ON feature_flags;
 CREATE POLICY "Allow all authenticated users to read flags"
     ON feature_flags FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Allow super admins to manage feature flags" ON feature_flags;
 CREATE POLICY "Allow super admins to manage feature flags"
     ON feature_flags FOR ALL TO authenticated
     USING (get_user_role() = 'super_admin');
@@ -799,9 +864,11 @@ CREATE TABLE system_errors (
 
 ALTER TABLE system_errors ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow all authenticated users to log exceptions" ON system_errors;
 CREATE POLICY "Allow all authenticated users to log exceptions"
     ON system_errors FOR INSERT TO authenticated WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow administrators to read errors" ON system_errors;
 CREATE POLICY "Allow administrators to read errors"
     ON system_errors FOR SELECT TO authenticated
     USING (get_user_role() IN ('super_admin', 'admin'));
@@ -818,9 +885,11 @@ CREATE TABLE system_logs (
 
 ALTER TABLE system_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow all authenticated users to insert system logs" ON system_logs;
 CREATE POLICY "Allow all authenticated users to insert system logs"
     ON system_logs FOR INSERT TO authenticated WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow administrators to read system logs" ON system_logs;
 CREATE POLICY "Allow administrators to read system logs"
     ON system_logs FOR SELECT TO authenticated
     USING (get_user_role() IN ('super_admin', 'admin'));
@@ -833,9 +902,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS block_audit_log_modification ON audit_logs;
 CREATE TRIGGER block_audit_log_modification
 BEFORE UPDATE OR DELETE ON audit_logs
 FOR EACH ROW
 EXECUTE FUNCTION prevent_audit_log_modification();
+
+-- N. AUTOMATIC STAFF SIGNUP LINKING TRIGGER
+CREATE OR REPLACE FUNCTION public.handle_staff_signup()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE public.nurses
+    SET user_id = NEW.id
+    WHERE email = NEW.email;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_staff_auth_signup ON auth.users;
+CREATE TRIGGER on_staff_auth_signup
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_staff_signup();
+
+-- O. INCREMENTAL COLUMNS FOR EXISTING DATABASES
+ALTER TABLE public.facilities ADD COLUMN IF NOT EXISTS level TEXT;
+ALTER TABLE public.facilities ADD COLUMN IF NOT EXISTS county TEXT;
+ALTER TABLE public.facilities ADD COLUMN IF NOT EXISTS sub_county TEXT;
+ALTER TABLE public.facilities ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.facilities ADD COLUMN IF NOT EXISTS address TEXT;
+
+ALTER TABLE public.nurses ADD COLUMN IF NOT EXISTS employee_id TEXT;
+ALTER TABLE public.nurses ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.nurses ADD COLUMN IF NOT EXISTS designation TEXT;
+ALTER TABLE public.nurses ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending_activation';
+
+-- Enable RLS and add update profile policy
+ALTER TABLE public.nurses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow nurses to update their own profile" ON public.nurses;
+CREATE POLICY "Allow nurses to update their own profile"
+    ON public.nurses FOR UPDATE TO authenticated
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
+
 
 

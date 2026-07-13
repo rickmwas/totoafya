@@ -3,6 +3,11 @@ export interface Facility {
   name: string;
   location?: string;
   facility_code?: string;
+  level?: string;
+  county?: string;
+  sub_county?: string;
+  phone?: string;
+  address?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -13,6 +18,10 @@ export interface Nurse {
   full_name: string;
   email: string;
   role?: 'nurse' | 'admin';
+  employee_id?: string;
+  phone?: string;
+  designation?: string;
+  status?: 'pending_activation' | 'active' | 'suspended';
   created_at?: string;
   updated_at?: string;
 }

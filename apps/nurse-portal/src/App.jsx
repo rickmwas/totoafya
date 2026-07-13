@@ -50,6 +50,10 @@ const AuthenticatedApp = () => {
     }
   }
 
+  if (user && user.status === 'pending_activation') {
+    return <Login isActivationFlow={true} />;
+  }
+
   // Redirect authenticated user with nurse role away from login
   if (user && user.role === 'nurse' && currentPath === '/login') {
     return <Navigate to="/" replace />;
