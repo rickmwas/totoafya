@@ -119,3 +119,5 @@ export function validateNationalId(id: string): boolean {
 export function validateAncNumber(anc: string): boolean {
   return anc.trim().length >= 4;
 }
+
+export * from './localCrypt';

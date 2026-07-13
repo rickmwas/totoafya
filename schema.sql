@@ -699,4 +699,76 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- K. FEATURE FLAGS CONFIGURATION
+CREATE TABLE feature_flags (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    flag_key TEXT UNIQUE NOT NULL,
+    is_enabled BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all authenticated users to read flags"
+    ON feature_flags FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Allow super admins to manage feature flags"
+    ON feature_flags FOR ALL TO authenticated
+    USING (get_user_role() = 'super_admin');
+
+-- L. SYSTEM EXCEPTIONS & APPLICATION LOGS
+CREATE TABLE system_errors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    user_role TEXT,
+    error_code TEXT,
+    message TEXT NOT NULL,
+    stack_trace TEXT,
+    device_info JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE system_errors ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all authenticated users to log exceptions"
+    ON system_errors FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow administrators to read errors"
+    ON system_errors FOR SELECT TO authenticated
+    USING (get_user_role() IN ('super_admin', 'admin'));
+
+CREATE TABLE system_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID,
+    user_role TEXT,
+    log_type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    payload JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE system_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all authenticated users to insert system logs"
+    ON system_logs FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Allow administrators to read system logs"
+    ON system_logs FOR SELECT TO authenticated
+    USING (get_user_role() IN ('super_admin', 'admin'));
+
+-- M. IMMUTABLE AUDIT LOGS TRIGGER
+CREATE OR REPLACE FUNCTION prevent_audit_log_modification()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Audit logs are immutable. Direct updates or deletions are prohibited.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER block_audit_log_modification
+BEFORE UPDATE OR DELETE ON audit_logs
+FOR EACH ROW
+EXECUTE FUNCTION prevent_audit_log_modification();
+
 
