@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS nurses (
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     role TEXT DEFAULT 'nurse',
+    county TEXT, -- Optional county assignment for county admins
     pin_code TEXT, -- 4-6 digit clinical access PIN
     badge_token TEXT UNIQUE, -- Badge tag identifier (NFC/RFID)
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -51,6 +52,17 @@ CREATE TRIGGER update_nurses_updated_at
     BEFORE UPDATE ON nurses
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- 2.1 TEMPORARY GRANTS Table (For super admin break-glass access)
+CREATE TABLE IF NOT EXISTS temporary_grants (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    record_id UUID NOT NULL, -- Target record ID (e.g. mother_id)
+    reason TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
 
 -- 3. MOTHERS Table (Maternal / Caregiver details)
 CREATE TABLE IF NOT EXISTS mothers (
@@ -357,6 +369,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Enable RLS on all tables
 ALTER TABLE facilities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE nurses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE temporary_grants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mothers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE children ENABLE ROW LEVEL SECURITY;
 ALTER TABLE anc_visits ENABLE ROW LEVEL SECURITY;
@@ -387,6 +400,11 @@ CREATE POLICY "Allow nurses to view other nurses at same facility"
     ON nurses FOR SELECT TO authenticated
     USING (facility_id = get_user_facility_id());
 
+-- B.1 TEMPORARY GRANTS policies
+CREATE POLICY "Allow super admins full access to temporary grants"
+    ON temporary_grants FOR ALL TO authenticated
+    USING (get_user_role() = 'super_admin');
+
 -- C. MOTHERS policies
 CREATE POLICY "Super admins break-glass access to mothers"
     ON mothers FOR ALL TO authenticated 
@@ -402,7 +420,14 @@ CREATE POLICY "Super admins break-glass access to mothers"
 
 CREATE POLICY "Facility staff manage facility mothers"
     ON mothers FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND facility_id = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND facility_id = get_user_facility_id());
+
+CREATE POLICY "County admins view mothers in county"
+    ON mothers FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND county = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers select and update own profile"
     ON mothers FOR ALL TO authenticated
@@ -432,7 +457,14 @@ CREATE POLICY "Super admins break-glass access to children"
 
 CREATE POLICY "Facility staff manage facility children"
     ON children FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+CREATE POLICY "County admins view children in county"
+    ON children FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers full access to own children"
     ON children FOR ALL TO authenticated
@@ -453,7 +485,14 @@ CREATE POLICY "Super admins break-glass access to visits"
 
 CREATE POLICY "Facility staff manage visits"
     ON anc_visits FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+CREATE POLICY "County admins view visits in county"
+    ON anc_visits FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers view own visits"
     ON anc_visits FOR ALL TO authenticated
@@ -474,7 +513,14 @@ CREATE POLICY "Super admins break-glass access to growth records"
 
 CREATE POLICY "Facility staff manage growth records"
     ON growth_records FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "County admins view growth records in county"
+    ON growth_records FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers view own child growth records"
     ON growth_records FOR ALL TO authenticated
@@ -495,7 +541,14 @@ CREATE POLICY "Super admins break-glass access to immunizations"
 
 CREATE POLICY "Facility staff manage immunizations"
     ON immunizations FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "County admins view immunizations in county"
+    ON immunizations FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers manage child immunizations"
     ON immunizations FOR ALL TO authenticated
@@ -516,7 +569,14 @@ CREATE POLICY "Super admins break-glass access to milestones"
 
 CREATE POLICY "Facility staff manage milestones"
     ON milestones FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+CREATE POLICY "County admins view milestones in county"
+    ON milestones FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers manage child milestones"
     ON milestones FOR ALL TO authenticated
@@ -537,7 +597,14 @@ CREATE POLICY "Super admins break-glass access to alerts"
 
 CREATE POLICY "Facility staff manage alerts"
     ON ai_alerts FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+CREATE POLICY "County admins view alerts in county"
+    ON ai_alerts FOR SELECT TO authenticated
+    USING (
+        get_user_role() = 'county_admin' 
+        AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
+    );
 
 CREATE POLICY "Mothers view own alerts"
     ON ai_alerts FOR ALL TO authenticated

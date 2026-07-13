@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Building, Users, Baby, Heart, Shield, Sparkles, 
-  Search, ArrowRight, Grid, AlertCircle, RefreshCw, Layers, LogOut, Menu
+  Search, ArrowRight, Grid, AlertCircle, RefreshCw, Layers, LogOut, Menu,
+  Activity
 } from 'lucide-react';
 import db from '@/api/totoafyaClient';
 import FacilityFacilities from './components/FacilityFacilities';
 import FacilityNurses from './components/FacilityNurses';
 import Login from './components/Login';
+import PilotMonitoring from './components/PilotMonitoring';
 
 const MetricSkeleton = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -218,6 +220,16 @@ export default function App() {
                 <Baby size={18} />
                 <span className="text-[13px]">Patients Registry</span>
               </button>
+
+              <button
+                onClick={() => { setActiveTab('monitoring'); setSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
+                  activeTab === 'monitoring' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
+                }`}
+              >
+                <Activity size={18} />
+                <span className="text-[13px]">Pilot Telemetry</span>
+              </button>
             </nav>
 
             <div className="px-4 py-3 border-t border-[#E5E5E5]">
@@ -292,6 +304,16 @@ export default function App() {
           >
             <Baby size={18} />
             <span className="text-[13px]">Patients Registry</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('monitoring')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
+              activeTab === 'monitoring' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
+            }`}
+          >
+            <Activity size={18} />
+            <span className="text-[13px]">Pilot Telemetry</span>
           </button>
         </nav>
 
@@ -561,6 +583,10 @@ export default function App() {
                     </div>
                   </div>
                 )
+              )}
+
+              {activeTab === 'monitoring' && (
+                <PilotMonitoring />
               )}
 
           </div>
