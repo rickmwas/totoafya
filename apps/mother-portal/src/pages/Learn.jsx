@@ -388,6 +388,28 @@ function getYoutubeEmbedUrl(url) {
 export default function Learn() {
   const { t, lang } = useLang();
   
+  const learningHubEnabled = db.features.isEnabled('enable-learning-hub');
+  
+  if (!learningHubEnabled) {
+    return (
+      <AppShell activeTab="learn" title={lang === 'sw' ? 'Kituo cha Kujifunza' : 'Learning Hub'}>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 mb-4 border border-rose-100">
+            <BookOpen size={28} />
+          </div>
+          <h2 className="text-[18px] font-extrabold text-[#0A0A0A]">
+            {lang === 'sw' ? 'Kituo cha Kujifunza kimezimwa' : 'Learning Hub is disabled'}
+          </h2>
+          <p className="text-[13px] text-[#666666] mt-2 max-w-[280px]">
+            {lang === 'sw' 
+              ? 'Msimamizi wa mfumo amezima kituo hiki kwa sasa. Tafadhali jaribu tena baadaye.'
+              : 'This section has been temporarily disabled by the system administrator. Please check back later.'}
+          </p>
+        </div>
+      </AppShell>
+    );
+  }
+
   // Context states
   const [mother, setMother] = useState(null);
   const [children, setChildren] = useState([]);

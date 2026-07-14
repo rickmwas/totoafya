@@ -9,6 +9,7 @@ import FacilityFacilities from './components/FacilityFacilities';
 import FacilityNurses from './components/FacilityNurses';
 import Login from './components/Login';
 import PilotMonitoring from './components/PilotMonitoring';
+import FeatureFlags from './components/FeatureFlags';
 
 const MetricSkeleton = () => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
@@ -57,6 +58,7 @@ export default function App() {
   const [nurses, setNurses] = useState([]);
   const [mothers, setMothers] = useState([]);
   const [children, setChildren] = useState([]);
+  const [featureFlags, setFeatureFlags] = useState([]);
   const [selectedFacilityFilter, setSelectedFacilityFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -74,6 +76,9 @@ export default function App() {
     try {
       const activeUser = await db.auth.me();
       setUser(activeUser);
+      if (db.features && db.features.load) {
+        await db.features.load();
+      }
       if (activeUser && activeUser.role === 'super_admin') {
         await loadAllData();
       }
@@ -87,17 +92,19 @@ export default function App() {
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [facs, ns, moms, kids] = await Promise.all([
+      const [facs, ns, moms, kids, flags] = await Promise.all([
         db.entities.Facility.list('-created_date', 500),
         db.entities.Nurse.list('-created_date', 500),
         db.entities.Mother.list('-created_date', 500),
         db.entities.Child.list('-created_date', 500),
+        db.entities.FeatureFlag ? db.entities.FeatureFlag.list('name', 100) : Promise.resolve([]),
       ]);
 
       setFacilities(facs);
       setNurses(ns);
       setMothers(moms);
       setChildren(kids);
+      setFeatureFlags(flags || []);
     } catch (err) {
       console.error('Failed to load data', err);
     } finally {
@@ -242,6 +249,16 @@ export default function App() {
                 <Activity size={18} />
                 <span className="text-[13px]">Pilot Telemetry</span>
               </button>
+
+              <button
+                onClick={() => { setActiveTab('features'); setSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
+                  activeTab === 'features' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
+                }`}
+              >
+                <Layers size={18} />
+                <span className="text-[13px]">Feature Flags</span>
+              </button>
             </nav>
 
             <div className="px-4 py-3 border-t border-[#E5E5E5]">
@@ -326,6 +343,16 @@ export default function App() {
           >
             <Activity size={18} />
             <span className="text-[13px]">Pilot Telemetry</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('features')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] w-full text-left transition-all duration-150 ${
+              activeTab === 'features' ? 'bg-[#0047FF] text-white font-bold' : 'text-[#666666] hover:bg-[#FAFAFA] font-semibold'
+            }`}
+          >
+            <Layers size={18} />
+            <span className="text-[13px]">Feature Flags</span>
           </button>
         </nav>
 
@@ -599,6 +626,10 @@ export default function App() {
 
               {activeTab === 'monitoring' && (
                 <PilotMonitoring />
+              )}
+
+              {activeTab === 'features' && (
+                <FeatureFlags initialFlags={featureFlags} onRefresh={loadAllData} />
               )}
 
           </div>

@@ -6,6 +6,24 @@ import ReactMarkdown from 'react-markdown';
 import { differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
 
 export default function PatientChatbot({ mother, children, lang, className, initialInput }) {
+  const chatbotEnabled = db.features.isEnabled('enable-chatbot');
+  
+  if (!chatbotEnabled) {
+    return (
+      <div className={cn("p-6 bg-slate-50 border border-slate-200 rounded-[20px] text-center flex flex-col items-center justify-center min-h-[200px]", className)}>
+        <Bot className="text-slate-400 mb-2 animate-bounce" size={28} />
+        <p className="text-[13px] font-bold text-slate-800">
+          {lang === 'sw' ? 'Msaidizi wa AI kwa sasa amezimwa' : 'AI Health Assistant is currently disabled'}
+        </p>
+        <p className="text-[11px] text-slate-500 mt-1 max-w-[250px] mx-auto">
+          {lang === 'sw' 
+            ? 'Tafadhali wasiliana na msimamizi wa kituo au jaribu tena baadaye.' 
+            : 'Please contact the system administrator or check back later.'}
+        </p>
+      </div>
+    );
+  }
+
   const caregiverType = mother?.caregiver_type || 'mother';
   const roleLabel = caregiverType === 'father' ? (lang === 'sw' ? 'baba' : 'Dad') 
                   : caregiverType === 'guardian' ? (lang === 'sw' ? 'mlezi' : 'Guardian')

@@ -38,7 +38,7 @@ export default function NursePatientView({ patient, onBack }) {
     setLoading(false);
   };
 
-  const riskColor = patient.risk_level === 'critical' ? '#E51010' :
+  const riskColor = (patient.risk_level === 'critical' && db.features.isEnabled('enable-danger-signs-red-alerts')) ? '#E51010' :
     patient.risk_level === 'high' ? '#F9A825' : '#0F4C81';
 
   return (

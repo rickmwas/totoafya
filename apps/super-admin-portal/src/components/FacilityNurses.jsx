@@ -53,7 +53,9 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
         const { error: inviteError } = await supabase.functions.invoke('invite-staff', {
           body: { 
             email: form.email, 
-            redirectTo: portalUrl 
+            redirectTo: portalUrl,
+            full_name: form.full_name,
+            role: form.role
           }
         });
 

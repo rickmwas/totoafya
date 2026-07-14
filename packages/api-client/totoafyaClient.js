@@ -119,7 +119,7 @@ function makeEntityStore(name) {
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
   'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
-  'ChildImmunization', 'Facility', 'Nurse', 'DeveloperConcern',
+  'ChildImmunization', 'Facility', 'Nurse', 'DeveloperConcern', 'FeatureFlag'
 ];
 
 const entities = Object.fromEntries(
@@ -582,9 +582,50 @@ const integrations = {
   },
 };
 
-const localDb = { auth, entities, integrations };
+let featureFlagsCache = {
+  'enable-chatbot': true,
+  'enable-learning-hub': true,
+  'enable-danger-signs-red-alerts': true
+};
 
-export const db = supabaseDb;
+export const features = {
+  isEnabled: (name) => {
+    return featureFlagsCache[name] ?? true;
+  },
+  load: async () => {
+    try {
+      const raw = localStorage.getItem('db_FeatureFlag');
+      const records = raw ? JSON.parse(raw) : [];
+      if (records.length === 0) {
+        const defaults = [
+          { id: '1', name: 'enable-chatbot', description: 'Enables chatbot', is_enabled: true },
+          { id: '2', name: 'enable-learning-hub', description: 'Enables learning hub', is_enabled: true },
+          { id: '3', name: 'enable-danger-signs-red-alerts', description: 'Enables danger signs red alerts', is_enabled: true }
+        ];
+        localStorage.setItem('db_FeatureFlag', JSON.stringify(defaults));
+        defaults.forEach(flag => {
+          featureFlagsCache[flag.name] = flag.is_enabled;
+        });
+      } else {
+        records.forEach(flag => {
+          featureFlagsCache[flag.name] = flag.is_enabled;
+        });
+      }
+    } catch (e) {
+      console.error("Failed to load mock feature flags", e);
+    }
+  },
+  setCache: (name, val) => {
+    featureFlagsCache[name] = val;
+  },
+  getAll: () => {
+    return featureFlagsCache;
+  }
+};
+
+const localDb = { auth, entities, integrations, features };
+
+export const db = isSupabase ? supabaseDb : localDb;
 export const totoafya = db;
 export default db;
 

@@ -7,9 +7,10 @@ import { AuthProvider, useAuth } from './lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider, useLang } from '@/context/LanguageContext';
 import { ProfileProvider } from '@/context/ProfileContext';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import SplashScreen from '@/components/SplashScreen';
 import B2CPaywall from '@/components/B2CPaywall';
+import db from '@/api/totoafyaClient';
 
 // Page imports
 import Home from '@/pages/Home';
@@ -36,6 +37,12 @@ const AuthenticatedApp = () => {
   const { lang } = useLang();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  useEffect(() => {
+    if (db.features && db.features.load) {
+      db.features.load().catch(console.error);
+    }
+  }, []);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (

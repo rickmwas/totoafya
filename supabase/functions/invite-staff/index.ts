@@ -15,6 +15,7 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error('Supabase environment variables are missing on the function container.');
@@ -27,7 +28,7 @@ serve(async (req) => {
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse invitation body
-    const { email, redirectTo } = await req.json();
+    const { email, redirectTo, full_name, role } = await req.json();
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email is required' }), {
@@ -36,20 +37,74 @@ serve(async (req) => {
       });
     }
 
-    // 1. Call Supabase Admin Auth API to generate a signup/invite confirmation link (WITHOUT sending email automatically)
-    const { data: linkData, error: linkError } = await supabaseClient.auth.admin.generateLink({
-      type: 'invite',
-      email: email,
-      options: {
-        redirectTo: redirectTo || undefined
+    // Generate a secure random temporary password (e.g. Toto@ followed by 6 random chars)
+    const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const tempPassword = `Toto@${randomChars}`;
+
+    // Check if the nurse profile exists and already has a user_id
+    const { data: nurseRecord, error: nurseFetchError } = await supabaseClient
+      .from('nurses')
+      .select('user_id, id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (nurseFetchError) throw nurseFetchError;
+
+    let authUser = null;
+
+    if (nurseRecord && nurseRecord.user_id) {
+      // If a user_id is already linked, update the password for the existing auth user
+      const { data: updateData, error: updateError } = await supabaseClient.auth.admin.updateUserById(
+        nurseRecord.user_id,
+        { password: tempPassword }
+      );
+      if (updateError) throw updateError;
+      authUser = updateData?.user;
+    } else {
+      // Create a new auth user
+      const { data: createData, error: createError } = await supabaseClient.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          role: role || 'nurse',
+          full_name: full_name || 'Staff Member'
+        }
+      });
+
+      if (createError) {
+        // Handle user already exists in auth.users but not linked to public.nurses
+        if (createError.message?.includes('already exists') || createError.status === 422) {
+          const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers();
+          if (listError) throw listError;
+          const existingUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          if (existingUser) {
+            const { data: updateData, error: updateError } = await supabaseClient.auth.admin.updateUserById(
+              existingUser.id,
+              { password: tempPassword }
+            );
+            if (updateError) throw updateError;
+            authUser = updateData?.user;
+
+            // Link the auth user ID to the nurse record explicitly
+            const { error: linkError } = await supabaseClient
+              .from('nurses')
+              .update({ user_id: existingUser.id })
+              .eq('email', email);
+            if (linkError) throw linkError;
+          } else {
+            throw createError;
+          }
+        } else {
+          throw createError;
+        }
+      } else {
+        authUser = createData?.user;
       }
-    });
+    }
 
-    if (linkError) throw linkError;
-
-    const actionLink = linkData?.properties?.action_link;
-    if (!actionLink) {
-      throw new Error('Failed to generate invitation action link from Supabase Auth.');
+    if (!authUser) {
+      throw new Error('Failed to resolve or create auth user.');
     }
 
     // 2. Dispatch a beautiful, premium, customized HTML email using Resend
@@ -109,6 +164,28 @@ serve(async (req) => {
                   text-align: center;
                   margin-bottom: 32px;
                 }
+                .credentials-box {
+                  background-color: #F7F5F0;
+                  border-radius: 16px;
+                  padding: 24px;
+                  margin-bottom: 32px;
+                  border: 1px solid #E5E5E5;
+                  text-align: left;
+                }
+                .credential-row {
+                  margin-bottom: 12px;
+                  font-size: 14px;
+                  color: #555555;
+                }
+                .credential-row:last-child {
+                  margin-bottom: 0;
+                }
+                .credential-value {
+                  font-family: monospace;
+                  font-weight: bold;
+                  color: #006B5F;
+                  font-size: 15px;
+                }
                 .button-container {
                   text-align: center;
                   margin-bottom: 32px;
@@ -143,18 +220,29 @@ serve(async (req) => {
             <body>
               <div class="card">
                 <div class="logo">🌿 TotoAfya Digital</div>
-                <h2 class="welcome-title">Welcome to TotoAfya!</h2>
+                <h2 class="welcome-title">Welcome to TotoAfya, ${full_name || 'Staff Member'}!</h2>
                 <p class="description">
                   You have been pre-registered as a staff member on the TotoAfya Digital platform. 
-                  Please click the secure button below to set up your password and activate your account.
+                  Please log in with the temporary credentials below to activate your account.
                 </p>
-                <div class="button-container">
-                  <a href="${actionLink}" class="btn" target="_blank">Activate Account</a>
+                <div class="credentials-box">
+                  <div class="credential-row">
+                    <strong>Email:</strong> <span class="credential-value" style="color: #0A0A0A;">${email}</span>
+                  </div>
+                  <div class="credential-row">
+                    <strong>Temporary Password:</strong> <span class="credential-value" style="font-size: 16px;">${tempPassword}</span>
+                  </div>
                 </div>
+                <div class="button-container">
+                  <a href="${redirectTo || 'https://nursetotoafya.vercel.app/login'}" class="btn" target="_blank">Log In & Activate Account</a>
+                </div>
+                <p style="font-size: 12px; color: #555555; text-align: center; margin-top: -16px; margin-bottom: 32px;">
+                  <em>Note: You will be prompted to choose a new secure password and complete your profile immediately after logging in.</em>
+                </p>
                 <div class="footer">
                   This invitation is sent automatically. If you did not request this, please ignore this email.<br/><br/>
                   If the button does not work, copy and paste this link in your browser:<br/>
-                  <a href="${actionLink}" class="fallback-link">${actionLink}</a>
+                  <a href="${redirectTo || 'https://nursetotoafya.vercel.app/login'}" class="fallback-link">${redirectTo || 'https://nursetotoafya.vercel.app/login'}</a>
                 </div>
               </div>
             </body>
@@ -172,7 +260,6 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       message: 'Invitation generated and sent via Resend successfully',
-      link: actionLink,
       resend: resendData
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

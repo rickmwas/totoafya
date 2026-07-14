@@ -34,7 +34,8 @@ const TABLE_MAP = {
   'LearningContent': 'learning_contents',
   'Facility': 'facilities',
   'Nurse': 'nurses',
-  'DeveloperConcern': 'developer_concerns'
+  'DeveloperConcern': 'developer_concerns',
+  'FeatureFlag': 'feature_flags'
 };
 
 function dbToClient(record) {
@@ -173,7 +174,7 @@ export const makeSupabaseStore = (entityName) => {
 const ENTITY_NAMES = [
   'Mother', 'Child', 'AIAlert', 'ANCVisit',
   'GrowthRecord', 'Milestone', 'Immunization', 'LearningContent',
-  'Facility', 'Nurse', 'DeveloperConcern'
+  'Facility', 'Nurse', 'DeveloperConcern', 'FeatureFlag'
 ];
 
 const entities = Object.fromEntries(
@@ -834,6 +835,40 @@ const integrations = {
   },
 };
 
-export const supabaseDb = { auth, entities, integrations };
+let featureFlagsCache = {
+  'enable-chatbot': true,
+  'enable-learning-hub': true,
+  'enable-danger-signs-red-alerts': true
+};
+
+export const features = {
+  isEnabled: (name) => {
+    return featureFlagsCache[name] ?? true;
+  },
+  load: async () => {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase.from('feature_flags').select('name, is_enabled');
+      if (error) throw error;
+      if (data) {
+        const newCache = {};
+        data.forEach(flag => {
+          newCache[flag.name] = flag.is_enabled;
+        });
+        featureFlagsCache = { ...featureFlagsCache, ...newCache };
+      }
+    } catch (e) {
+      console.error("Failed to load feature flags cache", e);
+    }
+  },
+  setCache: (name, val) => {
+    featureFlagsCache[name] = val;
+  },
+  getAll: () => {
+    return featureFlagsCache;
+  }
+};
+
+export const supabaseDb = { auth, entities, integrations, features };
 export default supabaseDb;
 

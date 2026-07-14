@@ -16,6 +16,9 @@ export default function NursePortal() {
   const [recentPatients, setRecentPatients] = useState([]);
 
   useEffect(() => {
+    if (db.features && db.features.load) {
+      db.features.load().catch(console.error);
+    }
     db.auth.me().then(u => {
       setUser(u);
       loadRecentPatients(u);
@@ -116,7 +119,7 @@ export default function NursePortal() {
                       </div>
                       <div className={cn(
                         'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide flex-shrink-0',
-                        p.risk_level === 'critical' ? 'bg-[#E51010]/10 text-[#E51010]' :
+                        (p.risk_level === 'critical' && db.features.isEnabled('enable-danger-signs-red-alerts')) ? 'bg-[#E51010]/10 text-[#E51010]' :
                         p.risk_level === 'high' ? 'bg-[#F9A825]/10 text-[#F9A825]' :
                         'bg-[#0F4C81]/10 text-[#0F4C81]'
                       )}>
