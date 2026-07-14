@@ -832,25 +832,42 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- K. FEATURE FLAGS CONFIGURATION
-CREATE TABLE IF NOT EXISTS feature_flags (
+DROP TABLE IF EXISTS feature_flags CASCADE;
+CREATE TABLE feature_flags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    flag_key TEXT UNIQUE NOT NULL,
-    is_enabled BOOLEAN DEFAULT FALSE,
+    name TEXT UNIQUE NOT NULL,
+    is_enabled BOOLEAN DEFAULT TRUE,
     description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Trigger for auto updated_at
+DROP TRIGGER IF EXISTS update_feature_flags_updated_at ON feature_flags;
+CREATE TRIGGER update_feature_flags_updated_at
+    BEFORE UPDATE ON feature_flags
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
 ALTER TABLE feature_flags ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow all authenticated users to read flags" ON feature_flags;
 CREATE POLICY "Allow all authenticated users to read flags"
-    ON feature_flags FOR SELECT TO authenticated USING (true);
+    ON feature_flags FOR SELECT TO authenticated, anon USING (true);
 
 DROP POLICY IF EXISTS "Allow super admins to manage feature flags" ON feature_flags;
 CREATE POLICY "Allow super admins to manage feature flags"
     ON feature_flags FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin')
+    WITH CHECK (get_user_role() = 'super_admin');
+
+-- Seed initial feature flags
+INSERT INTO feature_flags (name, description, is_enabled)
+VALUES 
+    ('enable-chatbot', 'Enables/disables the AI health chat assistant chatbot in the caregiver portal.', TRUE),
+    ('enable-learning-hub', 'Enables/disables the Learning Hub (bilingual health education hub) in the caregiver portal.', TRUE),
+    ('enable-danger-signs-red-alerts', 'Enables/disables the red high-risk alerts and indicators in the clinician portal.', TRUE)
+ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description;
 
 -- L. SYSTEM EXCEPTIONS & APPLICATION LOGS
 CREATE TABLE IF NOT EXISTS system_errors (
@@ -946,44 +963,3 @@ CREATE POLICY "Allow nurses to update their own profile"
     USING (user_id = auth.uid())
     WITH CHECK (user_id = auth.uid());
 
-
--- P. FEATURE FLAGS TABLE
-CREATE TABLE IF NOT EXISTS public.feature_flags (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    is_enabled BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Trigger for auto updated_at
-DROP TRIGGER IF EXISTS update_feature_flags_updated_at ON public.feature_flags;
-CREATE TRIGGER update_feature_flags_updated_at
-    BEFORE UPDATE ON public.feature_flags
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
--- Enable RLS
-ALTER TABLE public.feature_flags ENABLE ROW LEVEL SECURITY;
-
--- Allow public read (all authenticated/anon users can inspect flags)
-DROP POLICY IF EXISTS "Allow all authenticated users to read feature flags" ON public.feature_flags;
-CREATE POLICY "Allow all authenticated users to read feature flags"
-    ON public.feature_flags FOR SELECT TO authenticated, anon
-    USING (true);
-
--- Allow super_admins users to manage feature flags
-DROP POLICY IF EXISTS "Allow super_admins to manage feature flags" ON public.feature_flags;
-CREATE POLICY "Allow super_admins to manage feature flags"
-    ON public.feature_flags FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin')
-    WITH CHECK (get_user_role() = 'super_admin');
-
--- Seed initial feature flags
-INSERT INTO public.feature_flags (name, description, is_enabled)
-VALUES 
-    ('enable-chatbot', 'Enables/disables the AI health chat assistant chatbot in the caregiver portal.', TRUE),
-    ('enable-learning-hub', 'Enables/disables the Learning Hub (bilingual health education hub) in the caregiver portal.', TRUE),
-    ('enable-danger-signs-red-alerts', 'Enables/disables the red high-risk alerts and indicators in the clinician portal.', TRUE)
-ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description;
