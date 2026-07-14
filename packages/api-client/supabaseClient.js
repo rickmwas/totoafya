@@ -432,7 +432,7 @@ const auth = {
     const { data: nurse } = await supabase
       .from('nurses')
       .select('*')
-      .eq('email', emailStr)
+      .ilike('email', emailStr)
       .maybeSingle();
 
     if (nurse) {
@@ -518,7 +518,7 @@ const auth = {
       const { data: nurse } = await supabase
         .from('nurses')
         .select('*')
-        .eq('email', email)
+        .ilike('email', email)
         .maybeSingle();
 
       if (nurse) {

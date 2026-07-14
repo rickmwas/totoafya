@@ -35,7 +35,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
       // 1. Create staff profile in the database
       const newNurse = await db.entities.Nurse.create({
         full_name: form.full_name,
-        email: form.email,
+        email: form.email.toLowerCase().trim(),
         facility_id: form.facility_id,
         role: form.role,
         employee_id: form.employee_id,
@@ -52,7 +52,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
         const { error: inviteError } = await supabase.functions.invoke('invite-staff', {
           body: { 
-            email: form.email, 
+            email: form.email.toLowerCase().trim(), 
             redirectTo: portalUrl,
             full_name: form.full_name,
             role: form.role

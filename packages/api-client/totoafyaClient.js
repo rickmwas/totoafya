@@ -342,7 +342,7 @@ const auth = {
       localStorage.setItem('is_logged_in', 'true');
       return MOCK_USERS[foundRole];
     }
-    throw new Error('User not found. Try one of: ' + Object.values(MOCK_USERS).map(u => u.email).join(', '));
+    throw new Error('Invalid email or password.');
   },
   signUp: async (email, password, metadata = {}) => {
     const newUser = {

@@ -37,6 +37,8 @@ serve(async (req) => {
       });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
     // Generate a secure random temporary password (e.g. Toto@ followed by 6 random chars)
     const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
     const tempPassword = `Toto@${randomChars}`;
@@ -45,7 +47,7 @@ serve(async (req) => {
     const { data: nurseRecord, error: nurseFetchError } = await supabaseClient
       .from('nurses')
       .select('user_id, id')
-      .eq('email', email)
+      .ilike('email', cleanEmail)
       .maybeSingle();
 
     if (nurseFetchError) throw nurseFetchError;
@@ -63,7 +65,7 @@ serve(async (req) => {
     } else {
       // Create a new auth user
       const { data: createData, error: createError } = await supabaseClient.auth.admin.createUser({
-        email: email,
+        email: cleanEmail,
         password: tempPassword,
         email_confirm: true,
         user_metadata: {
@@ -77,7 +79,7 @@ serve(async (req) => {
         if (createError.message?.includes('already exists') || createError.status === 422) {
           const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers();
           if (listError) throw listError;
-          const existingUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+          const existingUser = users.find(u => u.email?.toLowerCase() === cleanEmail);
           if (existingUser) {
             const { data: updateData, error: updateError } = await supabaseClient.auth.admin.updateUserById(
               existingUser.id,
@@ -90,7 +92,7 @@ serve(async (req) => {
             const { error: linkError } = await supabaseClient
               .from('nurses')
               .update({ user_id: existingUser.id })
-              .eq('email', email);
+              .ilike('email', cleanEmail);
             if (linkError) throw linkError;
           } else {
             throw createError;
@@ -107,6 +109,8 @@ serve(async (req) => {
       throw new Error('Failed to resolve or create auth user.');
     }
 
+    const activationLink = `${redirectTo || 'https://nursetotoafya.vercel.app/login'}?email=${encodeURIComponent(cleanEmail)}&code=${encodeURIComponent(tempPassword)}`;
+
     // 2. Dispatch a beautiful, premium, customized HTML email using Resend
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -116,7 +120,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: "TotoAfya Onboarding <totoafya@terraseptsolutions.com>",
-        to: [email],
+        to: [cleanEmail],
         subject: "Activate Your TotoAfya Staff Account 🌿",
         html: `
           <!DOCTYPE html>
@@ -227,14 +231,14 @@ serve(async (req) => {
                 </p>
                 <div class="credentials-box">
                   <div class="credential-row">
-                    <strong>Email:</strong> <span class="credential-value" style="color: #0A0A0A;">${email}</span>
+                    <strong>Email:</strong> <span class="credential-value" style="color: #0A0A0A;">${cleanEmail}</span>
                   </div>
                   <div class="credential-row">
                     <strong>Temporary Password:</strong> <span class="credential-value" style="font-size: 16px;">${tempPassword}</span>
                   </div>
                 </div>
                 <div class="button-container">
-                  <a href="${redirectTo || 'https://nursetotoafya.vercel.app/login'}" class="btn" target="_blank">Log In & Activate Account</a>
+                  <a href="${activationLink}" class="btn" target="_blank">Activate Account</a>
                 </div>
                 <p style="font-size: 12px; color: #555555; text-align: center; margin-top: -16px; margin-bottom: 32px;">
                   <em>Note: You will be prompted to choose a new secure password and complete your profile immediately after logging in.</em>
@@ -242,7 +246,7 @@ serve(async (req) => {
                 <div class="footer">
                   This invitation is sent automatically. If you did not request this, please ignore this email.<br/><br/>
                   If the button does not work, copy and paste this link in your browser:<br/>
-                  <a href="${redirectTo || 'https://nursetotoafya.vercel.app/login'}" class="fallback-link">${redirectTo || 'https://nursetotoafya.vercel.app/login'}</a>
+                  <a href="${activationLink}" class="fallback-link">${activationLink}</a>
                 </div>
               </div>
             </body>

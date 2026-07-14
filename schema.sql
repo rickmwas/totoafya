@@ -933,7 +933,7 @@ RETURNS TRIGGER AS $$
 BEGIN
     UPDATE public.nurses
     SET user_id = NEW.id
-    WHERE email = NEW.email;
+    WHERE LOWER(email) = LOWER(NEW.email);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

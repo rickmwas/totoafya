@@ -18,6 +18,37 @@ export default function Login({ isActivationFlow = false }) {
   const [employeeId, setEmployeeId] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const [autoVerifying, setAutoVerifying] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    const codeParam = params.get('code');
+    if (emailParam && codeParam) {
+      setEmail(emailParam);
+      setPassword(codeParam);
+      setAutoVerifying(true);
+      setLoading(true);
+      setError(null);
+
+      const performAutoLogin = async () => {
+        try {
+          await db.auth.login(emailParam, codeParam);
+          await checkAppState();
+          window.history.replaceState({}, document.title, window.location.pathname);
+        } catch (err) {
+          console.error("Auto-activation failed:", err);
+          setError(err.message || 'Auto-activation failed. Please enter your credentials manually.');
+          setLoading(false);
+          setAutoVerifying(false);
+        }
+      };
+
+      const timer = setTimeout(performAutoLogin, 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   useEffect(() => {
     if (isActivationFlow && user?.nurse_id) {
       db.entities.Nurse.get(user.nurse_id).then(n => {
@@ -91,6 +122,26 @@ export default function Login({ isActivationFlow = false }) {
       setLoading(false);
     }
   };
+
+  if (autoVerifying) {
+    return (
+      <div className="min-h-screen bg-slate-955 flex flex-col justify-center items-center p-4 font-sans text-slate-100 animate-in fade-in duration-300">
+        <div className="w-full max-w-[420px] bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-6">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Building className="w-5 h-5 text-indigo-500 animate-pulse" />
+            <span className="text-xs font-semibold tracking-wider uppercase">TotoAfya Admin</span>
+          </div>
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-xl font-bold text-white">Verifying Onboarding Code</h1>
+            <p className="text-sm text-slate-400 max-w-[280px] leading-relaxed">
+              Verifying your invitation. You will be redirected to complete your profile in a moment...
+            </p>
+          </div>
+          <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   if (isActivationFlow) {
     return (
