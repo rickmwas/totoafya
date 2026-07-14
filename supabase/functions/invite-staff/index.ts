@@ -141,28 +141,29 @@ serve(async (req) => {
                   margin: 0 auto;
                   background-color: #FFFFFF;
                   border: 1px solid #E5E5E5;
-                  border-radius: 20px;
+                  border-radius: 24px;
                   padding: 40px;
-                  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                  box-shadow: 0 8px 30px rgba(0, 107, 95, 0.04);
                 }
-                .logo {
-                  font-size: 26px;
-                  font-weight: 800;
-                  color: #006B5F;
+                .logo-container {
                   text-align: center;
-                  margin-bottom: 24px;
-                  letter-spacing: -0.03em;
+                  margin-bottom: 32px;
+                }
+                .logo-img {
+                  height: 38px;
+                  object-fit: contain;
                 }
                 .welcome-title {
-                  font-size: 22px;
+                  font-size: 24px;
                   font-weight: 800;
                   color: #0A0A0A;
                   text-align: center;
+                  margin-top: 0;
                   margin-bottom: 12px;
-                  letter-spacing: -0.02em;
+                  letter-spacing: -0.03em;
                 }
                 .description {
-                  font-size: 14px;
+                  font-size: 14.5px;
                   color: #555555;
                   line-height: 1.6;
                   text-align: center;
@@ -174,21 +175,31 @@ serve(async (req) => {
                   padding: 24px;
                   margin-bottom: 32px;
                   border: 1px solid #E5E5E5;
-                  text-align: left;
                 }
                 .credential-row {
-                  margin-bottom: 12px;
+                  margin-bottom: 14px;
                   font-size: 14px;
                   color: #555555;
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
                 }
                 .credential-row:last-child {
                   margin-bottom: 0;
                 }
+                .credential-label {
+                  font-weight: 700;
+                  color: #555555;
+                }
                 .credential-value {
-                  font-family: monospace;
-                  font-weight: bold;
+                  font-family: 'Courier New', Courier, monospace;
+                  font-weight: 700;
                   color: #006B5F;
                   font-size: 15px;
+                  background-color: #FFFFFF;
+                  padding: 6px 12px;
+                  border-radius: 8px;
+                  border: 1px solid #E5E5E5;
                 }
                 .button-container {
                   text-align: center;
@@ -198,13 +209,13 @@ serve(async (req) => {
                   display: inline-block;
                   background-color: #006B5F;
                   color: #FFFFFF !important;
-                  padding: 14px 28px;
+                  padding: 14px 32px;
                   font-size: 14px;
                   font-weight: 700;
                   text-decoration: none;
-                  border-radius: 12px;
-                  box-shadow: 0 4px 12px rgba(0, 107, 95, 0.2);
-                  transition: all 0.2s ease;
+                  border-radius: 14px;
+                  box-shadow: 0 6px 18px rgba(0, 107, 95, 0.2);
+                  transition: all 0.25s ease;
                 }
                 .footer {
                   border-top: 1px solid #E5E5E5;
@@ -218,12 +229,15 @@ serve(async (req) => {
                   color: #006B5F;
                   word-break: break-all;
                   text-decoration: none;
+                  font-weight: 600;
                 }
               </style>
             </head>
             <body>
               <div class="card">
-                <div class="logo">🌿 TotoAfya Digital</div>
+                <div class="logo-container">
+                  <img class="logo-img" src="https://nursetotoafya.vercel.app/logo-horizontal.png" alt="TotoAfya Digital Logo" />
+                </div>
                 <h2 class="welcome-title">Welcome to TotoAfya, ${full_name || 'Staff Member'}!</h2>
                 <p class="description">
                   You have been pre-registered as a staff member on the TotoAfya Digital platform. 
@@ -231,20 +245,22 @@ serve(async (req) => {
                 </p>
                 <div class="credentials-box">
                   <div class="credential-row">
-                    <strong>Email:</strong> <span class="credential-value" style="color: #0A0A0A;">${cleanEmail}</span>
+                    <span class="credential-label">Email:</span>
+                    <span class="credential-value" style="color: #0A0A0A; font-family: sans-serif;">${cleanEmail}</span>
                   </div>
                   <div class="credential-row">
-                    <strong>Temporary Password:</strong> <span class="credential-value" style="font-size: 16px;">${tempPassword}</span>
+                    <span class="credential-label">Temporary Password:</span>
+                    <span class="credential-value">${tempPassword}</span>
                   </div>
                 </div>
                 <div class="button-container">
                   <a href="${activationLink}" class="btn" target="_blank">Activate Account</a>
                 </div>
-                <p style="font-size: 12px; color: #555555; text-align: center; margin-top: -16px; margin-bottom: 32px;">
-                  <em>Note: You will be prompted to choose a new secure password and complete your profile immediately after logging in.</em>
+                <p style="font-size: 12px; color: #777777; text-align: center; margin-top: -16px; margin-bottom: 32px; font-style: italic;">
+                  Note: You will be prompted to choose a new secure password and complete your profile immediately after logging in.
                 </p>
                 <div class="footer">
-                  This invitation is sent automatically. If you did not request this, please ignore this email.<br/><br/>
+                  This activation email is sent automatically. If you did not request this, please ignore it.<br/><br/>
                   If the button does not work, copy and paste this link in your browser:<br/>
                   <a href="${activationLink}" class="fallback-link">${activationLink}</a>
                 </div>
