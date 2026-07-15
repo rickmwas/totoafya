@@ -25,6 +25,9 @@ export default function Login({ isActivationFlow = false }) {
     const emailParam = params.get('email');
     const codeParam = params.get('code');
     if (emailParam && codeParam) {
+      // Clear the query parameters from the URL bar immediately to prevent duplicate runs on remount
+      window.history.replaceState({}, document.title, window.location.pathname);
+
       setEmail(emailParam);
       setPassword(codeParam);
       setAutoVerifying(true);
@@ -35,7 +38,6 @@ export default function Login({ isActivationFlow = false }) {
         try {
           await db.auth.login(emailParam, codeParam);
           await checkAppState();
-          window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
           console.error("Auto-activation failed:", err);
           setError(err.message || 'Auto-activation failed. Please enter your credentials manually.');
