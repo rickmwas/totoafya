@@ -2,6 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { hashCredential } from '@totoafya/auth';
 
 const getEnv = (key) => {
+  if (typeof window !== 'undefined' && window.__TOTOAFYA_ENV__ && window.__TOTOAFYA_ENV__[key] !== undefined) {
+    return window.__TOTOAFYA_ENV__[key];
+  }
   // Statically reference keys so Vite's compiler can replace them at build time
   if (key === 'VITE_DATABASE_PROVIDER') return import.meta.env.VITE_DATABASE_PROVIDER;
   if (key === 'VITE_SUPABASE_URL') return import.meta.env.VITE_SUPABASE_URL;
