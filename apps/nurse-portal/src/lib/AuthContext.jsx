@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings] = useState({ id: 'local', public_settings: {} });
+  const [lockKey, setLockKey] = useState(null);
 
   useEffect(() => {
     db.auth.me().then((u) => {
@@ -58,19 +59,120 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const lockSession = () => {
-    setIsLocked(true);
-    localStorage.setItem('nurse_session_locked', 'true');
+  // Helper to find the active Supabase auth token key in localStorage
+  const getSupabaseAuthKey = () => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        return key;
+      }
+    }
+    return null;
+  };
+
+  const lockSession = async () => {
+    const authKey = getSupabaseAuthKey();
+    if (!authKey) {
+      setIsLocked(true);
+      localStorage.setItem('nurse_session_locked', 'true');
+      return;
+    }
+
+    const tokenVal = localStorage.getItem(authKey);
+    if (!tokenVal) {
+      setIsLocked(true);
+      localStorage.setItem('nurse_session_locked', 'true');
+      return;
+    }
+
+    try {
+      // 1. Generate random key
+      const key = await window.crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+
+      // 2. Encrypt tokenVal
+      const enc = new TextEncoder();
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const ciphertext = await window.crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        enc.encode(tokenVal)
+      );
+
+      // 3. Export key and serialize data to base64
+      const rawKey = await window.crypto.subtle.exportKey('raw', key);
+      const keyBase64 = btoa(String.fromCharCode(...new Uint8Array(rawKey)));
+      const ivBase64 = btoa(String.fromCharCode(...iv));
+      const cipherBase64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)));
+
+      localStorage.setItem('nurse_encrypted_session', JSON.stringify({
+        iv: ivBase64,
+        ciphertext: cipherBase64
+      }));
+      localStorage.setItem('nurse_supabase_key_name', authKey);
+
+      // Save key in memory
+      setLockKey(keyBase64);
+
+      // Wipe raw token from disk
+      localStorage.removeItem(authKey);
+
+      setIsLocked(true);
+      localStorage.setItem('nurse_session_locked', 'true');
+    } catch (err) {
+      console.error("Failed to cryptographically lock session:", err);
+      setIsLocked(true);
+      localStorage.setItem('nurse_session_locked', 'true');
+    }
   };
 
   const unlockWithPin = async (pin) => {
     if (!user) throw new Error('No active nurse session found');
     setIsLoadingAuth(true);
     try {
+      // 1. Verify PIN via DB client
       const u = await db.auth.verifyNursePin(user.email, pin);
+
+      // 2. Decrypt the session token
+      const encryptedData = localStorage.getItem('nurse_encrypted_session');
+      const targetKey = localStorage.getItem('nurse_supabase_key_name') || getSupabaseAuthKey();
+
+      if (encryptedData && lockKey && targetKey) {
+        const { iv, ciphertext } = JSON.parse(encryptedData);
+
+        const keyData = new Uint8Array(atob(lockKey).split('').map(c => c.charCodeAt(0)));
+        const key = await window.crypto.subtle.importKey(
+          'raw',
+          keyData,
+          'AES-GCM',
+          true,
+          ['decrypt']
+        );
+
+        const ivData = new Uint8Array(atob(iv).split('').map(c => c.charCodeAt(0)));
+        const cipherData = new Uint8Array(atob(ciphertext).split('').map(c => c.charCodeAt(0)));
+
+        const decrypted = await window.crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: ivData },
+          key,
+          cipherData
+        );
+
+        const tokenVal = new TextDecoder().decode(decrypted);
+        localStorage.setItem(targetKey, tokenVal);
+
+        // Cleanup encrypted state
+        localStorage.removeItem('nurse_encrypted_session');
+        localStorage.removeItem('nurse_supabase_key_name');
+      }
+
       setUser(u);
       setIsLocked(false);
       localStorage.setItem('nurse_session_locked', 'false');
+      setLockKey(null);
       setAuthError(null);
     } catch (err) {
       throw err;
@@ -81,11 +183,14 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('nurse_session_locked');
+    localStorage.removeItem('nurse_encrypted_session');
+    localStorage.removeItem('nurse_supabase_key_name');
     db.auth.logout();
   };
 
   const navigateToLogin = () => {
-    db.auth.redirectToLogin();
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    window.location.href = '/login' + search;
   };
 
   const checkAppState = async () => {

@@ -1,6 +1,7 @@
 import db from '@/api/totoafyaClient';
 import React, { useState } from 'react';
 import { Search, X, UserPlus, Shield, Mail, Key, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { hashCredential } from '@totoafya/auth';
 import { cn } from '@/lib/utils';
 
 const KENYA_VACCINE_SCHEDULE = [
@@ -118,7 +119,7 @@ export default function NursePatientSearch({ onSelect }) {
         anc_number: caregiver.anc_number || null,
         edd: caregiver.lmp ? new Date(new Date(caregiver.lmp).getTime() + 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null,
         profile_complete: false,
-        activation_code: actCode,
+        activation_code: hashCredential(actCode),
         activation_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         pin_code: null, // Left null until mother activates
       });

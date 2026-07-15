@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, UserPlus, X, Key, Shield, Mail, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import db from '@/api/totoafyaClient';
+import { hashCredential } from '@totoafya/auth';
 
 const RISK_COLORS = {
   low: 'bg-[#2E5B47]/10 text-[#2E5B47]',
@@ -97,7 +98,7 @@ export default function FacilityMothers({ mothers, facilityId, onRefresh }) {
         anc_number: caregiver.anc_number || null,
         edd: caregiver.lmp ? new Date(new Date(caregiver.lmp).getTime() + 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null,
         profile_complete: false,
-        activation_code: actCode,
+        activation_code: hashCredential(actCode),
         activation_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         pin_code: null, // Left null until mother activates
       });

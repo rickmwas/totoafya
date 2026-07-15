@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "@sentry/react": "^10.65.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "@totoafya/auth": "*"
   }
 }

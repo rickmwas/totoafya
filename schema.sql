@@ -931,6 +931,11 @@ EXECUTE FUNCTION prevent_audit_log_modification();
 CREATE OR REPLACE FUNCTION public.handle_staff_signup()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Only link if the email confirmation is completed
+    IF NEW.email_confirmed_at IS NULL THEN
+        RETURN NEW;
+    END IF;
+
     UPDATE public.nurses
     SET user_id = NEW.id
     WHERE LOWER(email) = LOWER(NEW.email);
@@ -940,7 +945,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS on_staff_auth_signup ON auth.users;
 CREATE TRIGGER on_staff_auth_signup
-    AFTER INSERT ON auth.users
+    AFTER INSERT OR UPDATE OF email_confirmed_at ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_staff_signup();
 
 -- O. INCREMENTAL COLUMNS FOR EXISTING DATABASES

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { hashCredential } from '@totoafya/auth';
 
 const getEnv = (key) => {
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
@@ -274,9 +275,9 @@ const auth = {
           'verify_and_activate_mother',
           {
             p_identifier: identifier,
-            p_activation_code: activationCode,
+            p_activation_code: hashCredential(activationCode),
             p_user_id: signUpData.user.id,
-            p_pin_code: pin
+            p_pin_code: hashCredential(pin)
           }
         );
 
@@ -368,10 +369,11 @@ const auth = {
   },
   loginNurseWithBadge: async (badgeToken) => {
     if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const hashedBadge = hashCredential(badgeToken);
     const { data: nurse, error } = await supabase
       .from('nurses')
       .select('*')
-      .eq('badge_token', badgeToken)
+      .eq('badge_token', hashedBadge)
       .maybeSingle();
 
     if (error) throw error;
@@ -389,11 +391,12 @@ const auth = {
   },
   verifyNursePin: async (email, pin) => {
     if (!supabase) throw new Error('Supabase client not initialized. Check your environment variables.');
+    const hashedPin = hashCredential(pin);
     const { data: nurse, error } = await supabase
       .from('nurses')
       .select('*')
       .eq('email', email)
-      .eq('pin_code', pin)
+      .eq('pin_code', hashedPin)
       .maybeSingle();
 
     if (error) throw error;
@@ -597,7 +600,8 @@ const auth = {
     window.location.href = '/login';
   },
   redirectToLogin: () => {
-    window.location.href = '/login';
+    const search = typeof window !== 'undefined' ? window.location.search : '';
+    window.location.href = '/login' + search;
   },
   switchMockRole: (role) => {
     if (MOCK_USERS[role]) {

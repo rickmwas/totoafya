@@ -47,8 +47,8 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
       // 2. Trigger invitation email if connected to Supabase
       if (supabase) {
         const portalUrl = form.role === 'admin'
-          ? 'https://totoafya-facility.vercel.app/'
-          : 'https://nursetotoafya.vercel.app/';
+          ? 'https://totoafya-facility.vercel.app/login'
+          : 'https://nursetotoafya.vercel.app/login';
 
         const { error: inviteError } = await supabase.functions.invoke('invite-staff', {
           body: { 

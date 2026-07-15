@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, UserPlus, Shield, X, BadgeCheck, Mail, Key } from 'lucide-react';
 import db from '@/api/totoafyaClient';
 import { useToast } from '@/components/ui/use-toast';
+import { hashCredential } from '@totoafya/auth';
 
 const ROLE_LABELS = {
   admin: 'Facility Admin',
@@ -63,8 +64,8 @@ export default function FacilityNurses({ nurses, facilityId, onRefresh }) {
         full_name: fullName,
         email: email,
         role: role,
-        pin_code: pinCode,
-        badge_token: badgeToken || null,
+        pin_code: hashCredential(pinCode),
+        badge_token: badgeToken ? hashCredential(badgeToken) : null,
       });
 
       toast({
