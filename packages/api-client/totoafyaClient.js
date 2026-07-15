@@ -1,6 +1,12 @@
 import { supabaseDb } from './supabaseClient';
 
 const getEnv = (key) => {
+  // Statically reference keys so Vite's compiler can replace them at build time
+  if (key === 'VITE_DATABASE_PROVIDER') return import.meta.env.VITE_DATABASE_PROVIDER;
+  if (key === 'VITE_SUPABASE_URL') return import.meta.env.VITE_SUPABASE_URL;
+  if (key === 'VITE_SUPABASE_ANON_KEY') return import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (key === 'VITE_GEMINI_API_KEY') return import.meta.env.VITE_GEMINI_API_KEY;
+
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
     return process.env[key];
   }
