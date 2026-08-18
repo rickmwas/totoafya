@@ -25,7 +25,6 @@ import Settings from '@/pages/Settings';
 import AddChild from '@/pages/AddChild';
 import ChildProfile from '@/pages/ChildProfile';
 import PatentDocument from '@/pages/PatentDocument';
-import PitchDeck from '@/pages/PitchDeck';
 import Login from '@/pages/Login';
 import Care from '@/pages/Care';
 import Profile from '@/pages/Profile';
@@ -104,7 +103,6 @@ const AuthenticatedApp = () => {
       <Route path="/add-child" element={<AddChild />} />
       <Route path="/child/:id" element={<ChildProfile />} />
       <Route path="/patent" element={<PatentDocument />} />
-      <Route path="/pitch" element={<PitchDeck />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

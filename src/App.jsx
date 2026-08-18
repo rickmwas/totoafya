@@ -24,7 +24,6 @@ import ChildProfile from '@/pages/ChildProfile';
 import FacilityDashboard from '@/pages/FacilityDashboard';
 import NursePortal from '@/pages/NursePortal';
 import PatentDocument from '@/pages/PatentDocument';
-import PitchDeck from '@/pages/PitchDeck';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -65,7 +64,6 @@ const AuthenticatedApp = () => {
       <Route path="/child/:id" element={<ChildProfile />} />
       <Route path="/facility" element={<FacilityDashboard />} />
       <Route path="/patent" element={<PatentDocument />} />
-      <Route path="/pitch" element={<PitchDeck />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
