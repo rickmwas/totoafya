@@ -8,7 +8,10 @@ export default defineConfig({
   envDir: '../../',
   resolve: {
     alias: {
-      '@/api/totoafyaClient': '@totoafya/api-client',
+      '@totoafya/business-logic': path.resolve(__dirname, '../../packages/business-logic/src/index.ts'),
+      '@totoafya/api-client': path.resolve(__dirname, '../../packages/api-client/index.js'),
+      '@totoafya/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@/api/totoafyaClient': path.resolve(__dirname, '../../packages/api-client/index.js'),
       '@': path.resolve(__dirname, './src'),
     },
   },

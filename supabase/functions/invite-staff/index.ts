@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
-const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || 'https://nursetotoafya.vercel.app';
+const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || 'https://nurse.totoafya.co.ke';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
@@ -148,7 +148,7 @@ serve(async (req) => {
       throw new Error('Failed to resolve or create auth user.');
     }
 
-    const activationLink = `${redirectTo || 'https://nursetotoafya.vercel.app/login'}?email=${encodeURIComponent(cleanEmail)}&code=${encodeURIComponent(tempPassword)}`;
+    const activationLink = `${redirectTo || 'https://nurse.totoafya.co.ke/login'}?email=${encodeURIComponent(cleanEmail)}&code=${encodeURIComponent(tempPassword)}`;
 
     // 2. Dispatch a beautiful, premium, customized HTML email using Resend
     const resendResponse = await fetch("https://api.resend.com/emails", {
@@ -275,7 +275,7 @@ serve(async (req) => {
             <body>
               <div class="card">
                 <div class="logo-container">
-                  <img class="logo-img" src="https://nursetotoafya.vercel.app/logo-horizontal.png" alt="TotoAfya Digital Logo" />
+                  <img class="logo-img" src="https://nurse.totoafya.co.ke/logo-horizontal.png" alt="TotoAfya Digital Logo" />
                 </div>
                 <h2 class="welcome-title">Welcome to TotoAfya, ${full_name || 'Staff Member'}!</h2>
                 <p class="description">

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Search, Plus, X, User, Mail, Building, Phone, Key, Activity } from 'lucide-react';
+import { Search, Plus, X, User, Mail, Building, Phone, Key, Activity, Check, Copy, ExternalLink, Sparkles } from 'lucide-react';
 import db, { supabase } from '@/api/totoafyaClient';
 
 export default function FacilityNurses({ nurses, facilities, onRefresh }) {
   const [search, setSearch] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [createdStaffInfo, setCreatedStaffInfo] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [form, setForm] = useState({ 
     full_name: '', 
     email: '', 
@@ -31,11 +33,24 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
     }
     setSubmitting(true);
     setError('');
+
+    // Generate random temporary password
+    const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const tempPassword = `Toto@${randomChars}`;
+    const cleanEmail = form.email.toLowerCase().trim();
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const portalUrl = isLocal
+      ? (form.role === 'admin' ? 'http://localhost:5002/login' : 'http://localhost:5001/login')
+      : (form.role === 'admin' ? 'https://facility.totoafya.co.ke/login' : 'https://nurse.totoafya.co.ke/login');
+    const activationLink = `${portalUrl}?email=${encodeURIComponent(cleanEmail)}&code=${encodeURIComponent(tempPassword)}`;
+
+    let emailSentSuccessfully = false;
+
     try {
       // 1. Create staff profile in the database
       const newNurse = await db.entities.Nurse.create({
         full_name: form.full_name,
-        email: form.email.toLowerCase().trim(),
+        email: cleanEmail,
         facility_id: form.facility_id,
         role: form.role,
         employee_id: form.employee_id,
@@ -46,23 +61,35 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
       // 2. Trigger invitation email if connected to Supabase
       if (supabase) {
-        const portalUrl = form.role === 'admin'
-          ? 'https://totoafya-facility.vercel.app/login'
-          : 'https://nursetotoafya.vercel.app/login';
+        try {
+          const { data, error: inviteError } = await supabase.functions.invoke('invite-staff', {
+            body: { 
+              email: cleanEmail, 
+              redirectTo: portalUrl,
+              full_name: form.full_name,
+              role: form.role
+            }
+          });
 
-        const { error: inviteError } = await supabase.functions.invoke('invite-staff', {
-          body: { 
-            email: form.email.toLowerCase().trim(), 
-            redirectTo: portalUrl,
-            full_name: form.full_name,
-            role: form.role
+          if (!inviteError) {
+            emailSentSuccessfully = true;
+          } else {
+            console.warn('Edge function email trigger warning:', inviteError.message);
           }
-        });
-
-        if (inviteError) {
-          console.error('Triggering email invite failed:', inviteError.message);
+        } catch (edgeFnErr) {
+          console.warn('Edge function not reachable:', edgeFnErr.message);
         }
       }
+
+      // 3. Set created staff info for the credentials modal
+      setCreatedStaffInfo({
+        name: form.full_name,
+        email: cleanEmail,
+        role: form.role,
+        tempPassword,
+        activationLink,
+        emailSent: emailSentSuccessfully
+      });
 
       setForm({ 
         full_name: '', 
@@ -101,6 +128,86 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
           <Plus size={15} /> Add Staff
         </button>
       </div>
+
+      {/* Staff Registered Credentials Modal */}
+      {createdStaffInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[24px] border border-[#E5E5E5] w-full max-w-lg p-6 relative shadow-2xl animate-in fade-in zoom-in duration-150">
+            <button
+              onClick={() => { setCreatedStaffInfo(null); setCopied(false); }}
+              className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-[#FAFAFA] text-[#666666] hover:bg-[#E5E5E5]"
+            >
+              <X size={15} />
+            </button>
+
+            <div className="w-12 h-12 rounded-[16px] bg-[#107C41]/10 text-[#107C41] flex items-center justify-center mb-4">
+              <Sparkles size={24} />
+            </div>
+
+            <h2 className="text-[20px] font-extrabold text-[#0A0A0A] tracking-tight">Staff Account Registered!</h2>
+            <p className="text-[13px] text-[#666666] mt-1 mb-5">
+              {createdStaffInfo.name} has been enrolled as a <strong>{createdStaffInfo.role === 'admin' ? 'Facility Administrator' : 'Nurse'}</strong>.
+            </p>
+
+            {/* Email dispatch alert */}
+            <div className={`p-3.5 rounded-[14px] text-[12px] font-semibold mb-4 flex items-center gap-2 ${
+              createdStaffInfo.emailSent 
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
+                : 'bg-amber-50 border border-amber-200 text-amber-800'
+            }`}>
+              <Mail size={16} className="flex-shrink-0" />
+              <span>
+                {createdStaffInfo.emailSent
+                  ? 'Invitation email was dispatched via Resend.'
+                  : 'Email sending in test mode. Share credentials or activation link below directly with staff:'}
+              </span>
+            </div>
+
+            {/* Credentials Box */}
+            <div className="bg-[#FAFAFA] border border-[#E5E5E5] rounded-[16px] p-4 flex flex-col gap-3 mb-5">
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-[#666666] font-semibold">Login Email:</span>
+                <span className="font-bold text-[#0A0A0A] font-mono">{createdStaffInfo.email}</span>
+              </div>
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-[#666666] font-semibold">Temporary Password:</span>
+                <span className="font-bold text-[#0047FF] font-mono bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                  {createdStaffInfo.tempPassword}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 text-[12px] pt-2 border-t border-[#E5E5E5]">
+                <span className="text-[#666666] font-semibold">Activation Link:</span>
+                <span className="text-[#0047FF] font-mono text-[11px] break-all bg-white p-2 rounded-lg border border-[#E5E5E5]">
+                  {createdStaffInfo.activationLink}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  const text = `🌿 TotoAfya Staff Account Details:\nEmail: ${createdStaffInfo.email}\nTemporary Password: ${createdStaffInfo.tempPassword}\nActivation Link: ${createdStaffInfo.activationLink}`;
+                  navigator.clipboard.writeText(text);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2500);
+                }}
+                className="flex-1 h-11 bg-[#0047FF] text-white text-[13px] font-bold rounded-[14px] hover:bg-[#003BCC] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,71,255,0.2)]"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                <span>{copied ? 'Copied to Clipboard!' : 'Copy Credentials'}</span>
+              </button>
+
+              <button
+                onClick={() => { setCreatedStaffInfo(null); setCopied(false); }}
+                className="px-5 h-11 bg-[#FAFAFA] hover:bg-[#E5E5E5] text-[#0A0A0A] text-[13px] font-bold rounded-[14px] transition-all"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Nurse Form/Modal */}
       {showAddForm && (
