@@ -346,12 +346,33 @@ CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS app_role AS $$
 DECLARE
     v_role app_role;
+    v_jwt_role text;
 BEGIN
     IF auth.uid() IS NULL THEN
         RETURN NULL;
     END IF;
 
-    -- Check staff table for active staff account
+    -- 1. Check user_metadata in JWT directly (Fast path for super_admin and staff)
+    v_jwt_role := COALESCE(
+        auth.jwt() -> 'user_metadata' ->> 'role',
+        auth.jwt() -> 'app_metadata' ->> 'role'
+    );
+    
+    IF v_jwt_role = 'super_admin' THEN
+        RETURN 'super_admin'::app_role;
+    ELSIF v_jwt_role = 'admin' OR v_jwt_role = 'facility_admin' THEN
+        RETURN 'facility_admin'::app_role;
+    ELSIF v_jwt_role = 'nurse' THEN
+        RETURN 'nurse'::app_role;
+    ELSIF v_jwt_role = 'doctor' THEN
+        RETURN 'doctor'::app_role;
+    ELSIF v_jwt_role = 'county_admin' THEN
+        RETURN 'county_admin'::app_role;
+    ELSIF v_jwt_role = 'moh_admin' THEN
+        RETURN 'moh_admin'::app_role;
+    END IF;
+
+    -- 2. Check staff table for active staff account
     SELECT role INTO v_role 
     FROM public.nurses 
     WHERE user_id = auth.uid() AND status = 'active'
@@ -361,7 +382,7 @@ BEGIN
         RETURN v_role;
     END IF;
 
-    -- Check mother table
+    -- 3. Check mother table
     SELECT 'mother'::app_role INTO v_role 
     FROM public.mothers 
     WHERE user_id = auth.uid()
@@ -401,6 +422,10 @@ BEGIN
     WHERE user_id = auth.uid()
     LIMIT 1;
     
+    IF v_facility_id IS NOT NULL THEN
+        RETURN v_facility_id;
+    END IF;
+
     RETURN v_facility_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -426,13 +451,15 @@ CREATE POLICY "Allow read access to authenticated users"
 DROP POLICY IF EXISTS "Super admin facilities write access" ON facilities;
 CREATE POLICY "Super admin facilities write access" 
     ON facilities FOR ALL TO authenticated 
-    USING (get_user_role() = 'super_admin'::app_role);
+    USING (get_user_role() = 'super_admin'::app_role OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'super_admin')
+    WITH CHECK (get_user_role() = 'super_admin'::app_role OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'super_admin');
 
 -- B. NURSES policies
 DROP POLICY IF EXISTS "Allow super admins full access to nurses" ON nurses;
 CREATE POLICY "Allow super admins full access to nurses"
     ON nurses FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin'::app_role);
+    USING (get_user_role() = 'super_admin'::app_role OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'super_admin')
+    WITH CHECK (get_user_role() = 'super_admin'::app_role OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'super_admin');
 
 DROP POLICY IF EXISTS "Allow facility admins to manage facility nurses" ON nurses;
 CREATE POLICY "Allow facility admins to manage facility nurses"
@@ -919,6 +946,157 @@ BEGIN
     RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- J.1 DIRECT ADMIN STAFF PROVISIONING RPC
+CREATE OR REPLACE FUNCTION admin_register_staff(
+    p_facility_id UUID,
+    p_full_name TEXT,
+    p_email TEXT,
+    p_role TEXT,
+    p_temp_password TEXT,
+    p_employee_id TEXT DEFAULT NULL,
+    p_phone TEXT DEFAULT NULL,
+    p_designation TEXT DEFAULT NULL
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_caller_role app_role;
+    v_user_id UUID;
+    v_clean_email TEXT := LOWER(TRIM(p_email));
+    v_encrypted_pw TEXT;
+    v_nurse_id UUID;
+    v_app_role app_role;
+BEGIN
+    -- 1. Check caller authorization (Must be super_admin or facility_admin)
+    v_caller_role := get_user_role();
+    IF v_caller_role NOT IN ('super_admin'::app_role, 'facility_admin'::app_role, 'admin'::app_role) 
+       AND COALESCE(auth.jwt() -> 'user_metadata' ->> 'role', '') <> 'super_admin' THEN
+        RAISE EXCEPTION 'Unauthorized: Only administrators can register staff';
+    END IF;
+
+    -- Validate role
+    IF p_role = 'admin' OR p_role = 'facility_admin' THEN
+        v_app_role := 'facility_admin'::app_role;
+    ELSIF p_role = 'doctor' THEN
+        v_app_role := 'doctor'::app_role;
+    ELSIF p_role = 'county_admin' THEN
+        v_app_role := 'county_admin'::app_role;
+    ELSE
+        v_app_role := 'nurse'::app_role;
+    END IF;
+
+    -- 2. Check if auth.users already exists
+    SELECT id INTO v_user_id FROM auth.users WHERE LOWER(email) = v_clean_email LIMIT 1;
+    v_encrypted_pw := crypt(p_temp_password, gen_salt('bf'));
+
+    IF v_user_id IS NULL THEN
+        v_user_id := gen_random_uuid();
+
+        -- Insert into auth.users with auto-confirmed email
+        INSERT INTO auth.users (
+            instance_id,
+            id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            confirmation_token,
+            recovery_token,
+            email_change_token_new,
+            email_change
+        ) VALUES (
+            '00000000-0000-0000-0000-000000000000',
+            v_user_id,
+            'authenticated',
+            'authenticated',
+            v_clean_email,
+            v_encrypted_pw,
+            NOW(),
+            '{"provider":"email","providers":["email"]}',
+            jsonb_build_object('role', p_role, 'full_name', p_full_name),
+            NOW(),
+            NOW(),
+            '', '', '', ''
+        );
+
+        -- Insert into auth.identities
+        INSERT INTO auth.identities (
+            id,
+            user_id,
+            identity_data,
+            provider,
+            provider_id,
+            last_sign_in_at,
+            created_at,
+            updated_at
+        ) VALUES (
+            v_user_id,
+            v_user_id,
+            jsonb_build_object('sub', v_user_id::text, 'email', v_clean_email, 'email_verified', true),
+            'email',
+            v_user_id::text,
+            NOW(),
+            NOW(),
+            NOW()
+        );
+    ELSE
+        -- Update existing auth password and metadata
+        UPDATE auth.users
+        SET encrypted_password = v_encrypted_pw,
+            email_confirmed_at = COALESCE(email_confirmed_at, NOW()),
+            raw_user_meta_data = jsonb_build_object('role', p_role, 'full_name', p_full_name),
+            updated_at = NOW()
+        WHERE id = v_user_id;
+    END IF;
+
+    -- 3. Insert or update public.nurses record
+    INSERT INTO public.nurses (
+        user_id,
+        facility_id,
+        full_name,
+        email,
+        role,
+        employee_id,
+        phone,
+        designation,
+        status
+    ) VALUES (
+        v_user_id,
+        p_facility_id,
+        p_full_name,
+        v_clean_email,
+        v_app_role,
+        p_employee_id,
+        p_phone,
+        p_designation,
+        'pending_activation'
+    )
+    ON CONFLICT (email) DO UPDATE SET
+        user_id = v_user_id,
+        facility_id = p_facility_id,
+        full_name = p_full_name,
+        role = v_app_role,
+        employee_id = COALESCE(p_employee_id, nurses.employee_id),
+        phone = COALESCE(p_phone, nurses.phone),
+        designation = COALESCE(p_designation, nurses.designation),
+        status = 'pending_activation',
+        updated_at = NOW()
+    RETURNING id INTO v_nurse_id;
+
+    RETURN jsonb_build_object(
+        'success', true,
+        'nurse_id', v_nurse_id,
+        'user_id', v_user_id,
+        'email', v_clean_email,
+        'temporary_password', p_temp_password
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- K. FEATURE FLAGS CONFIGURATION
 DROP TABLE IF EXISTS feature_flags CASCADE;

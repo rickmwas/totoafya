@@ -47,17 +47,32 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
     let emailSentSuccessfully = false;
 
     try {
-      // 1. Create staff profile in the database
-      const newNurse = await db.entities.Nurse.create({
-        full_name: form.full_name,
-        email: cleanEmail,
-        facility_id: form.facility_id,
-        role: form.role,
-        employee_id: form.employee_id,
-        phone: form.phone,
-        designation: form.designation,
-        status: 'pending_activation'
-      });
+      // 1. Atomically provision staff auth user and nurse record in Supabase
+      if (supabase) {
+        const { data: rpcData, error: rpcError } = await supabase.rpc('admin_register_staff', {
+          p_facility_id: form.facility_id,
+          p_full_name: form.full_name,
+          p_email: cleanEmail,
+          p_role: form.role,
+          p_temp_password: tempPassword,
+          p_employee_id: form.employee_id || null,
+          p_phone: form.phone || null,
+          p_designation: form.designation || null
+        });
+
+        if (rpcError) throw rpcError;
+      } else {
+        await db.entities.Nurse.create({
+          full_name: form.full_name,
+          email: cleanEmail,
+          facility_id: form.facility_id,
+          role: form.role,
+          employee_id: form.employee_id,
+          phone: form.phone,
+          designation: form.designation,
+          status: 'pending_activation'
+        });
+      }
 
       // 2. Trigger invitation email if connected to Supabase
       if (supabase) {
