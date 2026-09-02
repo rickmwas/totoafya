@@ -36,20 +36,16 @@ serve(async (req) => {
       });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || '', {
-      global: { headers: { Authorization: `Bearer ${token}` } }
-    });
+    const token = authHeader.replace(/^Bearer\s+/i, '');
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: { user: callerUser }, error: callerError } = await userClient.auth.getUser();
+    const { data: { user: callerUser }, error: callerError } = await supabaseClient.auth.getUser(token);
     if (callerError || !callerUser) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired caller session token' }), {
+      return new Response(JSON.stringify({ error: `Unauthorized: ${callerError?.message || 'Invalid or expired caller session token'}` }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 401
       });
     }
-
-    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // 2. Authorize caller role (Must be facility_admin, admin, or super_admin)
     const { data: callerNurse } = await supabaseClient
@@ -310,15 +306,25 @@ serve(async (req) => {
       })
     });
 
+    let emailSent = false;
+    let emailError = null;
+    let resendData = null;
+
     if (!resendResponse.ok) {
-      const resendError = await resendResponse.text();
-      throw new Error(`Resend API dispatch failed: ${resendError}`);
+      emailError = await resendResponse.text();
+      console.warn(`Resend dispatch notice for ${cleanEmail}:`, emailError);
+    } else {
+      emailSent = true;
+      resendData = await resendResponse.json();
     }
 
-    const resendData = await resendResponse.json();
-
     return new Response(JSON.stringify({
-      message: 'Invitation generated and sent via Resend successfully',
+      success: true,
+      message: emailSent ? 'Invitation generated and sent via Resend successfully' : 'Account created. Manual credential delivery required due to email provider configuration.',
+      emailSent,
+      emailError,
+      tempPassword,
+      activationLink,
       resend: resendData
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

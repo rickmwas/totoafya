@@ -89,8 +89,8 @@ export default function App() {
     }
   };
 
-  const loadAllData = async () => {
-    setLoading(true);
+  const loadAllData = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [facs, ns, moms, kids, flags] = await Promise.all([
         db.entities.Facility.list('-created_date', 500),
@@ -108,7 +108,7 @@ export default function App() {
     } catch (err) {
       console.error('Failed to load data', err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 

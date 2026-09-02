@@ -101,7 +101,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
         designation: ''
       });
       setShowAddForm(false);
-      onRefresh();
+      if (onRefresh) onRefresh(true);
     } catch (err) {
       setError(err.message || 'Failed to register nurse.');
     } finally {
