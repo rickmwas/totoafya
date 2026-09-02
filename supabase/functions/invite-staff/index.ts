@@ -1,8 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
+const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || 'https://nursetotoafya.vercel.app';
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -25,7 +27,44 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY environment variable is not configured.');
     }
 
+    // 1. Authenticate caller via JWT Token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') || '', {
+      global: { headers: { Authorization: `Bearer ${token}` } }
+    });
+
+    const { data: { user: callerUser }, error: callerError } = await userClient.auth.getUser();
+    if (callerError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired caller session token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401
+      });
+    }
+
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // 2. Authorize caller role (Must be facility_admin, admin, or super_admin)
+    const { data: callerNurse } = await supabaseClient
+      .from('nurses')
+      .select('role, facility_id')
+      .eq('user_id', callerUser.id)
+      .maybeSingle();
+
+    const callerRole = callerNurse?.role || callerUser.user_metadata?.role;
+    if (!callerRole || !['facility_admin', 'admin', 'super_admin', 'county_admin'].includes(callerRole)) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Insufficient privilege to invite staff' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403
+      });
+    }
 
     // Parse invitation body
     const { email, redirectTo, full_name, role } = await req.json();
@@ -119,7 +158,7 @@ serve(async (req) => {
         "Authorization": `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: "TotoAfya Onboarding <totoafya@terraseptsolutions.com>",
+        from: Deno.env.get('RESEND_FROM_EMAIL') || "TotoAfya Onboarding <onboarding@resend.dev>",
         to: [cleanEmail],
         subject: "Activate Your TotoAfya Staff Account 🌿",
         html: `

@@ -252,6 +252,48 @@ const auth = {
   redirectToLogin: () => {
     window.location.href = '/login';
   },
+  login: async (email, password) => {
+    if (!email) throw new Error('Please enter your email.');
+    const cleanEmail = email.toLowerCase().trim();
+
+    const nursesStore = getStore('Nurse');
+    const nurse = nursesStore.find(n => n.email && n.email.toLowerCase() === cleanEmail);
+    if (nurse) {
+      if (nurse.status === 'pending_activation' || nurse.status === 'pending') {
+        nurse.status = 'active';
+        saveStore('Nurse', nursesStore);
+      }
+
+      const nurseUser = {
+        id: nurse.user_id || 'mock-nurse-' + nurse.id,
+        nurse_id: nurse.id,
+        email: nurse.email,
+        full_name: nurse.full_name,
+        role: nurse.role === 'admin' ? 'admin' : (nurse.role || 'nurse'),
+        facility_id: nurse.facility_id || 'fac-a-id',
+        employee_id: nurse.employee_id || nurse.id,
+        designation: nurse.designation || 'Nurse',
+      };
+
+      localStorage.setItem('custom_mock_user', JSON.stringify(nurseUser));
+      localStorage.setItem('active_mock_role', nurseUser.role === 'admin' ? 'facility_admin' : 'nurse');
+      localStorage.setItem('is_logged_in', 'true');
+      return nurseUser;
+    }
+
+    const dynamicUser = {
+      id: 'mock-' + Math.random().toString(36).slice(2),
+      email: cleanEmail,
+      full_name: cleanEmail.split('@')[0].replace(/[^a-zA-Z]/g, ' ').trim() || 'Staff Member',
+      role: cleanEmail.includes('admin') ? 'admin' : (cleanEmail.includes('super') ? 'super_admin' : 'nurse'),
+      facility_id: nursesStore[0]?.facility_id || 'fac-a-id',
+    };
+
+    localStorage.setItem('custom_mock_user', JSON.stringify(dynamicUser));
+    localStorage.setItem('active_mock_role', dynamicUser.role === 'admin' ? 'facility_admin' : 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return dynamicUser;
+  },
   signInWithNationalIdOrAnc: async (identifier, pin) => {
     const mothers = getStore('Mother');
     const mother = mothers.find(m => 

@@ -432,7 +432,7 @@ const auth = {
     
     const emailStr = data.user.email || '';
     
-    if (emailStr.toLowerCase() === 'cto@terraseptsolutions.com' || emailStr.toLowerCase() === 'rickmwasswiz@gmail.com' || data.user.user_metadata?.role === 'super_admin') {
+    if (data.user.user_metadata?.role === 'super_admin') {
       return {
         id: data.user.id,
         email: data.user.email,
@@ -517,7 +517,7 @@ const auth = {
       const email = user.email || '';
       
       // 1. Super Admin check
-      if (email.toLowerCase() === 'cto@terraseptsolutions.com' || email.toLowerCase() === 'rickmwasswiz@gmail.com' || user.user_metadata?.role === 'super_admin') {
+      if (user.user_metadata?.role === 'super_admin') {
         return {
           id: user.id,
           email: user.email,

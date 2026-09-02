@@ -345,13 +345,77 @@ const auth = {
     return MOCK_USERS[role] || MOCK_USERS.user;
   },
   login: async (email, password) => {
-    const foundRole = Object.keys(MOCK_USERS).find(r => MOCK_USERS[r].email.toLowerCase() === email.toLowerCase());
+    if (!email) throw new Error('Please enter your email.');
+    const cleanEmail = email.toLowerCase().trim();
+
+    // 1. Check hardcoded MOCK_USERS
+    const foundRole = Object.keys(MOCK_USERS).find(r => MOCK_USERS[r].email.toLowerCase() === cleanEmail);
     if (foundRole) {
+      localStorage.removeItem('custom_mock_user');
       localStorage.setItem('active_mock_role', foundRole);
       localStorage.setItem('is_logged_in', 'true');
       return MOCK_USERS[foundRole];
     }
-    throw new Error('Invalid email or password.');
+
+    // 2. Check registered Nurse / Staff entity store (db_Nurse)
+    const nursesStore = getStore('Nurse');
+    const nurse = nursesStore.find(n => n.email && n.email.toLowerCase() === cleanEmail);
+    if (nurse) {
+      if (nurse.status === 'pending_activation' || nurse.status === 'pending') {
+        nurse.status = 'active';
+        saveStore('Nurse', nursesStore);
+      }
+
+      const nurseUser = {
+        id: nurse.user_id || 'mock-nurse-' + nurse.id,
+        nurse_id: nurse.id,
+        email: nurse.email,
+        full_name: nurse.full_name,
+        role: nurse.role === 'admin' ? 'admin' : (nurse.role || 'nurse'),
+        facility_id: nurse.facility_id || 'fac-a-id',
+        employee_id: nurse.employee_id || nurse.id,
+        designation: nurse.designation || 'Nurse',
+      };
+
+      localStorage.setItem('custom_mock_user', JSON.stringify(nurseUser));
+      localStorage.setItem('active_mock_role', nurseUser.role === 'admin' ? 'facility_admin' : 'nurse');
+      localStorage.setItem('is_logged_in', 'true');
+      return nurseUser;
+    }
+
+    // 3. Check registered Mother entity store (db_Mother)
+    const mothersStore = getStore('Mother');
+    const mother = mothersStore.find(m => (m.email && m.email.toLowerCase() === cleanEmail));
+    if (mother) {
+      const motherUser = {
+        id: mother.user_id || 'mock-user-' + mother.id,
+        email: mother.email,
+        full_name: mother.full_name,
+        role: 'user',
+        facility_id: mother.facility_id || null,
+        mother_id: mother.id,
+        profile_complete: mother.profile_complete ?? true,
+      };
+
+      localStorage.setItem('custom_mock_user', JSON.stringify(motherUser));
+      localStorage.setItem('active_mock_role', 'user');
+      localStorage.setItem('is_logged_in', 'true');
+      return motherUser;
+    }
+
+    // 4. Local mode dynamic fallback for any valid email
+    const dynamicUser = {
+      id: 'mock-' + Math.random().toString(36).slice(2),
+      email: cleanEmail,
+      full_name: cleanEmail.split('@')[0].replace(/[^a-zA-Z]/g, ' ').trim() || 'Staff Member',
+      role: cleanEmail.includes('admin') ? 'admin' : (cleanEmail.includes('super') ? 'super_admin' : 'nurse'),
+      facility_id: nursesStore[0]?.facility_id || 'fac-a-id',
+    };
+
+    localStorage.setItem('custom_mock_user', JSON.stringify(dynamicUser));
+    localStorage.setItem('active_mock_role', dynamicUser.role === 'admin' ? 'facility_admin' : 'nurse');
+    localStorage.setItem('is_logged_in', 'true');
+    return dynamicUser;
   },
   signUp: async (email, password, metadata = {}) => {
     const newUser = {

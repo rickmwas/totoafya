@@ -39,6 +39,23 @@ INSERT INTO facilities (name, location, facility_code)
 VALUES ('Demo Referral Hospital', 'Central Region', 'REF-001')
 ON CONFLICT (facility_code) DO NOTHING;
 
+-- Canonical Role Enum Type
+DO $$ BEGIN
+    CREATE TYPE app_role AS ENUM (
+        'super_admin',
+        'moh_admin',
+        'county_admin',
+        'facility_admin',
+        'admin',
+        'doctor',
+        'nurse',
+        'chv',
+        'mother'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
 -- 2. NURSES Table (Clinic Staff)
 CREATE TABLE IF NOT EXISTS nurses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -46,7 +63,7 @@ CREATE TABLE IF NOT EXISTS nurses (
     facility_id UUID REFERENCES facilities(id) ON DELETE SET NULL,
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    role TEXT DEFAULT 'nurse',
+    role app_role DEFAULT 'nurse'::app_role,
     county TEXT, -- Optional county assignment for county admins
     pin_code TEXT, -- 4-6 digit clinical access PIN
     badge_token TEXT UNIQUE, -- Badge tag identifier (NFC/RFID)
@@ -325,42 +342,41 @@ CREATE INDEX IF NOT EXISTS idx_ai_alerts_mother_created ON ai_alerts(mother_id, 
 -- =========================================================================
 
 -- Helper function to securely resolve current authenticated user's role
-CREATE OR REPLACE FUNCTION get_user_role()
-RETURNS TEXT AS $$
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS app_role AS $$
 DECLARE
-    v_role TEXT;
-    v_email TEXT;
+    v_role app_role;
 BEGIN
     IF auth.uid() IS NULL THEN
         RETURN NULL;
     END IF;
 
-    -- Get email from auth.users
-    SELECT email INTO v_email FROM auth.users WHERE id = auth.uid();
+    -- Check staff table for active staff account
+    SELECT role INTO v_role 
+    FROM public.nurses 
+    WHERE user_id = auth.uid() AND status = 'active'
+    LIMIT 1;
     
-    -- Super Admin check
-    IF v_email = 'cto@terraseptsolutions.com' THEN
-        RETURN 'super_admin';
-    END IF;
-
-    -- Nurse or Facility Admin check
-    SELECT role INTO v_role FROM nurses WHERE user_id = auth.uid();
     IF v_role IS NOT NULL THEN
         RETURN v_role;
     END IF;
 
-    -- Mother check
-    SELECT 'user' INTO v_role FROM mothers WHERE user_id = auth.uid();
+    -- Check mother table
+    SELECT 'mother'::app_role INTO v_role 
+    FROM public.mothers 
+    WHERE user_id = auth.uid()
+    LIMIT 1;
+    
     IF v_role IS NOT NULL THEN
         RETURN v_role;
     END IF;
 
-    RETURN 'user';
+    RETURN 'mother'::app_role;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Helper function to resolve current user's facility_id
-CREATE OR REPLACE FUNCTION get_user_facility_id()
+CREATE OR REPLACE FUNCTION public.get_user_facility_id()
 RETURNS UUID AS $$
 DECLARE
     v_facility_id UUID;
@@ -369,21 +385,25 @@ BEGIN
         RETURN NULL;
     END IF;
 
-    -- Check nurse/admin
-    SELECT facility_id INTO v_facility_id FROM nurses WHERE user_id = auth.uid();
+    -- Check nurse staff assignment for active staff
+    SELECT facility_id INTO v_facility_id 
+    FROM public.nurses 
+    WHERE user_id = auth.uid() AND status = 'active'
+    LIMIT 1;
+    
     IF v_facility_id IS NOT NULL THEN
         RETURN v_facility_id;
     END IF;
 
-    -- Check mother
-    SELECT facility_id INTO v_facility_id FROM mothers WHERE user_id = auth.uid();
-    IF v_facility_id IS NOT NULL THEN
-        RETURN v_facility_id;
-    END IF;
-
-    RETURN NULL;
+    -- Check mother registration facility
+    SELECT facility_id INTO v_facility_id 
+    FROM public.mothers 
+    WHERE user_id = auth.uid()
+    LIMIT 1;
+    
+    RETURN v_facility_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Enable RLS on all tables
 ALTER TABLE facilities ENABLE ROW LEVEL SECURITY;
@@ -406,18 +426,19 @@ CREATE POLICY "Allow read access to authenticated users"
 DROP POLICY IF EXISTS "Super admin facilities write access" ON facilities;
 CREATE POLICY "Super admin facilities write access" 
     ON facilities FOR ALL TO authenticated 
-    USING (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin'::app_role);
 
 -- B. NURSES policies
 DROP POLICY IF EXISTS "Allow super admins full access to nurses" ON nurses;
 CREATE POLICY "Allow super admins full access to nurses"
     ON nurses FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin'::app_role);
 
 DROP POLICY IF EXISTS "Allow facility admins to manage facility nurses" ON nurses;
 CREATE POLICY "Allow facility admins to manage facility nurses"
     ON nurses FOR ALL TO authenticated
-    USING (get_user_role() = 'admin' AND facility_id = get_user_facility_id());
+    USING (get_user_role() = 'facility_admin'::app_role AND facility_id = get_user_facility_id())
+    WITH CHECK (get_user_role() = 'facility_admin'::app_role AND facility_id = get_user_facility_id());
 
 DROP POLICY IF EXISTS "Allow nurses to view other nurses at same facility" ON nurses;
 CREATE POLICY "Allow nurses to view other nurses at same facility"
@@ -434,14 +455,14 @@ CREATE POLICY "Allow nurses to update their own profile"
 DROP POLICY IF EXISTS "Allow super admins full access to temporary grants" ON temporary_grants;
 CREATE POLICY "Allow super admins full access to temporary grants"
     ON temporary_grants FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin'::app_role);
 
 -- C. MOTHERS policies
 DROP POLICY IF EXISTS "Super admins break-glass access to mothers" ON mothers;
 CREATE POLICY "Super admins break-glass access to mothers"
-    ON mothers FOR ALL TO authenticated 
+    ON mothers FOR SELECT TO authenticated 
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -450,39 +471,52 @@ CREATE POLICY "Super admins break-glass access to mothers"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage facility mothers" ON mothers;
-CREATE POLICY "Facility staff manage facility mothers"
-    ON mothers FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND facility_id = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select mothers" ON mothers;
+CREATE POLICY "Facility staff select mothers"
+    ON mothers FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND facility_id = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert mothers" ON mothers;
+CREATE POLICY "Facility staff insert mothers"
+    ON mothers FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND facility_id = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update mothers" ON mothers;
+CREATE POLICY "Facility staff update mothers"
+    ON mothers FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND facility_id = get_user_facility_id())
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND facility_id = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility admins delete mothers" ON mothers;
+CREATE POLICY "Facility admins delete mothers"
+    ON mothers FOR DELETE TO authenticated
+    USING (get_user_role() = 'facility_admin'::app_role AND facility_id = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view mothers in county" ON mothers;
 CREATE POLICY "County admins view mothers in county"
     ON mothers FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND county = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
-DROP POLICY IF EXISTS "Mothers select and update own profile" ON mothers;
-CREATE POLICY "Mothers select and update own profile"
-    ON mothers FOR ALL TO authenticated
-    USING (
-        user_id = auth.uid() 
-        OR (
-            user_id IS NULL 
-            AND (
-                auth.jwt() ->> 'email' = concat(replace(lower(national_id), ' ', ''), '@totoafya.org')
-                OR auth.jwt() ->> 'email' = concat(replace(lower(anc_number), ' ', ''), '@totoafya.org')
-            )
-        )
-    );
+DROP POLICY IF EXISTS "Mothers select own profile" ON mothers;
+CREATE POLICY "Mothers select own profile"
+    ON mothers FOR SELECT TO authenticated
+    USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Mothers update own profile" ON mothers;
+CREATE POLICY "Mothers update own profile"
+    ON mothers FOR UPDATE TO authenticated
+    USING (user_id = auth.uid())
+    WITH CHECK (user_id = auth.uid());
 
 -- D. CHILDREN policies
 DROP POLICY IF EXISTS "Super admins break-glass access to children" ON children;
 CREATE POLICY "Super admins break-glass access to children"
-    ON children FOR ALL TO authenticated 
+    ON children FOR SELECT TO authenticated 
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -491,30 +525,45 @@ CREATE POLICY "Super admins break-glass access to children"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage facility children" ON children;
-CREATE POLICY "Facility staff manage facility children"
-    ON children FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select children" ON children;
+CREATE POLICY "Facility staff select children"
+    ON children FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert children" ON children;
+CREATE POLICY "Facility staff insert children"
+    ON children FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update children" ON children;
+CREATE POLICY "Facility staff update children"
+    ON children FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view children in county" ON children;
 CREATE POLICY "County admins view children in county"
     ON children FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
-DROP POLICY IF EXISTS "Mothers full access to own children" ON children;
-CREATE POLICY "Mothers full access to own children"
-    ON children FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Mothers select own children" ON children;
+CREATE POLICY "Mothers select own children"
+    ON children FOR SELECT TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
+
+DROP POLICY IF EXISTS "Mothers insert own children" ON children;
+CREATE POLICY "Mothers insert own children"
+    ON children FOR INSERT TO authenticated
+    WITH CHECK ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- E. ANC VISITS policies
 DROP POLICY IF EXISTS "Super admins break-glass access to visits" ON anc_visits;
 CREATE POLICY "Super admins break-glass access to visits"
-    ON anc_visits FOR ALL TO authenticated
+    ON anc_visits FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -523,30 +572,40 @@ CREATE POLICY "Super admins break-glass access to visits"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage visits" ON anc_visits;
-CREATE POLICY "Facility staff manage visits"
-    ON anc_visits FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select visits" ON anc_visits;
+CREATE POLICY "Facility staff select visits"
+    ON anc_visits FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert visits" ON anc_visits;
+CREATE POLICY "Facility staff insert visits"
+    ON anc_visits FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update visits" ON anc_visits;
+CREATE POLICY "Facility staff update visits"
+    ON anc_visits FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view visits in county" ON anc_visits;
 CREATE POLICY "County admins view visits in county"
     ON anc_visits FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
 DROP POLICY IF EXISTS "Mothers view own visits" ON anc_visits;
 CREATE POLICY "Mothers view own visits"
-    ON anc_visits FOR ALL TO authenticated
+    ON anc_visits FOR SELECT TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = mother_id) = auth.uid());
 
 -- F. GROWTH RECORDS policies
 DROP POLICY IF EXISTS "Super admins break-glass access to growth records" ON growth_records;
 CREATE POLICY "Super admins break-glass access to growth records"
-    ON growth_records FOR ALL TO authenticated
+    ON growth_records FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -555,30 +614,40 @@ CREATE POLICY "Super admins break-glass access to growth records"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage growth records" ON growth_records;
-CREATE POLICY "Facility staff manage growth records"
-    ON growth_records FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select growth records" ON growth_records;
+CREATE POLICY "Facility staff select growth records"
+    ON growth_records FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert growth records" ON growth_records;
+CREATE POLICY "Facility staff insert growth records"
+    ON growth_records FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update growth records" ON growth_records;
+CREATE POLICY "Facility staff update growth records"
+    ON growth_records FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view growth records in county" ON growth_records;
 CREATE POLICY "County admins view growth records in county"
     ON growth_records FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
 DROP POLICY IF EXISTS "Mothers view own child growth records" ON growth_records;
 CREATE POLICY "Mothers view own child growth records"
-    ON growth_records FOR ALL TO authenticated
+    ON growth_records FOR SELECT TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- G. IMMUNIZATIONS policies
 DROP POLICY IF EXISTS "Super admins break-glass access to immunizations" ON immunizations;
 CREATE POLICY "Super admins break-glass access to immunizations"
-    ON immunizations FOR ALL TO authenticated
+    ON immunizations FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -587,30 +656,40 @@ CREATE POLICY "Super admins break-glass access to immunizations"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage immunizations" ON immunizations;
-CREATE POLICY "Facility staff manage immunizations"
-    ON immunizations FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select immunizations" ON immunizations;
+CREATE POLICY "Facility staff select immunizations"
+    ON immunizations FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert immunizations" ON immunizations;
+CREATE POLICY "Facility staff insert immunizations"
+    ON immunizations FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update immunizations" ON immunizations;
+CREATE POLICY "Facility staff update immunizations"
+    ON immunizations FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view immunizations in county" ON immunizations;
 CREATE POLICY "County admins view immunizations in county"
     ON immunizations FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
-DROP POLICY IF EXISTS "Mothers manage child immunizations" ON immunizations;
-CREATE POLICY "Mothers manage child immunizations"
-    ON immunizations FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Mothers view child immunizations" ON immunizations;
+CREATE POLICY "Mothers view child immunizations"
+    ON immunizations FOR SELECT TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- H. MILESTONES policies
 DROP POLICY IF EXISTS "Super admins break-glass access to milestones" ON milestones;
 CREATE POLICY "Super admins break-glass access to milestones"
-    ON milestones FOR ALL TO authenticated
+    ON milestones FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -619,30 +698,40 @@ CREATE POLICY "Super admins break-glass access to milestones"
         )
     );
 
-DROP POLICY IF EXISTS "Facility staff manage milestones" ON milestones;
-CREATE POLICY "Facility staff manage milestones"
-    ON milestones FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+DROP POLICY IF EXISTS "Facility staff select milestones" ON milestones;
+CREATE POLICY "Facility staff select milestones"
+    ON milestones FOR SELECT TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff insert milestones" ON milestones;
+CREATE POLICY "Facility staff insert milestones"
+    ON milestones FOR INSERT TO authenticated
+    WITH CHECK (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
+
+DROP POLICY IF EXISTS "Facility staff update milestones" ON milestones;
+CREATE POLICY "Facility staff update milestones"
+    ON milestones FOR UPDATE TO authenticated
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view milestones in county" ON milestones;
 CREATE POLICY "County admins view milestones in county"
     ON milestones FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
-DROP POLICY IF EXISTS "Mothers manage child milestones" ON milestones;
-CREATE POLICY "Mothers manage child milestones"
-    ON milestones FOR ALL TO authenticated
+DROP POLICY IF EXISTS "Mothers view child milestones" ON milestones;
+CREATE POLICY "Mothers view child milestones"
+    ON milestones FOR SELECT TO authenticated
     USING ((SELECT user_id FROM mothers WHERE id = (SELECT mother_id FROM children WHERE id = child_id)) = auth.uid());
 
 -- I. AI ALERTS policies
 DROP POLICY IF EXISTS "Super admins break-glass access to alerts" ON ai_alerts;
 CREATE POLICY "Super admins break-glass access to alerts"
-    ON ai_alerts FOR ALL TO authenticated
+    ON ai_alerts FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'super_admin' 
+        get_user_role() = 'super_admin'::app_role 
         AND EXISTS (
             SELECT 1 FROM temporary_grants 
             WHERE user_id = auth.uid() 
@@ -654,13 +743,13 @@ CREATE POLICY "Super admins break-glass access to alerts"
 DROP POLICY IF EXISTS "Facility staff manage alerts" ON ai_alerts;
 CREATE POLICY "Facility staff manage alerts"
     ON ai_alerts FOR ALL TO authenticated
-    USING (get_user_role() IN ('admin', 'nurse', 'doctor', 'chv') AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
+    USING (get_user_role() IN ('facility_admin'::app_role, 'nurse'::app_role, 'doctor'::app_role, 'chv'::app_role) AND (SELECT facility_id FROM mothers WHERE id = mother_id) = get_user_facility_id());
 
 DROP POLICY IF EXISTS "County admins view alerts in county" ON ai_alerts;
 CREATE POLICY "County admins view alerts in county"
     ON ai_alerts FOR SELECT TO authenticated
     USING (
-        get_user_role() = 'county_admin' 
+        get_user_role() = 'county_admin'::app_role 
         AND (SELECT county FROM mothers WHERE id = mother_id) = (SELECT county FROM nurses WHERE user_id = auth.uid() LIMIT 1)
     );
 
@@ -677,7 +766,7 @@ CREATE POLICY "Allow all authenticated users to read learning content"
 DROP POLICY IF EXISTS "Allow super admins and content admins to manage content" ON learning_contents;
 CREATE POLICY "Allow super admins and content admins to manage content"
     ON learning_contents FOR ALL TO authenticated
-    USING (get_user_role() IN ('super_admin', 'admin'));
+    USING (get_user_role() IN ('super_admin'::app_role, 'admin'::app_role, 'facility_admin'::app_role, 'county_admin'::app_role, 'moh_admin'::app_role));
 
 -- K. DEVELOPER CONCERNS Table
 CREATE TABLE IF NOT EXISTS developer_concerns (
@@ -710,7 +799,7 @@ CREATE POLICY "Allow facility staff to manage facility concerns"
 DROP POLICY IF EXISTS "Allow super admins full access to concerns" ON developer_concerns;
 CREATE POLICY "Allow super admins full access to concerns"
     ON developer_concerns FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin'::app_role);
 
 -- L. AUDITING AND TEMPORARY GRANTS SCHEMA (Break-Glass)
 CREATE TABLE IF NOT EXISTS temporary_grants (
@@ -758,9 +847,9 @@ BEGIN
         RAISE EXCEPTION 'Not authenticated';
     END IF;
 
-    v_role := get_user_role();
+    v_role := get_user_role()::TEXT;
     
-    IF v_role NOT IN ('super_admin', 'admin') THEN
+    IF v_role NOT IN ('super_admin', 'admin', 'facility_admin', 'county_admin', 'moh_admin') THEN
         RAISE EXCEPTION 'Only administrators can request emergency break-glass access';
     END IF;
 
@@ -858,8 +947,8 @@ CREATE POLICY "Allow all authenticated users to read flags"
 DROP POLICY IF EXISTS "Allow super admins to manage feature flags" ON feature_flags;
 CREATE POLICY "Allow super admins to manage feature flags"
     ON feature_flags FOR ALL TO authenticated
-    USING (get_user_role() = 'super_admin')
-    WITH CHECK (get_user_role() = 'super_admin');
+    USING (get_user_role() = 'super_admin'::app_role)
+    WITH CHECK (get_user_role() = 'super_admin'::app_role);
 
 -- Seed initial feature flags
 INSERT INTO feature_flags (name, description, is_enabled)
@@ -890,7 +979,7 @@ CREATE POLICY "Allow all authenticated users to log exceptions"
 DROP POLICY IF EXISTS "Allow administrators to read errors" ON system_errors;
 CREATE POLICY "Allow administrators to read errors"
     ON system_errors FOR SELECT TO authenticated
-    USING (get_user_role() IN ('super_admin', 'admin'));
+    USING (get_user_role() IN ('super_admin'::app_role, 'admin'::app_role, 'facility_admin'::app_role, 'county_admin'::app_role, 'moh_admin'::app_role));
 
 CREATE TABLE IF NOT EXISTS system_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -911,7 +1000,7 @@ CREATE POLICY "Allow all authenticated users to insert system logs"
 DROP POLICY IF EXISTS "Allow administrators to read system logs" ON system_logs;
 CREATE POLICY "Allow administrators to read system logs"
     ON system_logs FOR SELECT TO authenticated
-    USING (get_user_role() IN ('super_admin', 'admin'));
+    USING (get_user_role() IN ('super_admin'::app_role, 'admin'::app_role, 'facility_admin'::app_role, 'county_admin'::app_role, 'moh_admin'::app_role));
 
 -- M. IMMUTABLE AUDIT LOGS TRIGGER
 CREATE OR REPLACE FUNCTION prevent_audit_log_modification()

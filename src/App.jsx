@@ -25,6 +25,8 @@ import FacilityDashboard from '@/pages/FacilityDashboard';
 import NursePortal from '@/pages/NursePortal';
 import PatentDocument from '@/pages/PatentDocument';
 
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
 
@@ -51,7 +53,14 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/nurse/*" element={<NursePortal />} />
+      <Route
+        path="/nurse/*"
+        element={
+          <ProtectedRoute allowedRoles={['nurse', 'doctor', 'facility_admin', 'admin', 'chv', 'super_admin']}>
+            <NursePortal />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/" element={<Home />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/vaccines" element={<VaccinationSchedule />} />
@@ -62,7 +71,14 @@ const AuthenticatedApp = () => {
       <Route path="/settings" element={<Settings />} />
       <Route path="/add-child" element={<AddChild />} />
       <Route path="/child/:id" element={<ChildProfile />} />
-      <Route path="/facility" element={<FacilityDashboard />} />
+      <Route
+        path="/facility"
+        element={
+          <ProtectedRoute allowedRoles={['facility_admin', 'admin', 'county_admin', 'moh_admin', 'super_admin']}>
+            <FacilityDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/patent" element={<PatentDocument />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

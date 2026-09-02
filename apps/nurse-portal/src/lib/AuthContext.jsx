@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     db.auth.me().then((u) => {
       if (u) {
-        if (u.role === 'nurse') {
+        const isAllowedRole = ['nurse', 'admin', 'facility_admin', 'super_admin'].includes(u.role);
+        if (isAllowedRole) {
           setUser(u);
           setIsAuthenticated(true);
           setAuthError(null);
@@ -197,7 +198,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const u = await db.auth.me();
       if (u) {
-        if (u.role === 'nurse') {
+        const isAllowedRole = ['nurse', 'admin', 'facility_admin', 'super_admin'].includes(u.role);
+        if (isAllowedRole) {
           setUser(u);
           setIsAuthenticated(true);
           setAuthError(null);

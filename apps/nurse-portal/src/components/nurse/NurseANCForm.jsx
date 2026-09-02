@@ -1,4 +1,5 @@
 import db from '@/api/totoafyaClient';
+import { calculateGestationalAgeInWeeks, calculateEdd } from '@totoafya/business-logic';
 
 import React, { useState } from 'react';
 import { Check } from 'lucide-react';
@@ -29,7 +30,8 @@ export default function NurseANCForm({ patient, onSaved }) {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState({
     visit_date: new Date().toISOString().split('T')[0],
-    gestational_age_weeks: '',
+    lmp: patient.lmp || '',
+    gestational_age_weeks: patient.lmp ? calculateGestationalAgeInWeeks(patient.lmp) : '',
     facility: patient.facility_name || '',
     clinician_name: '',
     blood_pressure_systolic: '',
@@ -77,6 +79,15 @@ export default function NurseANCForm({ patient, onSaved }) {
     setTimeout(() => setSaved(false), 3000);
   };
 
+  const handleLmpChange = (lmpVal) => {
+    const ageWeeks = lmpVal ? calculateGestationalAgeInWeeks(lmpVal) : '';
+    setForm(f => ({
+      ...f,
+      lmp: lmpVal,
+      gestational_age_weeks: ageWeeks,
+    }));
+  };
+
   return (
     <div className="bg-white rounded-[24px] border border-[#E5E5E5] p-5 flex flex-col gap-5">
       <p className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0]">Record ANC Visit</p>
@@ -85,8 +96,16 @@ export default function NurseANCForm({ patient, onSaved }) {
         <Field label="Visit Date">
           <Input type="date" value={form.visit_date} onChange={v => setF('visit_date', v)} />
         </Field>
+        <Field label="LMP (Last Menstrual Period)">
+          <Input type="date" value={form.lmp} onChange={handleLmpChange} />
+        </Field>
         <Field label="Gestational Age (wks)">
-          <Input type="number" value={form.gestational_age_weeks} onChange={v => setF('gestational_age_weeks', v)} placeholder="e.g. 28" />
+          <Input type="number" value={form.gestational_age_weeks} onChange={v => setF('gestational_age_weeks', v)} placeholder="Auto-calculated from LMP" />
+        </Field>
+        <Field label="Calculated EDD">
+          <div className="h-12 px-4 bg-[#F4F6F8] border border-[#E5E5E5] rounded-[14px] text-[14px] font-bold text-[#0F4C81] flex items-center">
+            {form.lmp ? calculateEdd(form.lmp) : 'Select LMP to compute'}
+          </div>
         </Field>
         <Field label="BP Systolic (mmHg)">
           <Input type="number" value={form.blood_pressure_systolic} onChange={v => setF('blood_pressure_systolic', v)} placeholder="e.g. 120" />

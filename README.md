@@ -148,14 +148,29 @@ To run the mobile client for mothers:
 
 ## 7. Deployment & Packaging
 
+### Production Custom Domains
+
+| Portal | App Directory | Production Custom Domain |
+| :--- | :--- | :--- |
+| **Marketing & Main Hub** | `totoweb` | [https://totoafya.co.ke](https://totoafya.co.ke) |
+| **Mother Web & PWA** | `apps/mother-portal` | [https://mother.totoafya.co.ke](https://mother.totoafya.co.ke) |
+| **Nurse Clinical Registry** | `apps/nurse-portal` | [https://nurse.totoafya.co.ke](https://nurse.totoafya.co.ke) |
+| **Facility Admin Dashboard** | `apps/facility-pc` | [https://facility.totoafya.co.ke](https://facility.totoafya.co.ke) |
+
 ### Deploying Web Portals
-Web applications can be deployed to static hosting providers (such as Vercel, Netlify, or AWS Amplify) by configuring the root of the deployment to point to the respective subdirectory and executing the workspace-specific build commands:
+Web applications can be deployed to static hosting providers (such as Vercel, Netlify, or Cloudflare Pages) by configuring the root of the deployment to point to the respective subdirectory and executing the workspace-specific build commands:
 
 * **Mother Portal**:
   * Root Directory: `apps/mother-portal`
+  * Custom Domain: `mother.totoafya.co.ke`
   * Build Command: `npm run build`
 * **Nurse Portal**:
   * Root Directory: `apps/nurse-portal`
+  * Custom Domain: `nurse.totoafya.co.ke`
+  * Build Command: `npm run build`
+* **Facility Portal**:
+  * Root Directory: `apps/facility-pc`
+  * Custom Domain: `facility.totoafya.co.ke`
   * Build Command: `npm run build`
 * **Super Admin Portal**:
   * Root Directory: `apps/super-admin-portal`

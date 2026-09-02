@@ -1,4 +1,5 @@
 import db from '@/api/totoafyaClient';
+import { classifyNutritionStatus } from '@totoafya/business-logic';
 
 import React, { useState } from 'react';
 import { Check } from 'lucide-react';
@@ -27,12 +28,11 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
     return Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
   };
 
-  const calcNutritionStatus = (muac) => {
-    if (!muac) return 'normal';
-    const m = parseFloat(muac);
-    if (m < 11.5) return 'sam';
-    if (m < 12.5) return 'mam';
-    return 'normal';
+  const calcNutritionStatus = (muac, weight, ageMonths) => {
+    const w = weight ? parseFloat(weight) : null;
+    const m = muac ? parseFloat(muac) : null;
+    const a = ageMonths ? Number(ageMonths) : null;
+    return classifyNutritionStatus(w, a, m);
   };
 
   const handleSave = async () => {
@@ -48,7 +48,7 @@ export default function NurseGrowthForm({ patient, children, onSaved }) {
       height_cm: parseFloat(form.height_cm) || null,
       muac_cm: parseFloat(form.muac_cm) || null,
       head_circumference_cm: parseFloat(form.head_circumference_cm) || null,
-      nutrition_status: calcNutritionStatus(form.muac_cm),
+      nutrition_status: calcNutritionStatus(form.muac_cm, form.weight_kg, ageWeeks ? Math.floor(ageWeeks / 4.33) : null),
       facility: form.facility,
       recorded_by: form.recorded_by,
       notes: form.notes,

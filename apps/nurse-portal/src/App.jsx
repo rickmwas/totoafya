@@ -54,8 +54,32 @@ const AuthenticatedApp = () => {
     return <Login isActivationFlow={true} />;
   }
 
+  // Enforce staff role boundary
+  const isStaff = user && ['nurse', 'doctor', 'facility_admin', 'admin', 'chv', 'super_admin'].includes(user.role);
+  if (user && !isStaff) {
+    return (
+      <div className="min-h-screen bg-[#F5F5F7] flex items-center justify-center p-6 text-center">
+        <div className="max-w-md bg-white rounded-3xl p-8 border border-red-100 shadow-xl">
+          <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">
+            403
+          </div>
+          <h2 className="text-xl font-extrabold text-gray-900 mb-2">Clinical Portal Access Denied</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Your account role ({user.role || 'caregiver'}) does not have clinical staff access privileges.
+          </p>
+          <button
+            onClick={() => { useAuth().logout(); }}
+            className="px-6 py-3 bg-[#0F4C81] text-white font-bold text-sm rounded-xl hover:bg-[#0c3c66] transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Redirect authenticated user with nurse role away from login
-  if (user && user.role === 'nurse' && currentPath === '/login') {
+  if (user && isStaff && currentPath === '/login') {
     return <Navigate to="/" replace />;
   }
 

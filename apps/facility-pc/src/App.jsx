@@ -49,8 +49,32 @@ const AuthenticatedApp = () => {
     return <Login isActivationFlow={true} />;
   }
 
+  // Enforce facility admin role boundary
+  const isFacilityAdmin = user && ['facility_admin', 'admin', 'county_admin', 'moh_admin', 'super_admin'].includes(user.role);
+  if (user && !isFacilityAdmin) {
+    return (
+      <div className="min-h-screen bg-[#FAFBFB] flex items-center justify-center p-6 text-center">
+        <div className="max-w-md bg-white rounded-3xl p-8 border border-red-100 shadow-xl">
+          <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 font-bold text-xl">
+            403
+          </div>
+          <h2 className="text-xl font-extrabold text-gray-900 mb-2">Facility Desktop Access Denied</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Your account role ({user.role || 'caregiver'}) does not have facility administration privileges.
+          </p>
+          <button
+            onClick={() => { useAuth().logout(); }}
+            className="px-6 py-3 bg-[#2E5B47] text-white font-bold text-sm rounded-xl hover:bg-[#234737] transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Redirect authenticated user with admin role away from login
-  if (user && user.role === 'admin' && currentPath === '/login') {
+  if (user && isFacilityAdmin && currentPath === '/login') {
     return <Navigate to="/" replace />;
   }
 
