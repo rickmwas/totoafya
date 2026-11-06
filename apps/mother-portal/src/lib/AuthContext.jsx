@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import db from '@/api/totoafyaClient';
 
@@ -12,6 +11,8 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings] = useState({ id: 'local', public_settings: {} });
 
+  const isLocal = import.meta.env.VITE_DATABASE_PROVIDER === 'local' || !import.meta.env.VITE_DATABASE_PROVIDER;
+
   useEffect(() => {
     db.auth.me().then((u) => {
       if (u) {
@@ -19,9 +20,28 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setAuthError(null);
       } else {
-        setUser(null);
-        setIsAuthenticated(false);
-        setAuthError({ type: 'auth_required', message: 'Authentication required' });
+        // If user is explicitly visiting /login, leave them unauthenticated so Login screen renders without authError
+        if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+          setUser(null);
+          setIsAuthenticated(false);
+          setAuthError(null);
+        } else if (isLocal && !localStorage.getItem('is_logged_out')) {
+          // In local dev mode: auto-grant demo mother user so page never goes blank
+          const defaultUser = db.auth.quickLogin ? db.auth.quickLogin('user') : null;
+          if (defaultUser) {
+            setUser(defaultUser);
+            setIsAuthenticated(true);
+            setAuthError(null);
+          } else {
+            setUser(null);
+            setIsAuthenticated(false);
+            setAuthError({ type: 'auth_required', message: 'Authentication required' });
+          }
+        } else {
+          setUser(null);
+          setIsAuthenticated(false);
+          setAuthError({ type: 'auth_required', message: 'Authentication required' });
+        }
       }
     }).catch((err) => {
       setUser(null);
@@ -30,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     }).finally(() => {
       setIsLoadingAuth(false);
     });
-  }, []);
+  }, [isLocal]);
 
   const logout = () => {
     db.auth.logout();
@@ -46,6 +66,10 @@ export const AuthProvider = ({ children }) => {
       if (u) {
         setUser(u);
         setIsAuthenticated(true);
+        setAuthError(null);
+      } else if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+        setUser(null);
+        setIsAuthenticated(false);
         setAuthError(null);
       } else {
         setUser(null);

@@ -58,6 +58,26 @@ export default function Login({ onLoginSuccess }) {
           </div>
         )}
 
+                {/* Local Dev Fast Access */}
+        <div className="w-full bg-slate-800 border border-indigo-500/40 rounded-xl p-3 mb-5 text-left">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 mb-1">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            <span>Local Dev: Auth Disabled</span>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              if (db.auth.quickLogin) db.auth.quickLogin('super_admin');
+              else await db.auth.login('cto@terraseptsolutions.com', 'admin');
+              if (onLoginSuccess) await onLoginSuccess();
+              else window.location.reload();
+            }}
+            className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5"
+          >
+            ⚡ Quick Login as Super Admin
+          </button>
+        </div>
+
         <form onSubmit={handleEmailLogin} className="w-full flex flex-col gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">

@@ -1,415 +1,362 @@
-import db from '@/api/totoafyaClient';
-
-import React, { useState, useEffect } from 'react';
-import { Sparkles, AlertTriangle, TrendingUp, Bell, RefreshCw, ChevronRight, Shield, MessageCircle, ChevronLeft, MoreVertical } from 'lucide-react';
-import EmergencyCallBar from '@/components/shared/EmergencyCallBar';
-
-import { useLang } from '@/context/LanguageContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  Sparkles,
+  Send,
+  AlertTriangle,
+  Shield,
+  Phone,
+  Baby,
+  Heart,
+  Bot,
+  User,
+  ArrowLeft,
+  RefreshCw,
+  HelpCircle,
+  Stethoscope,
+} from 'lucide-react';
+import { dataClient } from '@totoafya/api-client';
+import {
+  calculateGestationalAgeInWeeks,
+  DANGER_SIGNS_EN,
+  DANGER_SIGNS_SW,
+} from '@totoafya/business-logic';
+import { Button, Input, Badge, Card, CardHeader, CardTitle, CardContent } from '@totoafya/shared-ui';
 import AppShell from '@/components/layout/AppShell';
-import { differenceInWeeks, differenceInDays, parseISO } from 'date-fns';
-import { cn } from '@/lib/utils';
-import PatientChatbot from '@/components/ai/PatientChatbot';
+import { useLang } from '@/context/LanguageContext';
 
 export default function AIHealthAssistant() {
+  const navigate = useNavigate();
   const { lang } = useLang();
+  const isSw = lang === 'sw';
+
   const [mother, setMother] = useState(null);
   const [children, setChildren] = useState([]);
-  const [vaccines, setVaccines] = useState([]);
-  const [growthRecords, setGrowthRecords] = useState([]);
-  const [ancVisits, setAncVisits] = useState([]);
-  const [analysis, setAnalysis] = useState(null);
+  const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [riskScore, setRiskScore] = useState(null);
-  const [existingAlerts, setExistingAlerts] = useState([]);
-  const [activeTab, setActiveTab] = useState('analysis'); // 'analysis' | 'chat'
+  const [emergencyAlert, setEmergencyAlert] = useState(null);
 
-  useEffect(() => { loadData(); }, []);
+  const messagesEndRef = useRef(null);
 
-  const loadData = async () => {
-    const [mothers, kids, v, alerts] = await Promise.all([
-      db.entities.Mother.list('-created_date', 1),
-      db.entities.Child.list('-created_date', 10),
-      db.entities.Immunization.filter({ status: 'overdue' }, '-scheduled_date', 20),
-      db.entities.AIAlert.filter({ is_resolved: false }, '-created_date', 10),
-    ]);
-    setMother(mothers[0] || null);
-    setChildren(kids);
-    setVaccines(v);
-    setExistingAlerts(alerts);
-    if (mothers[0]) setRiskScore(mothers[0].risk_score);
+  const [messages, setMessages] = useState([
+    {
+      id: 'welcome-01',
+      sender: 'ai',
+      text: isSw
+        ? 'Jambo Mama! Mimi ni Msaidizi wako wa Afya ya Uzazi na Mtoto wa TotoAfya. Ninafuata miongozo ya Wizara ya Afya (MOH) na WHO. Una swali gani kuhusu afya yako au ya mtoto leo?'
+        : 'Hello Mama! I am your TotoAfya Maternal & Child AI Health Assistant, grounded strictly in Kenya Ministry of Health (MOH) and WHO clinical guidelines. What health question can I help you with today?',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    },
+  ]);
+
+  useEffect(() => {
+    loadScopedMotherProfile();
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const loadScopedMotherProfile = async () => {
+    try {
+      const user = await dataClient.auth.me();
+      if (!user) {
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      let m = null;
+      if (user.mother_id) {
+        m = await dataClient.mothers.get(user.mother_id);
+      }
+      if (!m) {
+        const mothers = await dataClient.mothers.filter({ user_id: user.id });
+        if (mothers.length > 0) m = mothers[0];
+      }
+      if (!m && dataClient.mode === 'mock') {
+        const list = await dataClient.mothers.list();
+        m = list.find((item) => item.user_id === user.id) || list[0];
+      }
+
+      setMother(m);
+
+      if (m?.id) {
+        const kids = await dataClient.children.filter({ mother_id: m.id });
+        setChildren(kids);
+      }
+    } catch (e) {
+      console.warn('Could not load mother profile in AI assistant:', e);
+    }
   };
 
-  const runAnalysis = async () => {
-    setLoading(true);
-    try {
-      // Gather context data
-      const ancList = await db.entities.ANCVisit.list('-visit_date', 5);
-      const growthList = await db.entities.GrowthRecord.list('-recorded_date', 10);
+  /**
+   * Check for Kenya MOH danger signs in input
+   */
+  const checkDangerSigns = (text) => {
+    const lower = text.toLowerCase();
+    const dangerKeywords = [
+      'bleeding',
+      'damu',
+      'severe headache',
+      'kichwa kinauma sana',
+      'blurred vision',
+      'kutoona vizuri',
+      'convulsion',
+      'fits',
+      'kifafa',
+      'high fever',
+      'homa kali',
+      'swollen face',
+      'kuvimba uso',
+      'stopped moving',
+      'kuacha kucheza',
+      'severe pain',
+      'maumivu makali',
+    ];
 
-      const contextData = {
-        mother: mother ? {
-          caregiver_type: mother.caregiver_type || 'mother',
-          pregnancy_status: mother.pregnancy_status,
-          weeks_pregnant: mother.lmp ? differenceInWeeks(new Date(), parseISO(mother.lmp)) : null,
-          gravida: mother.gravida,
-          parity: mother.parity,
-          anc_visits: ancList.length,
-          last_bp: ancList[0] ? `${ancList[0].blood_pressure_systolic}/${ancList[0].blood_pressure_diastolic}` : null,
-          danger_signs_reported: ancList.flatMap(v => v.danger_signs || []),
-        } : null,
-        children: children.map(child => ({
-          name: child.full_name,
-          age_months: child.date_of_birth
-            ? Math.floor(differenceInDays(new Date(), parseISO(child.date_of_birth)) / 30)
-            : null,
-          health_status: child.health_status,
-          days_since_visit: child.last_visit_date
-            ? differenceInDays(new Date(), parseISO(child.last_visit_date))
-            : null,
-        })),
-        overdue_vaccines: vaccines.length,
-        latest_growth: growthList[0] ? {
-          weight_kg: growthList[0].weight_kg,
-          height_cm: growthList[0].height_cm,
-          muac_cm: growthList[0].muac_cm,
-          nutrition_status: growthList[0].nutrition_status,
-        } : null,
+    return dangerKeywords.some((k) => lower.includes(k));
+  };
+
+  const handleSend = async (customPrompt) => {
+    const textToSend = customPrompt || inputMessage;
+    if (!textToSend.trim() || loading) return;
+
+    const userMsg = {
+      id: 'msg-' + Date.now(),
+      sender: 'user',
+      text: textToSend.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInputMessage('');
+    setLoading(true);
+
+    // 1. Intercept Kenya MOH danger signs
+    const isDangerDetected = checkDangerSigns(textToSend);
+    if (isDangerDetected) {
+      setEmergencyAlert(
+        isSw
+          ? 'ONYO LA HATARI: Dalili uliyotaja inahitaji tathmini ya haraka hospitalini. Tafadhali tembelea kituo cha afya au piga nambari ya dharura mara moja.'
+          : 'CLINICAL ALERT: The symptom you mentioned represents a potential maternal or neonatal emergency. Please proceed to the nearest healthcare center or call the emergency hotline immediately.'
+      );
+    }
+
+    try {
+      // 2. Prepare patient context
+      const gestationalAge = mother?.lmp ? calculateGestationalAgeInWeeks(mother.lmp) : undefined;
+      const context = {
+        gestationalAge,
+        childAgeMonths: children[0]?.date_of_birth ? 6 : undefined,
       };
 
-      const result = await db.integrations.Core.InvokeLLM({
-        prompt: `You are a maternal and child health AI assistant for TotoAfya Digital in Kenya.
+      // 3. Secure call via dataClient.ai.askClinicalQuestion proxy
+      const res = await dataClient.ai.askClinicalQuestion(
+        textToSend.trim(),
+        context,
+        lang
+      );
 
-Analyze the following patient data and provide:
-1. A risk score (0-100, where 0=no risk, 100=critical)
-2. Risk level: "low", "medium", "high", or "critical"
-3. Up to 5 specific health alerts or observations (severity: "info", "warning", or "critical")
-4. Up to 4 personalized recommendations
-5. A brief health summary (2-3 sentences, warm and reassuring tone)
+      const aiMsg = {
+        id: 'msg-ai-' + Date.now(),
+        sender: 'ai',
+        text: res.response || (isSw ? 'Ushauri wa kliniki haukupatikana kwa sasa.' : 'Clinical advisory unavailable.'),
+        isEmergency: res.emergencyDetected || isDangerDetected,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
 
-CRITICAL INSTRUCTIONS regarding Caregiver Type:
-- The caregiver_type is explicitly specified in the patient data. It can be "mother", "father", or "guardian".
-- If the caregiver_type is "father" or "guardian", they CANNOT be pregnant or postpartum themselves. Do NOT generate pregnancy-specific warnings, antenatal care (ANC) visit warnings, or postpartum flags (e.g. Gravida/Parity mismatch, missing postpartum checkups, or "We understand you are postpartum") for them.
-- Instead, address them as the supporting parent/caregiver (e.g. "We understand you are caring for the child as a father/guardian...") and focus exclusively on the child's health, immunization schedule, growth, and how they can support the child and mother (if applicable).
-- Only if the caregiver_type is "mother" should you evaluate maternal health, pregnancy status, weeks pregnant, ANC visits, and postpartum status.
-
-Be clinically accurate, use WHO/Kenya MCH guidelines. For language preference "${lang}", provide responses in both English and Swahili.
-
-Patient data: ${JSON.stringify(contextData, null, 2)}`,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            risk_score: { type: 'number' },
-            risk_level: { type: 'string' },
-            summary: { type: 'string' },
-            summary_sw: { type: 'string' },
-            alerts: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  type: { type: 'string' },
-                  severity: { type: 'string' },
-                  title: { type: 'string' },
-                  title_sw: { type: 'string' },
-                  message: { type: 'string' },
-                  message_sw: { type: 'string' },
-                  chv_needed: { type: 'boolean' },
-                },
-              },
-            },
-            recommendations: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  action: { type: 'string' },
-                  action_sw: { type: 'string' },
-                  priority: { type: 'string' },
-                  icon: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      setAnalysis(result);
-      setRiskScore(result.risk_score);
-
-      // Update mother risk score
-      if (mother) {
-        await db.entities.Mother.update(mother.id, {
-          risk_score: result.risk_score,
-          risk_level: result.risk_level,
-        });
-      }
-
-      // Save new alerts
-      for (const alert of (result.alerts || []).slice(0, 3)) {
-        await db.entities.AIAlert.create({
-          mother_id: mother?.id,
-          alert_type: alert.type || 'risk_flag',
-          severity: alert.severity || 'info',
-          title: alert.title,
-          title_sw: alert.title_sw,
-          message: alert.message,
-          message_sw: alert.message_sw,
-          ai_confidence: 0.85,
-        });
-      }
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (err) {
+      console.error('Error invoking clinical AI:', err);
+      const fallbackMsg = {
+        id: 'msg-err-' + Date.now(),
+        sender: 'ai',
+        text: isSw
+          ? 'Huduma ya AI haipatikani kwa muda. Ikiwa una dalili za hatari (kama homa kali, kuvuja damu, au maumivu makali), fika kituo cha afya kilicho karibu mara moja.'
+          : 'The AI assistant is momentarily offline. If experiencing acute symptoms such as bleeding, high fever, or severe pain, please proceed to your nearest health facility.',
+        isEmergency: true,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setLoading(false);
     }
   };
 
-  const riskColor = riskScore === null ? '#A0A0A0'
-    : riskScore < 30 ? '#2E7A5D'
-    : riskScore < 60 ? '#F9A825'
-    : '#E51010';
-
-  const riskLabel = riskScore === null ? '—'
-    : riskScore < 30 ? (lang === 'sw' ? 'Hatari Ndogo' : 'Low Risk')
-    : riskScore < 60 ? (lang === 'sw' ? 'Hatari ya Kati' : 'Medium Risk')
-    : (lang === 'sw' ? 'Hatari Kubwa' : 'High Risk');
+  const samplePrompts = isSw
+    ? [
+        'Je, ni vyakula gani bora wakati wa ujauzito?',
+        'Mtoto wangu anapaswa kupokea chanjo gani wiki ya 6?',
+        'Dalili za kifafa cha mimba (pre-eclampsia) ni zipi?',
+        'Je, mtoto anapaswa kunyonya maziwa mara ngapi kwa siku?',
+      ]
+    : [
+        'What foods are recommended during pregnancy?',
+        'Which KEPI vaccines are due at 6 weeks?',
+        'What are the warning signs of pre-eclampsia?',
+        'How many kicks per day are considered healthy?',
+      ];
 
   return (
     <AppShell>
-      <div className="animate-fade-in bg-[#f7f9f7] min-h-screen pb-12 font-sans text-[#131714]">
-        
-        {/* Header (Screen 08) */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
-          <Link to="/" className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform">
-            <ChevronLeft size={20} className="text-[#131714]" />
-          </Link>
-          <h1 className="text-[18px] font-extrabold text-[#131714]">
-            {lang === 'sw' ? 'Msaidizi wa AI' : 'AI Assistant'}
-          </h1>
-          <button 
-            className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
-            onClick={() => alert(lang === 'sw' ? 'Chaguo' : 'Options')}
-          >
-            <MoreVertical size={20} className="text-[#131714]" />
-          </button>
-        </div>
-
-        {/* Tabs (Analysis vs Chat) */}
-        <div className="flex bg-white border-b border-[#e5e7eb] px-6 mb-5">
-          <button
-            onClick={() => setActiveTab('analysis')}
-            className={`flex-1 pb-3 text-[14px] font-bold text-center relative transition-all ${
-              activeTab === 'analysis' ? 'text-toto-teal' : 'text-[#6e7772] hover:text-[#131714]'
-            }`}
-          >
-            {lang === 'sw' ? 'Uchambuzi' : 'Analysis'}
-            {activeTab === 'analysis' && (
-              <div className="absolute bottom-0 left-4 right-4 h-[2px] bg-toto-teal rounded-full" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('chat')}
-            className={`flex-1 pb-3 text-[14px] font-bold text-center relative transition-all ${
-              activeTab === 'chat' ? 'text-toto-teal' : 'text-[#6e7772] hover:text-[#131714]'
-            }`}
-          >
-            {lang === 'sw' ? 'Soga' : 'AI Chat'}
-            {activeTab === 'chat' && (
-              <div className="absolute bottom-0 left-4 right-4 h-[2px] bg-toto-teal rounded-full" />
-            )}
-          </button>
-        </div>
-
-        {/* Chat Tab */}
-        {activeTab === 'chat' && (
-          <div className="px-4 pb-6">
-            <PatientChatbot mother={mother} children={children} lang={lang} />
-          </div>
-        )}
-
-        {activeTab === 'analysis' && (<>
-
-        {/* Risk Score Card */}
-        <div className="mx-4 mb-4 rounded-[28px] overflow-hidden" style={{ background: `linear-gradient(135deg, ${riskColor}15, ${riskColor}05)`, border: `1px solid ${riskColor}25` }}>
-          <div className="p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[10px] tracking-[0.18em] uppercase font-bold text-[#A0A0A0] mb-1">
-                  {lang === 'sw' ? 'ALAMA YA HATARI' : 'RISK SCORE'}
-                </p>
-                <p className="text-[11px] font-semibold" style={{ color: riskColor }}>{riskLabel}</p>
-              </div>
-              <Shield size={20} style={{ color: riskColor }} />
-            </div>
-            <div className="flex items-end gap-2 mb-4">
-              <span className="text-[64px] font-extrabold leading-none tracking-[-0.03em]" style={{ color: riskColor }}>
-                {riskScore ?? '?'}
-              </span>
-              <span className="text-[18px] text-[#A0A0A0] mb-3">/100</span>
-            </div>
-            {/* Risk meter */}
-            <div className="h-2 bg-black/8 rounded-full overflow-hidden mb-4">
-              <div
-                className="h-full rounded-full transition-all duration-1000"
-                style={{
-                  width: `${riskScore ?? 0}%`,
-                  background: `linear-gradient(90deg, #2E7A5D, ${riskColor})`,
-                }}
-              />
-            </div>
+      <div className="bg-[#F8FAFC] min-h-screen flex flex-col font-sans text-slate-900 pb-20">
+        {/* Top Header */}
+        <div className="px-4 py-3 bg-white border-b border-slate-200/80 sticky top-0 z-20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={runAnalysis}
-              disabled={loading}
-              className="w-full h-12 rounded-full text-white text-[13px] font-bold flex items-center justify-center gap-2 active:scale-[0.97] transition-all"
-              style={{ backgroundColor: riskColor, boxShadow: `0 8px 24px ${riskColor}40` }}
+              onClick={() => navigate(-1)}
+              className="p-1 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
             >
-              {loading
-                ? <><RefreshCw size={16} className="animate-spin" /> {lang === 'sw' ? 'Inachambua...' : 'Analyzing...'}</>
-                : <><Sparkles size={16} /> {lang === 'sw' ? 'Changanua Sasa' : 'Run Analysis'}</>
-              }
+              <ArrowLeft size={18} />
             </button>
+            <div className="w-8 h-8 rounded-xl bg-teal-50 text-[#006B5F] flex items-center justify-center">
+              <Bot size={18} />
+            </div>
+            <div>
+              <h1 className="text-sm font-extrabold text-slate-900 leading-none">
+                {isSw ? 'Msaidizi wa Afya ya Uzazi' : 'TotoAfya AI Assistant'}
+              </h1>
+              <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Kenya MOH & WHO IMCI Active</span>
+              </span>
+            </div>
           </div>
+
+          <Badge variant="secondary">Gemini 2.5</Badge>
         </div>
 
-        {/* Emergency Call Bar — shown when risk is high or critical */}
-        <EmergencyCallBar mother={mother} lang={lang} />
-
-        {/* Loading state */}
-        {loading && (
-          <div className="mx-4 mb-4 bg-white rounded-[20px] p-5 border border-[#E5E5E5] shadow-card">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 border-2 border-[#0047FF] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-              <div>
-                <p className="text-[13px] font-bold text-[#0A0A0A]">
-                  {lang === 'sw' ? 'AI inachambua data yako ya afya...' : 'AI is analyzing your health data...'}
-                </p>
-                <p className="text-[11px] text-[#A0A0A0] mt-0.5">
-                  {lang === 'sw' ? 'Hii inaweza kuchukua sekunde 10-15' : 'This may take 10-15 seconds'}
-                </p>
+        {/* Emergency Alert Banner if triggered */}
+        {emergencyAlert && (
+          <div className="mx-4 mt-3 p-3.5 bg-rose-50 border border-rose-300 rounded-2xl flex items-start gap-2.5 text-xs text-rose-900 animate-fade-in shadow-sm">
+            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <strong className="block font-bold uppercase tracking-wider text-rose-950">
+                {isSw ? 'HATUA YA HARAKA INAHITAJIKA' : 'URGENT CLINICAL ASSESSMENT REQUIRED'}
+              </strong>
+              <p className="mt-0.5 text-rose-800 leading-relaxed">{emergencyAlert}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <a
+                  href={`tel:${mother?.facility_emergency_phone || '1190'}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold shadow-sm"
+                >
+                  <Phone size={13} />
+                  <span>{isSw ? 'Piga 1190 Sasa' : 'Call 1190 Hotline'}</span>
+                </a>
+                <button
+                  onClick={() => setEmergencyAlert(null)}
+                  className="px-2.5 py-1.5 text-rose-700 text-xs font-semibold hover:underline"
+                >
+                  {isSw ? 'Funga' : 'Dismiss'}
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Analysis results */}
-        {analysis && !loading && (
-          <>
-            {/* Summary */}
-            <div className="mx-4 mb-4 bg-[#0047FF]/5 rounded-[20px] p-4 border border-[#0047FF]/15">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles size={14} className="text-[#0047FF]" />
-                <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#0047FF]">
-                  {lang === 'sw' ? 'MUHTASARI WA AI' : 'AI SUMMARY'}
-                </p>
-              </div>
-              <p className="text-[14px] text-[#0A0A0A] leading-relaxed font-medium">
-                {lang === 'sw' && analysis.summary_sw ? analysis.summary_sw : analysis.summary}
-              </p>
-            </div>
-
-            {/* Alerts */}
-            {analysis.alerts?.length > 0 && (
-              <div className="px-4 mb-4">
-                <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] mb-3">
-                  {lang === 'sw' ? 'ARIFA ZA AFYA' : 'HEALTH ALERTS'}
-                </p>
-                <div className="flex flex-col gap-2">
-                  {analysis.alerts.map((alert, i) => {
-                    const color = alert.severity === 'critical' ? '#E51010' : alert.severity === 'warning' ? '#F9A825' : '#0047FF';
-                    return (
-                      <div key={i} className="bg-white rounded-[18px] p-4 border shadow-card" style={{ borderColor: `${color}25`, backgroundColor: `${color}05` }}>
-                        <div className="flex items-start gap-3">
-                          <AlertTriangle size={16} style={{ color }} className="flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-[13px] font-bold text-[#0A0A0A]">
-                              {lang === 'sw' && alert.title_sw ? alert.title_sw : alert.title}
-                            </p>
-                            <p className="text-[12px] text-[#666666] mt-0.5 leading-snug">
-                              {lang === 'sw' && alert.message_sw ? alert.message_sw : alert.message}
-                            </p>
-                            {alert.chv_needed && (
-                              <p className="text-[11px] font-bold mt-1.5" style={{ color }}>
-                                {lang === 'sw' ? '👷 Ziara ya CHV inahitajika' : '👷 CHV home visit needed'}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Recommendations */}
-            {analysis.recommendations?.length > 0 && (
-              <div className="px-4 mb-4">
-                <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] mb-3">
-                  {lang === 'sw' ? 'MAPENDEKEZO' : 'RECOMMENDATIONS'}
-                </p>
-                <div className="flex flex-col gap-2">
-                  {analysis.recommendations.map((rec, i) => (
-                    <div key={i} className="bg-white rounded-[18px] p-4 border border-[#E5E5E5] flex items-center gap-3 shadow-card">
-                      <div className="w-8 h-8 bg-[#2E7A5D]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                        <TrendingUp size={14} className="text-[#2E7A5D]" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[13px] font-semibold text-[#0A0A0A]">
-                          {lang === 'sw' && rec.action_sw ? rec.action_sw : rec.action}
-                        </p>
-                        {rec.priority === 'high' && (
-                          <p className="text-[10px] text-[#F9A825] font-bold mt-0.5 uppercase tracking-wide">
-                            {lang === 'sw' ? 'Muhimu' : 'High Priority'}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight size={16} className="text-[#D0D0D0] flex-shrink-0" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Existing alerts */}
-        {!analysis && existingAlerts.length > 0 && (
-          <div className="px-4 mb-4">
-            <p className="text-[10px] tracking-[0.15em] uppercase font-bold text-[#A0A0A0] mb-3">
-              {lang === 'sw' ? 'ARIFA ZA HIVI KARIBUNI' : 'RECENT ALERTS'}
-            </p>
-            <div className="flex flex-col gap-2">
-              {existingAlerts.slice(0, 5).map(alert => {
-                const color = alert.severity === 'critical' ? '#E51010' : alert.severity === 'warning' ? '#F9A825' : '#0047FF';
-                return (
-                  <div key={alert.id} className="bg-white rounded-[18px] p-4 border shadow-card" style={{ borderColor: `${color}20` }}>
-                    <p className="text-[13px] font-bold text-[#0A0A0A]">
-                      {lang === 'sw' && alert.title_sw ? alert.title_sw : alert.title}
-                    </p>
-                    <p className="text-[12px] text-[#666666] mt-0.5">
-                      {lang === 'sw' && alert.message_sw ? alert.message_sw : alert.message}
-                    </p>
+        {/* Chat Messages Body */}
+        <div className="flex-1 p-4 space-y-3.5 overflow-y-auto max-w-[430px] mx-auto w-full">
+          {messages.map((m) => {
+            const isAi = m.sender === 'ai';
+            return (
+              <div
+                key={m.id}
+                className={`flex gap-2.5 ${isAi ? 'items-start' : 'items-end justify-end'}`}
+              >
+                {isAi && (
+                  <div className="w-7 h-7 rounded-xl bg-teal-50 text-[#006B5F] flex items-center justify-center shrink-0 mt-0.5">
+                    <Bot size={15} />
                   </div>
-                );
-              })}
+                )}
+
+                <div
+                  className={`max-w-[82%] rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm ${
+                    isAi
+                      ? m.isEmergency
+                        ? 'bg-rose-50 border border-rose-200 text-rose-950'
+                        : 'bg-white border border-slate-200/80 text-slate-800'
+                      : 'bg-[#006B5F] text-white rounded-br-none'
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap">{m.text}</p>
+                  <div
+                    className={`text-[9px] mt-1.5 text-right font-medium ${
+                      isAi ? 'text-slate-400' : 'text-teal-200'
+                    }`}
+                  >
+                    {m.timestamp}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {loading && (
+            <div className="flex items-center gap-2.5 text-xs text-slate-500 pl-2">
+              <div className="w-7 h-7 rounded-xl bg-teal-50 text-[#006B5F] flex items-center justify-center shrink-0">
+                <RefreshCw size={14} className="animate-spin" />
+              </div>
+              <span>{isSw ? 'Inatathmini kulingana na miongozo ya MOH...' : 'Evaluating Kenya MOH clinical guidelines...'}</span>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Suggested Prompts Pill Carousel */}
+        {messages.length <= 2 && (
+          <div className="px-4 py-2 border-t border-slate-100 bg-white">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
+              {isSw ? 'Maswali ya Kawaida:' : 'Frequently Asked:'}
+            </span>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {samplePrompts.map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSend(p)}
+                  className="px-3 py-1.5 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-medium shrink-0 transition-colors"
+                >
+                  {p}
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {!analysis && !loading && (
-          <div className="px-4 pb-6">
-            <div className="bg-white rounded-[20px] p-6 border border-[#E5E5E5] text-center">
-              <Sparkles size={28} className="text-[#0047FF] mx-auto mb-3" />
-              <p className="text-[14px] font-bold text-[#0A0A0A] mb-1">
-                {lang === 'sw' ? 'Changanua Afya Yako' : 'Analyze Your Health'}
-              </p>
-              <p className="text-[12px] text-[#A0A0A0]">
-                {lang === 'sw'
-                  ? 'Bonyeza "Changanua Sasa" kupata uchambuzi wa AI kulingana na data yako'
-                  : 'Tap "Run Analysis" to get AI-powered health insights based on your data'}
-              </p>
-            </div>
-          </div>
-        )}
-        </>)}
+        {/* Input Bar */}
+        <div className="p-3 bg-white border-t border-slate-200 sticky bottom-0 z-20">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex items-center gap-2 max-w-[430px] mx-auto"
+          >
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder={isSw ? 'Andika swali lako la afya hapa...' : 'Ask a maternal or child health question...'}
+              className="flex-1 h-12 px-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#006B5F] transition-colors"
+            />
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={loading || !inputMessage.trim()}
+              className="h-12 w-12 !px-0 rounded-xl shrink-0 flex items-center justify-center"
+            >
+              <Send size={16} />
+            </Button>
+          </form>
+          <p className="text-[9.5px] text-slate-400 text-center mt-1.5">
+            {isSw
+              ? 'TotoAfya AI hutoa ushauri wa jumla. Ukiona dalili za hatari, tembelea hospitali.'
+              : 'TotoAfya AI provides general guidance. In acute emergencies, visit your hospital immediately.'}
+          </p>
+        </div>
       </div>
     </AppShell>
   );

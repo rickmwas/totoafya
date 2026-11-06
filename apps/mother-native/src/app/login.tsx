@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useAuthStore } from '../store/authStore';
 import { useLanguageStore } from '../store/languageStore';
-import { db } from '@totoafya/api-client';
+import { dataClient } from '@totoafya/api-client';
 
 export default function LoginScreen() {
   const { login } = useAuthStore();
@@ -52,25 +52,25 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       if (isActivating) {
-        const mockUser = await db.auth.signInWithNationalIdOrAnc(identifier, pin, activationCode);
+        const mockUser = await dataClient.auth.signInWithNationalIdOrAnc(identifier, pin, activationCode);
         await login({
           id: mockUser.id,
           email: mockUser.email || '',
           full_name: mockUser.full_name || '',
           role: 'user',
-          facility_id: mockUser.facility_id,
-          mother_id: mockUser.mother_id,
+          facility_id: mockUser.facility_id || undefined,
+          mother_id: mockUser.mother_id || undefined,
           profile_complete: true,
         }, pin);
       } else {
-        const mockUser = await db.auth.signInWithNationalIdOrAnc(identifier, pin);
+        const mockUser = await dataClient.auth.signInWithNationalIdOrAnc(identifier, pin);
         await login({
           id: mockUser.id,
           email: mockUser.email || '',
           full_name: mockUser.full_name || '',
           role: 'user',
-          facility_id: mockUser.facility_id,
-          mother_id: mockUser.mother_id,
+          facility_id: mockUser.facility_id || undefined,
+          mother_id: mockUser.mother_id || undefined,
           profile_complete: mockUser.profile_complete ?? true,
         }, pin);
       }
@@ -85,7 +85,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       if (role === 'new_mother') {
-        const mockUser = await db.auth.signUpMother(`anc-9988-mock`, '123456', {
+        const mockUser = await dataClient.auth.signUpMother(`anc-9988-mock`, '123456', {
           full_name: 'New Mother',
           facility_id: 'fac-a-id',
         });
@@ -94,24 +94,24 @@ export default function LoginScreen() {
           email: mockUser.email || '',
           full_name: mockUser.full_name || '',
           role: 'user',
-          facility_id: mockUser.facility_id,
-          mother_id: mockUser.mother_id,
+          facility_id: mockUser.facility_id || undefined,
+          mother_id: mockUser.mother_id || undefined,
           profile_complete: false,
         });
       } else {
         // Normal mother
-        const mockUser = await db.auth.signInWithNationalIdOrAnc('mother-a', '123456').catch(async () => {
-          return await db.auth.signUpMother('mother-a', '123456', {
+        const mockUser = await dataClient.auth.signInWithNationalIdOrAnc('mother-a', '123456').catch(async () => {
+          return await dataClient.auth.signUpMother('mother-a', '123456', {
             full_name: 'Jane Doe',
             facility_id: 'fac-a-id',
           });
         });
 
         // Ensure Jane Doe Mother record is created in localDB
-        const mothers = await db.entities.Mother.filter({ user_id: mockUser.id });
+        const mothers = await dataClient.mothers.filter({ user_id: mockUser.id });
         let motherId = mothers[0]?.id;
         if (!motherId) {
-          const newMother = await db.entities.Mother.create({
+          const newMother = await dataClient.mothers.create({
             user_id: mockUser.id,
             full_name: mockUser.full_name || 'Jane Doe',
             phone: '+254712345678',
@@ -130,8 +130,8 @@ export default function LoginScreen() {
           email: mockUser.email || '',
           full_name: mockUser.full_name || '',
           role: 'user',
-          facility_id: mockUser.facility_id,
-          mother_id: motherId,
+          facility_id: mockUser.facility_id || undefined,
+          mother_id: motherId || undefined,
           profile_complete: true,
         });
       }

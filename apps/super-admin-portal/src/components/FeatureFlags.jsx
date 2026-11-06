@@ -59,11 +59,11 @@ export default function FeatureFlags({ initialFlags, onRefresh }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search feature flags by name..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF]"
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#006B5F]"
           />
         </div>
         
-        <div className="bg-[#0047FF]/5 border border-[#0047FF]/10 py-2 px-4 rounded-[12px] flex items-center gap-2 text-[11px] font-bold text-[#0047FF] ml-auto">
+        <div className="bg-[#006B5F]/5 border border-[#006B5F]/15 py-2 px-4 rounded-[12px] flex items-center gap-2 text-[11px] font-bold text-[#006B5F] ml-auto">
           <Sparkles size={12} className="animate-pulse" />
           <span>Real-time runtime updates enabled</span>
         </div>
@@ -104,13 +104,13 @@ export default function FeatureFlags({ initialFlags, onRefresh }) {
                 <td className="px-6 py-5 text-center">
                   <div className="flex items-center justify-center">
                     {updatingFlagId === flag.id ? (
-                      <RefreshCw size={18} className="animate-spin text-[#0047FF]" />
+                      <RefreshCw size={18} className="animate-spin text-[#006B5F]" />
                     ) : (
                       <button
                         onClick={() => handleToggle(flag)}
                         aria-label={`Toggle ${flag.name}`}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 outline-none ${
-                          flag.is_enabled ? 'bg-[#0047FF]' : 'bg-[#E5E5E5]'
+                          flag.is_enabled ? 'bg-[#006B5F]' : 'bg-[#E5E5E5]'
                         }`}
                       >
                         <span

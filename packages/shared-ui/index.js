@@ -1,2 +1,1 @@
-// Placeholder for future shared components and styles
-export {};
+export * from './src/index.js';

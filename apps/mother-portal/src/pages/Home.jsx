@@ -1,184 +1,230 @@
-import db from '@/api/totoafyaClient';
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Bell, 
-  Sparkles, 
-  BookOpen, 
-  Shield, 
-  TrendingUp, 
-  HeartHandshake,
+import {
+  Bell,
   Activity,
   MessageSquare,
   Footprints,
   AlertTriangle,
   ChevronRight,
-  X,
   Phone,
-  MapPin
+  Plus,
+  Heart,
+  Calendar,
+  ShieldAlert,
+  Sparkles,
+  Baby,
+  RefreshCw,
+  X,
+  Stethoscope,
 } from 'lucide-react';
-
-import { useLang } from '@/context/LanguageContext';
-import AppShell from '@/components/layout/AppShell';
-import FetalDevelopmentCard from '@/components/home/FetalDevelopmentCard';
-import ChildCard from '@/components/home/ChildCard';
-import AIAlertBanner from '@/components/home/AIAlertBanner';
-import ModeHeader from '@/components/home/ModeHeader';
-import { useProfile } from '@/context/ProfileContext';
-import { cn } from '@/lib/utils';
-import PatientChatbot from '@/components/ai/PatientChatbot';
+import { dataClient } from '@totoafya/api-client';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from '@/components/ui/drawer';
-
-const getGreeting = (lang) => {
-  const hour = new Date().getHours();
-  if (lang === 'sw') {
-    if (hour < 12) return 'Habari za asubuhi';
-    if (hour < 17) return 'Habari za mchana';
-    return 'Habari za jioni';
-  }
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-};
+  calculateGestationalAgeInWeeks,
+  calculateEdd,
+  DANGER_SIGNS_EN,
+  DANGER_SIGNS_SW,
+} from '@totoafya/business-logic';
+import { Button, Card, CardHeader, CardTitle, CardContent, Badge, SyncStatusBar } from '@totoafya/shared-ui';
+import AppShell from '@/components/layout/AppShell';
+import ChildCard from '@/components/home/ChildCard';
+import FetalDevelopmentCard from '@/components/home/FetalDevelopmentCard';
+import AIAlertBanner from '@/components/home/AIAlertBanner';
+import { useLang } from '@/context/LanguageContext';
+import { useProfile } from '@/context/ProfileContext';
 
 export default function Home() {
-  const { t, lang } = useLang();
+  const { lang, setLang } = useLang();
+  const isSw = lang === 'sw';
   const navigate = useNavigate();
   const { setProfile } = useProfile();
-  
-  // Data states
+
+  // Primary Data State
   const [mother, setMother] = useState(null);
   const [children, setChildren] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [nextAncVisit, setNextAncVisit] = useState(null);
   const [vaccineMap, setVaccineMap] = useState({});
   const [growthMap, setGrowthMap] = useState({});
   const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [error, setError] = useState(null);
 
-  // Drawer states
+  // Modals & Drawers
   const [symptomsOpen, setSymptomsOpen] = useState(false);
-  const [aiChatOpen, setAiChatOpen] = useState(false);
   const [kickCounterOpen, setKickCounterOpen] = useState(false);
-  const [emergencyOpen, setEmergencyOpen] = useState(false);
-  const [initialChatInput, setInitialChatInput] = useState('');
   const [kicksToday, setKicksToday] = useState(10);
+  const [emergencyOpen, setEmergencyOpen] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  // Sync State
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isLiveDb, setIsLiveDb] = useState(dataClient.mode === 'live');
+  const [pendingCount, setPendingCount] = useState(0);
+  const [isSyncing, setIsSyncing] = useState(false);
 
-  const loadData = async () => {
+  useEffect(() => {
+    loadAuthenticatedMotherData();
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    checkPendingCount();
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const checkPendingCount = async () => {
+    try {
+      if (dataClient.getPendingMutationsCount) {
+        const count = await dataClient.getPendingMutationsCount();
+        setPendingCount(count);
+      }
+    } catch {}
+  };
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      await dataClient.sync();
+      await checkPendingCount();
+    } catch (e) {
+      console.warn('Sync failed:', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  /**
+   * CRITICAL SECURITY & DATA PRIVACY FIX:
+   * Load mother profile STRICTLY by authenticated user ID or mother_id.
+   * Never query Mother.list() and pick index 0.
+   */
+  const loadAuthenticatedMotherData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const currentUser = await db.auth.me();
-      if (currentUser?.role === 'nurse') {
-        navigate('/nurse', { replace: true });
+      const currentUser = await dataClient.auth.me();
+      if (!currentUser) {
+        navigate('/login', { replace: true });
         return;
       }
 
-      const [mothers, kids, alertList] = await Promise.all([
-        db.entities.Mother.list('-created_date', 1),
-        db.entities.Child.list('-created_date', 20),
-        db.entities.AIAlert.filter({ is_resolved: false }, '-created_date', 10).catch(() => []),
-      ]);
-      const m = mothers[0] || null;
+      if (currentUser.role === 'nurse') {
+        navigate('/login', { replace: true });
+        return;
+      }
 
-      if (!m) {
+      let motherRecord = null;
+
+      // 1. If session has explicit mother_id, get by ID
+      if (currentUser.mother_id) {
+        motherRecord = await dataClient.mothers.get(currentUser.mother_id);
+      }
+
+      // 2. Query by user_id
+      if (!motherRecord && currentUser.id) {
+        const matching = await dataClient.mothers.filter({ user_id: currentUser.id });
+        if (matching.length > 0) motherRecord = matching[0];
+      }
+
+      // 3. Query by national_id or anc_number
+      if (!motherRecord && (currentUser.national_id || currentUser.anc_number)) {
+        const criteria = currentUser.national_id
+          ? { national_id: currentUser.national_id }
+          : { anc_number: currentUser.anc_number };
+        const matching = await dataClient.mothers.filter(criteria);
+        if (matching.length > 0) motherRecord = matching[0];
+      }
+
+      // 4. In mock mode fallback, look up fixtures safely matching user or default to Amina
+      if (!motherRecord && dataClient.mode === 'mock') {
+        const allMock = await dataClient.mothers.list();
+        motherRecord =
+          allMock.find(
+            (m) =>
+              m.user_id === currentUser.id ||
+              m.national_id === currentUser.national_id ||
+              m.phone === currentUser.phone
+          ) || allMock[0];
+      }
+
+      if (!motherRecord) {
         navigate('/onboarding', { replace: true });
         return;
       }
 
-      setMother(m);
-      setProfile(m);
-      setChildren(kids);
-      setAlerts(alertList);
-      setUnreadCount(alertList.filter(a => !a.is_read).length);
+      setMother(motherRecord);
+      setProfile(motherRecord);
 
+      // Scoped queries strictly tied to this mother's ID
+      const [kids, alertsList, ancVisitsList] = await Promise.all([
+        dataClient.children.filter({ mother_id: motherRecord.id }),
+        dataClient.alerts
+          ? dataClient.alerts.filter({ mother_id: motherRecord.id, is_resolved: false }).catch(() => [])
+          : [],
+        dataClient.ancVisits
+          ? dataClient.ancVisits.filter({ mother_id: motherRecord.id }, '-visit_date', 1).catch(() => [])
+          : [],
+      ]);
+
+      setChildren(kids);
+      setAlerts(alertsList);
+      if (ancVisitsList.length > 0) {
+        setNextAncVisit(ancVisitsList[0]);
+      }
+
+      // Load vaccine & growth records for each child
       if (kids.length > 0) {
         const vMap = {};
         const gMap = {};
-        await Promise.all(kids.map(async (child) => {
-          const [vaccines, growth] = await Promise.all([
-            db.entities.Immunization.filter({ child_id: child.id, status: 'due' }, 'scheduled_date', 1),
-            db.entities.GrowthRecord.filter({ child_id: child.id }, '-recorded_date', 1),
-          ]);
-          vMap[child.id] = vaccines[0] || null;
-          gMap[child.id] = growth[0] || null;
-        }));
+        await Promise.all(
+          kids.map(async (child) => {
+            const [vaccines, growth] = await Promise.all([
+              dataClient.immunizations.filter({ child_id: child.id, status: 'due' }, 'scheduled_date', 1),
+              dataClient.growthRecords.filter({ child_id: child.id }, '-recorded_date', 1),
+            ]);
+            vMap[child.id] = vaccines[0] || null;
+            gMap[child.id] = growth[0] || null;
+          })
+        );
         setVaccineMap(vMap);
         setGrowthMap(gMap);
       }
-    } catch (e) {
-      setError(e);
+    } catch (err) {
+      console.error('Failed to load mother portal data:', err);
+      setError(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const dismissAlert = async (alertId) => {
-    await db.entities.AIAlert.update(alertId, { is_read: true });
-    setAlerts(prev => prev.filter(a => a.id !== alertId));
-  };
-
   const isPregnant = mother?.pregnancy_status === 'pregnant';
-  const hasChildren = children.length > 0;
-  const caregiverType = mother?.caregiver_type || 'mother';
-  const isCaregiverOnly = caregiverType === 'father' || caregiverType === 'guardian';
+  const gestationalAge = mother?.lmp ? calculateGestationalAgeInWeeks(mother.lmp) : null;
+  const calculatedEdd = mother?.lmp ? calculateEdd(mother.lmp) : mother?.edd;
 
-  const caregiverEmoji = { mother: '👩', father: '👨', guardian: '🧑' }[caregiverType] || '👋';
-  const caregiverLabel = {
-    mother: lang === 'sw' ? 'Mama' : 'Mum',
-    father: lang === 'sw' ? 'Baba' : 'Dad',
-    guardian: lang === 'sw' ? 'Mlezi' : 'Guardian',
-  }[caregiverType] || '';
+  const dismissAlert = async (alertId) => {
+    if (dataClient.alerts?.update) {
+      await dataClient.alerts.update(alertId, { is_read: true, is_resolved: true });
+    }
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+  };
 
   if (loading) {
     return (
       <AppShell>
-        <div className="max-w-[440px] mx-auto p-5 pb-24 flex flex-col gap-6 animate-pulse bg-[#FFF6F0] min-h-screen">
-          {/* Header Row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-[18px] bg-slate-200/80"></div>
-              <div className="flex flex-col gap-1.5">
-                <div className="h-3.5 bg-slate-200/80 rounded w-20"></div>
-                <div className="h-3 bg-slate-200/80 rounded w-28"></div>
-              </div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-slate-200/80"></div>
-          </div>
-
-          {/* Fetal Womb Stage Card */}
-          <div className="bg-white rounded-[36px] h-60 bg-slate-200/60 shadow-sm border border-[#e5e7eb]"></div>
-
-          {/* Action Grid */}
+        <div className="max-w-[430px] mx-auto p-4 flex flex-col gap-5 animate-pulse bg-[#F8FAFC] min-h-screen">
+          <div className="h-14 bg-slate-200 rounded-2xl" />
+          <div className="h-44 bg-slate-200 rounded-3xl" />
           <div className="grid grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="w-14 h-14 rounded-[22px] bg-slate-200/60"></div>
-                <div className="h-2.5 bg-slate-200/80 rounded w-12"></div>
-              </div>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-20 bg-slate-200 rounded-2xl" />
             ))}
           </div>
-
-          {/* Section title */}
-          <div className="h-5 bg-slate-200/80 rounded w-1/3 mt-2"></div>
-          
-          {/* Card list */}
-          <div className="flex flex-col gap-3">
-            {[1, 2].map(i => (
-              <div key={i} className="h-24 bg-slate-200/60 rounded-[24px]"></div>
-            ))}
-          </div>
+          <div className="h-32 bg-slate-200 rounded-3xl" />
         </div>
       </AppShell>
     );
@@ -187,17 +233,19 @@ export default function Home() {
   if (error) {
     return (
       <AppShell>
-        <div className="flex flex-col items-center justify-center h-64 gap-4 px-6 text-center">
-          <p className="text-[15px] font-bold text-[#0A0A0A]">
-            {lang === 'sw' ? 'Hitilafu ya mtandao' : 'Connection error'}
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+            <AlertTriangle size={32} />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">
+            {isSw ? 'Hitilafu ya kupakia data' : 'Unable to load profile'}
+          </h2>
+          <p className="text-xs text-slate-500 max-w-[280px]">
+            {error.message || (isSw ? 'Hakikisha una mtandao kisha jaribu tena' : 'Check connection and retry')}
           </p>
-          <p className="text-[13px] text-[#A0A0A0]">
-            {lang === 'sw' ? 'Hakikisha una mtandao kisha jaribu tena' : 'Check your connection and try again'}
-          </p>
-          <button onClick={loadData}
-            className="h-12 px-8 rounded-full bg-[#006B4F] text-white text-[14px] font-bold shadow-teal-glow-sm active:scale-[0.97] transition-transform">
-            {lang === 'sw' ? 'Jaribu Tena' : 'Retry'}
-          </button>
+          <Button variant="primary" onClick={loadAuthenticatedMotherData}>
+            {isSw ? 'Jaribu Tena' : 'Retry'}
+          </Button>
         </div>
       </AppShell>
     );
@@ -205,422 +253,408 @@ export default function Home() {
 
   return (
     <AppShell>
-      <div className="animate-fade-in bg-[#FFF6F0] min-h-screen pb-12 font-sans text-[#131714]">
+      <div className="bg-[#F8FAFC] min-h-screen pb-16 font-sans text-slate-900">
+        {/* Real-time Network & Outbox Sync Status Bar */}
+        <SyncStatusBar
+          isOnline={isOnline}
+          isLiveDb={isLiveDb}
+          pendingCount={pendingCount}
+          isSyncing={isSyncing}
+          onSync={handleManualSync}
+          lang={lang}
+        />
 
-        {/* ── Designer Top Bar & Greeting (Screen 04) ── */}
-        <div className="flex items-center justify-between px-4 pt-6 pb-4 bg-[#FFF6F0]/80 backdrop-blur-md sticky top-0 z-20">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#006B4F] to-[#2E7A5D] flex items-center justify-center shadow-[0_4px_12px_rgba(0,107,79,0.15)] flex-shrink-0">
-              <svg className="w-5.5 h-5.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
+        {/* Top Header Bar */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-2 bg-white border-b border-slate-100 sticky top-0 z-20">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#006B5F] to-[#0A2E2B] flex items-center justify-center shadow-sm text-white font-serif font-black text-lg">
+              T
             </div>
-            <div className="flex flex-col">
-              <span className="text-[16px] font-black tracking-tight text-[#17201D] leading-tight">TotoAfya</span>
-              <span className="text-[8.5px] font-bold text-[#5F6C66] tracking-wider leading-none">Healthy family, stronger future</span>
+            <div>
+              <span className="text-sm font-extrabold text-[#006B5F] tracking-tight block leading-none">
+                TotoAfya
+              </span>
+              <span className="text-[10px] text-slate-500 font-medium">
+                {isSw ? 'Afya ya Mama na Mtoto' : 'Maternal & Child Health'}
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Notification Bell */}
-            <button className="w-10 h-10 bg-white rounded-full border border-[#EEF2EF] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] active:scale-95 transition-transform relative">
-              <Bell size={18} className="text-[#17201D]" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#D64545] rounded-full border border-white" />
-              )}
+
+          <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <button
+              onClick={() => setLang(isSw ? 'en' : 'sw')}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition-colors"
+            >
+              {isSw ? '🇰🇪 SW' : '🇬🇧 EN'}
             </button>
-            {/* Profile Avatar Card */}
+
+            {/* Profile Avatar */}
             <Link to="/more">
-              <div className="w-10 h-10 rounded-full border border-[#EEF2EF] overflow-hidden bg-[#E8F5EF] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.03)] font-bold text-[#006B4F]">
-                {(mother?.full_name || 'A').charAt(0)}
+              <div className="w-9 h-9 rounded-full bg-[#E6F4F1] border border-[#006B5F]/20 flex items-center justify-center font-bold text-[#006B5F] text-sm">
+                {(mother?.full_name || 'M').charAt(0)}
               </div>
             </Link>
           </div>
         </div>
 
-        {/* Greeting block */}
-        <div className="px-4 pt-3 pb-3">
-          <h1 className="text-[28px] font-extrabold leading-tight text-[#131714] tracking-tight">
-            Hello, {mother?.full_name?.split(' ')[0] || 'Amina'} 👋
+        {/* Greeting & Subtitle */}
+        <div className="px-4 pt-4 pb-2">
+          <h1 className="text-[22px] font-extrabold text-slate-900 leading-tight">
+            {isSw ? 'Habari' : 'Hello'}, {mother?.full_name?.split(' ')[0] || 'Mama'} 👋
           </h1>
-          <p className="text-[13.5px] text-[#6e7772] font-semibold mt-0.5">
-            {lang === 'sw' ? 'Unaendelea vyema sana!' : "You're doing great!"}
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isSw
+              ? 'Karibu kwenye kituo chako cha afya ya kidijitali'
+              : 'Welcome to your personalized healthcare portal'}
           </p>
         </div>
 
-        {/* ── AI Alerts (If any) ── */}
-        <AIAlertBanner alerts={alerts} onDismiss={dismissAlert} />
+        {/* Alerts Banner */}
+        {alerts.length > 0 && <AIAlertBanner alerts={alerts} onDismiss={dismissAlert} />}
 
-        {/* ── MATERNAL MODE: Pregnancy Progress Banner ── */}
-        {isPregnant && !isCaregiverOnly && (
-          <FetalDevelopmentCard mother={mother} lang={lang} />
-        )}
-
-        {/* ── Today's Recommendation Banner (Screen 04) ── */}
-        <div className="mx-4 mb-5">
-          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-start gap-4 overflow-hidden relative">
-            <div className="flex-1">
-              <p className="text-[10px] font-bold text-[#E68A00] tracking-widest uppercase">
-                {lang === 'sw' ? 'PENDEKEZO LA LEO' : "TODAY'S RECOMMENDATION"}
-              </p>
-              <p className="text-[14px] font-bold text-[#131714] mt-2 leading-relaxed max-w-[80%]">
-                {isPregnant 
-                  ? (lang === 'sw' ? 'Kunywa maji ya kutosha na upate mapumziko ya kutosha leo.' : 'Drink enough water and get enough rest today.')
-                  : (lang === 'sw' ? 'Hakikisha mtoto amelala salama na ana joto la kutosha.' : 'Ensure your baby sleeps in a safe position and is kept warm.')}
-              </p>
-            </div>
-            
-            {/* Minimalist Water Glass Vector overlay on the right */}
-            <div className="absolute right-3 bottom-0 w-20 h-24 opacity-80 flex items-end justify-center select-none pointer-events-none">
-              <svg className="w-14 h-20 text-[#006B5F]/10" viewBox="0 0 100 150" fill="currentColor">
-                <path d="M10 10 L90 10 L80 140 L20 140 Z" fill="none" stroke="currentColor" strokeWidth="6" />
-                <path d="M18 120 L82 120 L78 135 L22 135 Z" stroke="none" />
-                <path d="M13 50 L87 50 L82 120 L18 120 Z" className="text-[#006B5F]/20" stroke="none" />
-                <path d="M85 30 C75 25, 65 35, 75 45 C85 55, 95 40, 85 30 Z" className="text-[#E68A00]/25" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Upcoming Appointments Card (Screen 04) ── */}
-        <div className="mx-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[15px] font-bold text-toto-black">
-              {lang === 'sw' ? 'Miadi Inayofuata' : 'Upcoming Appointment'}
-            </h3>
-            <Link to="/care" className="text-[12.5px] font-bold text-toto-teal hover:underline">
-              {lang === 'sw' ? 'Ona Zote' : 'View all'}
-            </Link>
-          </div>
-          
-          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-[#E6F4F1] flex items-center justify-center text-[#006B5F] flex-shrink-0">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-[15px] font-bold text-[#131714]">
-                  {lang === 'sw' ? 'Ziara ya ANC' : 'ANC Visit'}
-                </h4>
-                <p className="text-[12.5px] text-[#6e7772] mt-0.5">
-                  10 May 2026 • 10:00 AM
-                </p>
-                <p className="text-[11.5px] text-toto-gray mt-0.5 truncate">
-                  {mother?.facility_name || 'Kibera Health Centre'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="rounded-full bg-[#F0FAF5] text-[#107C41] px-3.5 py-1.5 text-[11px] font-bold border border-[#F0FAF5] flex-shrink-0">
-              {lang === 'sw' ? 'Imethibitishwa' : 'Confirmed'}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Quick Actions Grid (Screen 04 / Drawer triggers) ── */}
-        <div className="mx-4 mb-6">
-          <h3 className="text-[15px] font-bold text-toto-black mb-3">
-            {lang === 'sw' ? 'Vitendo vya Haraka' : 'Quick Actions'}
-          </h3>
-          <div className="grid grid-cols-4 gap-3.5">
-            {[
-              {
-                icon: Activity,
-                label: lang === 'sw' ? 'Dalili' : 'Symptoms',
-                color: 'bg-[#F0FAF5] text-[#107C41] border-[#107C41]/10',
-                onClick: () => setSymptomsOpen(true)
-              },
-              {
-                icon: MessageSquare,
-                label: lang === 'sw' ? 'Soga ya AI' : 'AI Chat',
-                color: 'bg-[#E6F4F1] text-[#006B5F] border-[#006B5F]/10',
-                onClick: () => {
-                  setInitialChatInput('');
-                  setAiChatOpen(true);
-                }
-              },
-              {
-                icon: Footprints,
-                label: lang === 'sw' ? 'Mateke' : 'Kick Counter',
-                color: 'bg-[#FFFBEB] text-[#E68A00] border-[#E68A00]/10',
-                onClick: () => setKickCounterOpen(true)
-              },
-              {
-                icon: AlertTriangle,
-                label: lang === 'sw' ? 'Dharura' : 'Emergency',
-                color: 'bg-[#FFF5F5] text-[#D13438] border-[#D13438]/10',
-                onClick: () => setEmergencyOpen(true)
-              }
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={idx}
-                  onClick={item.onClick}
-                  className="flex flex-col items-center gap-2 active:scale-95 transition-all select-none"
-                >
-                  <div className={cn("w-14 h-14 rounded-[20px] flex items-center justify-center border shadow-[0_2px_8px_rgba(0,0,0,0.01)] transition-colors", item.color)}>
-                    <Icon size={21} strokeWidth={2.2} />
-                  </div>
-                  <span className="text-[11px] font-extrabold text-toto-gray text-center leading-tight">
-                    {item.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* ── Promo Banner ── */}
-        <div className="mx-4 mb-6">
-          <div className="bg-white border border-[#e5e7eb] rounded-[28px] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex justify-between items-center gap-4 relative overflow-hidden">
-            <div className="flex-1 z-10">
-              <h4 className="text-[17px] font-black text-[#006B5F] leading-snug">
-                {lang === 'sw' ? 'Jifunze, jiandae na ujiamini' : 'Learn, prepare and feel confident'}
-              </h4>
-              <p className="text-[12.5px] text-[#6e7772] font-semibold mt-1.5 leading-relaxed max-w-[85%]">
-                {lang === 'sw' ? 'Pata makala na video zilizotayarishwa na wataalamu kwa ajili yako.' : 'Access expert articles and videos made for you.'}
-              </p>
-              <Link to="/learn" className="inline-flex items-center gap-1.5 bg-[#006B5F] hover:bg-[#005249] text-white px-5 py-2.5 rounded-full text-[12px] font-bold mt-4 shadow-sm active:scale-95 transition-all">
-                {lang === 'sw' ? 'Gundua Sasa' : 'Explore Now'} →
-              </Link>
-            </div>
-            
-            {/* Styled Illustration representing a pregnant mother */}
-            <div className="absolute right-0 bottom-0 w-28 h-32 opacity-70 pointer-events-none select-none flex items-end justify-end">
-              <svg className="w-24 h-28 text-[#006B5F]/15" viewBox="0 0 100 120" fill="currentColor">
-                <path d="M60 20 C60 10 50 10 50 20 C50 30 60 30 60 20 Z" />
-                <path d="M40 30 C50 30 55 40 50 55 C45 70 30 80 40 100 C45 110 65 110 60 120 L20 120 C18 100 25 80 30 60 C35 40 30 30 40 30 Z" />
-                <path d="M50 55 C65 60 70 75 55 80 C48 82 45 78 48 76 C55 74 58 68 50 65 Z" className="text-[#E68A00]/25" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Children Section (For childcare mode) ── */}
-        {hasChildren && (
+        {/* MATERNAL MODE: Pregnancy Progress Banner */}
+        {isPregnant && (
           <div className="px-4 mb-4">
-            <div className="flex items-center justify-between mb-3 animate-fade-in">
-              <h2 className="text-[15px] font-bold text-toto-black">
-                {lang === 'sw' ? 'Watoto Wako' : 'Your Children'}
-              </h2>
-              <Link to="/add-child">
-                <button className="flex items-center gap-1 bg-toto-teal text-white px-3 py-1.5 rounded-full text-[11px] font-bold active:scale-[0.95] transition-transform shadow-sm">
-                  <Plus size={12} /> {t('add_child')}
-                </button>
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {children.map(child => (
-                <ChildCard key={child.id} child={child}
-                  nextVaccine={vaccineMap[child.id]}
-                  lastGrowth={growthMap[child.id]} />
-              ))}
-            </div>
+            <FetalDevelopmentCard mother={mother} lang={lang} />
           </div>
         )}
 
-      </div>
-
-      {/* ── Drawer: Symptoms ── */}
-      <Drawer open={symptomsOpen} onOpenChange={setSymptomsOpen}>
-        <DrawerContent className="max-w-[430px] mx-auto bg-white rounded-t-[32px] px-6 pb-8 pt-4 border-t border-[#e5e7eb] max-h-[85vh] overflow-y-auto">
-          <div className="w-12 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-5" />
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <DrawerTitle className="text-[17px] font-black text-toto-black">
-                {lang === 'sw' ? 'Uchunguzi wa Haraka wa Dalili' : 'Quick Symptom Check'}
-              </DrawerTitle>
-              <DrawerDescription className="text-[12.5px] text-toto-gray font-semibold mt-0.5">
-                {lang === 'sw' ? 'Je, unajisikia vipi leo?' : 'How are you feeling today?'}
-              </DrawerDescription>
-            </div>
-            <DrawerClose className="w-8 h-8 rounded-full bg-[#f8faf8] border border-[#e5e7eb] flex items-center justify-center text-toto-gray hover:text-toto-black active:scale-90 transition-all">
-              <X size={15} />
-            </DrawerClose>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {[
-              { label: lang === 'sw' ? 'Kuumwa Kichwa' : 'Headache', query: lang === 'sw' ? 'Kuumwa kichwa leo, nifanye nini?' : 'I have a headache today, what should I do?' },
-              { label: lang === 'sw' ? 'Kichefuchefu / Kutapika' : 'Nausea / Vomiting', query: lang === 'sw' ? 'Kichefuchefu na kutapika leo, nifanye nini?' : 'I feel nauseous and have been vomiting today, what should I do?' },
-              { label: lang === 'sw' ? 'Maumivu ya Mgongo' : 'Back Pain', query: lang === 'sw' ? 'Maumivu makali ya mgongo leo, nifanye nini?' : 'I am experiencing severe back pain today, what should I do?' },
-              { label: lang === 'sw' ? 'Kuvimba Miguu' : 'Swelling', query: lang === 'sw' ? 'Kuvimba mikono au miguu leo, nifanye nini?' : 'I noticed swelling in my feet or hands today, what should I do?' },
-              { label: lang === 'sw' ? 'Uchovu Mwingi' : 'Fatigue', query: lang === 'sw' ? 'Uchovu mwingi usio wa kawaida leo, nifanye nini?' : 'I am feeling extremely fatigued today, what should I do?' },
-              { label: lang === 'sw' ? 'Dalili Nyinginezo' : 'Other Symptoms', query: lang === 'sw' ? 'Nina maswali ya afya...' : 'I have a health concern...' }
-            ].map((symptom, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setInitialChatInput(symptom.query);
-                  setSymptomsOpen(false);
-                  setAiChatOpen(true);
-                }}
-                className="w-full text-left p-5 rounded-[20px] border border-[#e5e7eb] bg-[#f8faf8]/40 hover:border-toto-teal hover:bg-toto-teal/5 active:scale-[0.99] transition-all flex items-center justify-between"
-              >
-                <span className="text-[14px] font-extrabold text-toto-black">{symptom.label}</span>
-                <ChevronRight size={16} className="text-toto-light" />
-              </button>
-            ))}
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* ── Drawer: AI Health Assistant ── */}
-      <Drawer open={aiChatOpen} onOpenChange={setAiChatOpen}>
-        <DrawerContent className="max-w-[430px] mx-auto bg-white rounded-t-[32px] px-6 pb-6 pt-4 border-t border-[#e5e7eb] h-[85vh]">
-          <div className="w-12 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-4 flex-shrink-0" />
-          <div className="flex justify-between items-center mb-3 flex-shrink-0">
-            <div>
-              <DrawerTitle className="text-[17px] font-black text-toto-black">
-                {lang === 'sw' ? 'Msaidizi wa Afya wa AI' : 'AI Health Assistant'}
-              </DrawerTitle>
-              <DrawerDescription className="text-[12px] text-toto-gray font-semibold mt-0.5">
-                {lang === 'sw' ? 'Uliza maswali yoyote kwa faragha' : 'Ask any questions in confidence'}
-              </DrawerDescription>
-            </div>
-            <DrawerClose className="w-8 h-8 rounded-full bg-[#f8faf8] border border-[#e5e7eb] flex items-center justify-center text-toto-gray hover:text-toto-black active:scale-90 transition-all">
-              <X size={15} />
-            </DrawerClose>
-          </div>
-
-          <div className="flex-1 min-h-0">
-            <PatientChatbot
-              mother={mother}
-              children={children}
-              lang={lang}
-              className="border-none shadow-none rounded-none h-full bg-white animate-none"
-              initialInput={initialChatInput}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* ── Drawer: Kick Counter ── */}
-      <Drawer open={kickCounterOpen} onOpenChange={setKickCounterOpen}>
-        <DrawerContent className="max-w-[430px] mx-auto bg-white rounded-t-[32px] px-6 pb-8 pt-4 border-t border-[#e5e7eb] max-h-[80vh] overflow-y-auto">
-          <div className="w-12 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-5" />
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <DrawerTitle className="text-[17px] font-black text-toto-black">
-                {lang === 'sw' ? 'Saa ya Mateke' : 'Kick Counter'}
-              </DrawerTitle>
-              <DrawerDescription className="text-[12.5px] text-toto-gray font-semibold mt-0.5">
-                {lang === 'sw' ? 'Fuatilia miondoko ya mtoto wako' : "Monitor your baby's movements"}
-              </DrawerDescription>
-            </div>
-            <DrawerClose className="w-8 h-8 rounded-full bg-[#f8faf8] border border-[#e5e7eb] flex items-center justify-center text-toto-gray hover:text-toto-black active:scale-90 transition-all">
-              <X size={15} />
-            </DrawerClose>
-          </div>
-
-          <div className="flex flex-col items-center py-6">
-            <p className="text-[12px] font-black text-toto-gray tracking-wider uppercase">
-              {lang === 'sw' ? 'MATEKE YA LEO' : "TODAY'S KICKS"}
-            </p>
-            <h1 className="text-[64px] font-black text-[#E68A00] leading-none mt-2 font-numeric-tabular">
-              {kicksToday}
-            </h1>
-            <p className="text-[13px] text-toto-light mt-1 font-semibold">
-              {lang === 'sw' ? 'Lengo la kila siku: Mateke 10' : 'Daily target: 10 kicks'}
-            </p>
-
-            {/* Giant Baby Footprint click button */}
+        {/* Quick Actions (Symptoms, AI Assistant, Kick Counter, Emergency) */}
+        <div className="px-4 mb-4">
+          <div className="grid grid-cols-4 gap-2.5">
             <button
-              onClick={() => {
-                setKicksToday(k => k + 1);
-              }}
-              className="w-32 h-32 rounded-full bg-[#FFFBEB] border border-[#FFF3C4] shadow-sm flex items-center justify-center text-[#E68A00] hover:bg-[#FFF3C4] active:scale-[0.93] transition-all my-8 select-none"
+              type="button"
+              onClick={() => setSymptomsOpen(true)}
+              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm active:scale-95 transition-transform"
             >
-              <Footprints size={48} strokeWidth={1.8} />
+              <div className="w-11 h-11 rounded-xl bg-teal-50 text-[#006B5F] flex items-center justify-center">
+                <Activity size={22} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">
+                {isSw ? 'Dalili' : 'Symptoms'}
+              </span>
             </button>
 
-            <p className="text-[13px] text-[#6e7772] text-center font-medium leading-relaxed max-w-[80%] mb-6">
-              {lang === 'sw' ? 'Bonyeza nyayo hapo juu kila wakati unapohisi mtoto wako akipiga au kugeuka.' : 'Tap the footprints above every time you feel your baby kick, roll, or flutter.'}
-            </p>
-
-            <div className="flex w-full gap-3.5">
-              <button
-                onClick={() => setKicksToday(0)}
-                className="flex-1 h-12 rounded-full border border-[#e5e7eb] text-[13px] font-bold text-toto-gray active:scale-[0.97] transition-all"
-              >
-                {lang === 'sw' ? 'Weka Sifuri' : 'Reset Count'}
-              </button>
-              <DrawerClose className="flex-1 h-12 rounded-full bg-[#E68A00] text-white text-[13px] font-bold active:scale-[0.97] transition-all flex items-center justify-center">
-                {lang === 'sw' ? 'Maliza' : 'Done'}
-              </DrawerClose>
-            </div>
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* ── Drawer: Emergency Help ── */}
-      <Drawer open={emergencyOpen} onOpenChange={setEmergencyOpen}>
-        <DrawerContent className="max-w-[430px] mx-auto bg-white rounded-t-[32px] px-6 pb-8 pt-4 border-t border-[#e5e7eb] max-h-[80vh] overflow-y-auto">
-          <div className="w-12 h-1 bg-[#EBEBEB] rounded-full mx-auto mb-5" />
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <DrawerTitle className="text-[17px] font-black text-toto-red">
-                {lang === 'sw' ? 'Usaidizi wa Dharura' : 'Emergency Help'}
-              </DrawerTitle>
-              <DrawerDescription className="text-[12.5px] text-toto-gray font-semibold mt-0.5">
-                {lang === 'sw' ? 'Pata msaada wa matibabu haraka' : 'Get immediate medical assistance'}
-              </DrawerDescription>
-            </div>
-            <DrawerClose className="w-8 h-8 rounded-full bg-[#f8faf8] border border-[#e5e7eb] flex items-center justify-center text-toto-gray hover:text-toto-black active:scale-90 transition-all">
-              <X size={15} />
-            </DrawerClose>
-          </div>
-
-          <div className="flex flex-col items-center py-4">
-            <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center text-toto-red mb-4">
-              <AlertTriangle size={28} />
-            </div>
-
-            <p className="text-[13.5px] text-[#6e7772] text-center font-semibold leading-relaxed max-w-[90%] mb-8">
-              {lang === 'sw' ? 'Ikiwa hii ni dharura ya matibabu, tafadhali piga simu mara moja kuomba msaada.' : 'If this is a medical emergency, please call for help immediately.'}
-            </p>
-
-            <a
-              href="tel:1199"
-              className="w-28 h-28 rounded-full bg-[#FFF5F5] border border-[#FFE3E3] shadow-md flex flex-col items-center justify-center text-toto-red hover:bg-[#FFE3E3] active:scale-[0.93] transition-all select-none mb-4"
+            <Link
+              to="/ai-health"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm active:scale-95 transition-transform"
             >
-              <Phone size={36} strokeWidth={2} className="animate-bounce" />
-            </a>
-            
-            <p className="text-[18px] font-black text-toto-black">1199</p>
-            <p className="text-[11.5px] font-bold text-toto-gray uppercase tracking-wider mt-0.5">
-              {lang === 'sw' ? 'Nambari ya Dharura' : 'Call Emergency Hotline'}
-            </p>
-
-            <div className="w-full bg-[#f8faf8] border border-[#e5e7eb] rounded-[24px] p-5 flex items-center justify-between gap-4 mt-8 hover:border-toto-teal/20 transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-toto-teal/5 flex items-center justify-center text-toto-teal">
-                  <MapPin size={16} />
-                </div>
-                <div className="text-left">
-                  <h4 className="text-[13px] font-extrabold text-toto-black">
-                    {lang === 'sw' ? 'Shiriki Mahali Ulipo' : 'Share My Location'}
-                  </h4>
-                  <p className="text-[11.5px] text-toto-gray mt-0.5">
-                    {lang === 'sw' ? 'Tuma kuratibu zako kwa waokoaji' : 'Send your location details to emergency services'}
-                  </p>
-                </div>
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                <MessageSquare size={22} />
               </div>
-              <ChevronRight size={16} className="text-toto-light" />
-            </div>
+              <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">
+                {isSw ? 'Soga ya AI' : 'AI Health'}
+              </span>
+            </Link>
 
-            <DrawerClose className="w-full h-12 rounded-full border border-[#e5e7eb] text-[13px] font-bold text-toto-gray active:scale-[0.97] transition-all mt-8">
-              {lang === 'sw' ? 'Ghairi' : 'Cancel'}
-            </DrawerClose>
+            <button
+              type="button"
+              onClick={() => setKickCounterOpen(true)}
+              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm active:scale-95 transition-transform"
+            >
+              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Footprints size={22} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">
+                {isSw ? 'Mateke' : 'Kicks'}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setEmergencyOpen(true)}
+              className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white border border-slate-200/80 shadow-sm active:scale-95 transition-transform"
+            >
+              <div className="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <AlertTriangle size={22} />
+              </div>
+              <span className="text-[11px] font-bold text-slate-700 text-center leading-tight">
+                {isSw ? 'Dharura' : 'Emergency'}
+              </span>
+            </button>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </div>
+
+        {/* Kenya MOH Danger Signs Alert Banner */}
+        <div className="px-4 mb-4">
+          <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-start gap-3">
+            <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wider">
+                {isSw ? 'Dalili za Hatari (Wizara ya Afya)' : 'Kenya MOH Maternal Danger Signs'}
+              </h4>
+              <p className="text-[11px] text-rose-700 mt-1 leading-relaxed">
+                {isSw
+                  ? 'Ukipata maumivu makali ya tumbo, homa kali, kuvuja damu, au mtoto kuacha kucheza, piga simu ya dharura au tembelea kituo cha afya mara moja.'
+                  : 'Severe headache, blurred vision, bleeding, high fever, or reduced fetal movement require immediate hospital assessment.'}
+              </p>
+              <div className="mt-2.5 flex items-center gap-2">
+                <a
+                  href={`tel:${mother?.facility_emergency_phone || '1190'}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-sm"
+                >
+                  <Phone size={13} />
+                  <span>{isSw ? 'Piga Simu ya Dharura (1190)' : 'Call Emergency Hotline (1190)'}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming Appointments Card */}
+        <div className="px-4 mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              {isSw ? 'Miadi Inayofuata Kliniki' : 'Next Clinic Appointment'}
+            </h3>
+            <Link to="/care" className="text-xs font-bold text-[#006B5F] hover:underline">
+              {isSw ? 'Tazama yote' : 'View all'}
+            </Link>
+          </div>
+
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 text-[#006B5F] flex items-center justify-center">
+                <Calendar size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-900">
+                  {isPregnant
+                    ? isSw ? 'Kliniki ya Wajawazito (ANC Contact)' : 'Antenatal Care Visit'
+                    : isSw ? 'Chanjo na Ukuaji wa Mtoto' : 'Immunization & Growth Checkup'}
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {nextAncVisit?.next_visit_date || calculatedEdd || '2026-05-15'} • 09:00 AM
+                </p>
+                <p className="text-[11px] font-medium text-[#006B5F] mt-0.5">
+                  {mother?.facility_name || 'Pumwani Maternity Hospital'}
+                </p>
+              </div>
+            </div>
+            <Badge variant="scheduled">
+              {isSw ? 'Imepangwa' : 'Scheduled'}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Children Overview Section */}
+        <div className="px-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                {isSw ? 'Watoto Wako' : 'Your Children'}
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                {children.length} {children.length === 1 ? (isSw ? 'mtoto aliyesajiliwa' : 'registered child') : (isSw ? 'watoto waliosajiliwa' : 'registered children')}
+              </p>
+            </div>
+            <Link
+              to="/add-child"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#E6F4F1] hover:bg-[#D5EDE8] text-[#006B5F] text-xs font-bold transition-colors"
+            >
+              <Plus size={14} />
+              <span>{isSw ? 'Ongeza Mtoto' : 'Add Child'}</span>
+            </Link>
+          </div>
+
+          {children.length > 0 ? (
+            <div className="space-y-3">
+              {children.map((child) => (
+                <ChildCard
+                  key={child.id}
+                  child={child}
+                  nextVaccine={vaccineMap[child.id]}
+                  lastGrowth={growthMap[child.id]}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center">
+              <Baby className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-bold text-slate-700">
+                {isSw ? 'Bado hujasajili mtoto' : 'No children registered yet'}
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1 mb-3">
+                {isSw
+                  ? 'Sajili mtoto wako ili kuanza kufuatilia chanjo na uzito'
+                  : 'Register your newborn to track growth and the KEPI immunization schedule'}
+              </p>
+              <Link to="/add-child">
+                <Button variant="outline" size="sm">
+                  {isSw ? 'Sajili Mtoto Sasa' : 'Register Child Now'}
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Kick Counter Modal */}
+        {kickCounterOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+            <div className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center">
+              <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4 sm:hidden" />
+              <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
+                <Footprints size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">
+                {isSw ? 'Kipimo cha Mateke ya Mtoto' : 'Fetal Kick Counter'}
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 mb-6 max-w-[280px]">
+                {isSw
+                  ? 'Kiwango cha kawaida ni angalau mateke 10 ndani ya masaa 2 ukiwa umepumzika.'
+                  : 'Under WHO guidelines, count at least 10 kicks or movements within a 2-hour resting window.'}
+              </p>
+
+              <div className="text-5xl font-extrabold text-[#006B5F] font-serif mb-6">
+                {kicksToday}
+              </div>
+
+              <div className="flex gap-3 w-full mb-4">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="flex-1"
+                  onClick={() => setKicksToday((k) => k + 1)}
+                >
+                  <Plus size={18} />
+                  <span>{isSw ? 'Nimesikia Teke (+1)' : 'Record Kick (+1)'}</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setKicksToday(0)}
+                >
+                  {isSw ? 'Weka Upya' : 'Reset'}
+                </Button>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setKickCounterOpen(false)}
+                className="w-full"
+              >
+                {isSw ? 'Funga' : 'Close'}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Symptoms Screening Modal */}
+        {symptomsOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+            <div className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-[#006B5F]" />
+                  <span>{isSw ? 'Uchunguzi wa Dalili' : 'Symptom Triage'}</span>
+                </h3>
+                <button
+                  onClick={() => setSymptomsOpen(false)}
+                  className="p-1 rounded-full hover:bg-slate-100 text-slate-400"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+                {isSw
+                  ? 'Chagua dalili unazohisi kwa sasa ili upate ushauri wa haraka kulingana na miongozo ya Wizara ya Afya:'
+                  : 'Select any symptoms you are currently experiencing for guided clinical triage:'}
+              </p>
+
+              <div className="space-y-2 mb-6">
+                {(isSw ? DANGER_SIGNS_SW : DANGER_SIGNS_EN).map((sign, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 rounded-xl border border-rose-100 bg-rose-50/60 flex items-start gap-2.5 text-xs text-rose-900"
+                  >
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                    <span>{sign}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                <Link
+                  to="/ai-health"
+                  className="w-full"
+                  onClick={() => setSymptomsOpen(false)}
+                >
+                  <Button variant="primary" size="lg" className="w-full">
+                    <MessageSquare size={16} />
+                    <span>{isSw ? 'Zungumza na Msaidizi wa AI' : 'Consult AI Health Assistant'}</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => setSymptomsOpen(false)}
+                >
+                  {isSw ? 'Sina Dalili za Hatari' : 'No Danger Signs Present'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Emergency Modal */}
+        {emergencyOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+            <div className="w-full max-w-md bg-white rounded-t-[32px] sm:rounded-3xl p-6 shadow-2xl text-center">
+              <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">
+                {isSw ? 'Msaada wa Dharura' : 'Emergency Assistance'}
+              </h3>
+              <p className="text-xs text-slate-600 mt-1 mb-6 leading-relaxed">
+                {isSw
+                  ? 'Ukikumbana na dharura ya kiafya, piga simu mara moja au fika kwenye kituo chako cha afya kilichosajiliwa.'
+                  : 'For acute maternal or newborn emergencies, dial immediately or proceed to your registered hospital.'}
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <a
+                  href="tel:1190"
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-600 text-white font-bold text-sm shadow-md"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Phone size={18} />
+                    <span>{isSw ? 'Nambari ya Dharura ya Kitaifa' : 'National Health Hotline'}</span>
+                  </div>
+                  <span className="font-mono text-base">1190</span>
+                </a>
+
+                <a
+                  href={`tel:${mother?.facility_emergency_phone || mother?.facility_phone || '+254202223344'}`}
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-sm transition-colors"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Stethoscope size={18} className="text-[#006B5F]" />
+                    <span className="truncate max-w-[200px]">
+                      {mother?.facility_name || 'Hospital MCH Wing'}
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-slate-600">
+                    {mother?.facility_emergency_phone || 'Call'}
+                  </span>
+                </a>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={() => setEmergencyOpen(false)}
+                className="w-full"
+              >
+                {isSw ? 'Funga' : 'Dismiss'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </AppShell>
   );
 }

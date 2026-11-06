@@ -72,7 +72,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-1.5 h-10 px-4 bg-[#0047FF] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#003BCC] active:scale-[0.97] transition-all shadow-[0_4px_12px_rgba(0,71,255,0.2)]"
+          className="flex items-center gap-1.5 h-10 px-4 bg-[#006B5F] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#0A2E2B] active:scale-[0.97] transition-all shadow-sm"
         >
           <Plus size={15} /> Add Facility
         </button>
@@ -99,7 +99,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Facility Name</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Building size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -114,7 +114,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Facility Code</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Key size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -129,7 +129,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Facility Level</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Info size={14} className="text-[#A0A0A0]" />
                     <select
                       value={form.level}
@@ -148,7 +148,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">County</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Compass size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -162,7 +162,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Sub-County</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <MapPin size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -176,7 +176,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Contact Phone</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Phone size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -190,7 +190,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">General Location</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <MapPin size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -204,7 +204,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Physical Address</label>
-                  <div className="flex items-center gap-2 p-2 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 p-2 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <textarea
                       value={form.address}
                       onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
@@ -218,7 +218,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="h-12 bg-[#0047FF] text-white text-[14px] font-bold rounded-[16px] hover:bg-[#003BCC] active:scale-[0.98] transition-all disabled:opacity-50 mt-2 shadow-[0_4px_12px_rgba(0,71,255,0.25)]"
+                className="h-12 bg-[#006B5F] text-white text-[14px] font-bold rounded-[16px] hover:bg-[#0A2E2B] active:scale-[0.98] transition-all disabled:opacity-50 mt-2 shadow-sm"
               >
                 {submitting ? 'Creating...' : 'Register Facility'}
               </button>
@@ -235,7 +235,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, code or location..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF]"
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#006B5F]"
           />
         </div>
       </div>
@@ -254,7 +254,7 @@ export default function FacilityFacilities({ facilities, onRefresh }) {
             {filtered.map(f => (
               <tr key={f.id} className="border-t border-[#FAFAFA] hover:bg-[#FAFAFA]/50 transition-colors">
                 <td className="px-6 py-4 text-[13px] font-semibold text-[#0A0A0A] whitespace-nowrap">{f.name}</td>
-                <td className="px-6 py-4 text-[12px] font-bold text-[#0047FF]">{f.facility_code}</td>
+                <td className="px-6 py-4 text-[12px] font-bold text-[#006B5F]">{f.facility_code}</td>
                 <td className="px-6 py-4 text-[12px] text-[#666666] whitespace-nowrap">{f.level || '—'}</td>
                 <td className="px-6 py-4 text-[12px] text-[#666666] whitespace-nowrap">{f.county || '—'}</td>
                 <td className="px-6 py-4 text-[12px] text-[#666666]">{f.location || '—'}</td>

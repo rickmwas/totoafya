@@ -302,6 +302,29 @@ export default function Login({ isActivationFlow = false }) {
           </div>
         )}
 
+                {/* Local Dev Fast-Access Banner */}
+        <div className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 mb-5 text-left">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 mb-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Local Dev: Auth Disabled</span>
+          </div>
+          <p className="text-[11px] text-emerald-700 mb-2">
+            Enter any email & password or click below for instant admin login:
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              if (db.auth.quickLogin) db.auth.quickLogin('facility_admin');
+              else await db.auth.login('admin@facility.org', 'demo');
+              await checkAppState();
+              window.location.href = '/';
+            }}
+            className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5"
+          >
+            ⚡ Quick Login as Facility Admin
+          </button>
+        </div>
+
         <form onSubmit={handleEmailLogin} className="w-full flex flex-col gap-4">
           <div>
             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">

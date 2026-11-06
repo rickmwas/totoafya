@@ -6,10 +6,13 @@ export default defineConfig({
   plugins: [react()],
   envDir: '../../',
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@totoafya/business-logic': path.resolve(__dirname, '../../packages/business-logic/src/index.ts'),
       '@totoafya/api-client': path.resolve(__dirname, '../../packages/api-client/index.js'),
       '@totoafya/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts'),
+      '@totoafya/design-system': path.resolve(__dirname, '../../packages/design-system/src/index.ts'),
+      '@totoafya/shared-ui': path.resolve(__dirname, '../../packages/shared-ui/index.js'),
       '@/api/totoafyaClient': path.resolve(__dirname, '../../packages/api-client/index.js'),
       '@': path.resolve(__dirname, './src'),
     },

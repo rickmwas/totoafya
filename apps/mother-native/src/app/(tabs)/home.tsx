@@ -6,65 +6,12 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useAuthStore } from '../../store/authStore';
 import { AlertCircle, PlusCircle, Calendar, Phone, Heart, Activity } from 'lucide-react-native';
 import { colors } from '@totoafya/design-system';
+import { dataClient } from '@totoafya/api-client';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { t } = useLanguageStore();
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
-  const [phone, setPhone] = useState('');
-  const [paywallStep, setPaywallStep] = useState<'select' | 'sending' | 'pin_sent' | 'success'>('select');
-  const [paywallError, setPaywallError] = useState<string | null>(null);
-
-  const price = selectedPlan === 'monthly' ? 150 : 1000;
-  const isExpired = mother?.subscription_status === 'expired' || user?.subscription_status === 'expired';
-
-  const handlePaywallSubmit = () => {
-    if (!phone.match(/^(?:\+254|0)?(7|1)\d{8}$/)) {
-      setPaywallError('Please enter a valid Safaricom M-Pesa number');
-      return;
-    }
-    setPaywallError(null);
-    setPaywallStep('sending');
-    setTimeout(() => {
-      setPaywallStep('pin_sent');
-    }, 1500);
-  };
-
-  const handlePaywallSuccess = async () => {
-    setPaywallStep('sending');
-    try {
-      const raw = localStorage.getItem('db_Mother') || '[]';
-      const mothersStore = JSON.parse(raw);
-      const motherId = mother?.id || user?.mother_id;
-      const motherIdx = mothersStore.findIndex((m: any) => m.id === motherId || m.user_id === user?.id);
-      
-      if (motherIdx !== -1) {
-        mothersStore[motherIdx].subscription_status = 'active';
-        const expDate = new Date();
-        if (selectedPlan === 'monthly') {
-          expDate.setMonth(expDate.getMonth() + 1);
-        } else {
-          expDate.setFullYear(expDate.getFullYear() + 1);
-        }
-        mothersStore[motherIdx].subscription_expires_at = expDate.toISOString();
-        localStorage.setItem('db_Mother', JSON.stringify(mothersStore));
-      }
-
-      setPaywallStep('success');
-      setTimeout(() => {
-        if (user) {
-          useAuthStore.getState().updateUserProfile({
-            subscription_status: 'active',
-          });
-        }
-        setPaywallStep('select');
-      }, 1500);
-    } catch (err: any) {
-      setPaywallError(err.message || 'Payment simulation failed');
-      setPaywallStep('select');
-    }
-  };
 
   const { 
     mother, 
@@ -77,6 +24,65 @@ export default function HomeScreen() {
     alerts,
     isLoading 
   } = useHealthSummary();
+
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [phone, setPhone] = useState('');
+  const [paywallStep, setPaywallStep] = useState<'select' | 'sending' | 'pin_sent' | 'success'>('select');
+  const [paywallError, setPaywallError] = useState<string | null>(null);
+
+  const price = selectedPlan === 'monthly' ? 150 : 1000;
+  const isExpired = mother?.subscription_status === 'expired' || user?.subscription_status === 'expired';
+
+  const handlePaywallSubmit = async () => {
+    if (!phone.match(/^(?:\+254|0)?(7|1)\d{8}$/)) {
+      setPaywallError('Please enter a valid Safaricom M-Pesa number');
+      return;
+    }
+    setPaywallError(null);
+    setPaywallStep('sending');
+    try {
+      await dataClient.payments.initiateSTKPush(phone, price, selectedPlan);
+      setTimeout(() => {
+        setPaywallStep('pin_sent');
+      }, 1000);
+    } catch (err: any) {
+      setPaywallError(err.message || 'Failed to initiate M-Pesa STK push');
+      setPaywallStep('select');
+    }
+  };
+
+  const handlePaywallSuccess = async () => {
+    setPaywallStep('sending');
+    try {
+      const motherId = mother?.id || user?.mother_id;
+      const expDate = new Date();
+      if (selectedPlan === 'monthly') {
+        expDate.setMonth(expDate.getMonth() + 1);
+      } else {
+        expDate.setFullYear(expDate.getFullYear() + 1);
+      }
+
+      if (motherId) {
+        await dataClient.mothers.update(motherId, {
+          subscription_status: 'active',
+          subscription_expires_at: expDate.toISOString(),
+        });
+      }
+
+      setPaywallStep('success');
+      setTimeout(() => {
+        if (user) {
+          useAuthStore.getState().updateUserProfile({
+            subscription_status: 'active',
+          });
+        }
+        setPaywallStep('select');
+      }, 1500);
+    } catch (err: any) {
+      setPaywallError(err.message || 'Payment completion failed');
+      setPaywallStep('select');
+    }
+  };
 
   const getGreeting = () => {
     const hrs = new Date().getHours();

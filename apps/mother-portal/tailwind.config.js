@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  presets: [require('../../packages/design-system/src/tailwind-preset.js')],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "../../packages/shared-ui/src/**/*.{ts,tsx,js,jsx}",
+  ],
   safelist: [
     "bg-[#1B6B5A]", "bg-[#2E7A5D]", "bg-[#E51010]", "bg-[#F9A825]", "bg-[#7C3AED]",
     "text-[#1B6B5A]", "text-[#2E7A5D]", "text-[#E51010]", "text-[#F9A825]", "text-[#7C3AED]",

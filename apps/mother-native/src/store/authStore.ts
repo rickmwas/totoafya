@@ -9,16 +9,16 @@ const getStorage = () => {
   if (Platform.OS === 'web') {
     return {
       getString: (key: string) => {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem(key);
+        if (typeof window === 'undefined' || !window.localStorage) return null;
+        return window.localStorage.getItem(key);
       },
       set: (key: string, value: string) => {
-        if (typeof window === 'undefined') return;
-        localStorage.setItem(key, value);
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        window.localStorage.setItem(key, value);
       },
       delete: (key: string) => {
-        if (typeof window === 'undefined') return;
-        localStorage.removeItem(key);
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        window.localStorage.removeItem(key);
       }
     };
   }
@@ -27,7 +27,12 @@ const getStorage = () => {
       const { MMKV } = require('react-native-mmkv');
       storage = new MMKV();
     } catch (e) {
-      return null;
+      const mem = new Map<string, string>();
+      storage = {
+        getString: (k: string) => mem.get(k) || null,
+        set: (k: string, v: string) => mem.set(k, v),
+        delete: (k: string) => mem.delete(k),
+      };
     }
   }
   return storage;
@@ -37,16 +42,16 @@ const getSecureStore = () => {
   if (Platform.OS === 'web') {
     return {
       getItemAsync: async (key: string) => {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem(key);
+        if (typeof window === 'undefined' || !window.localStorage) return null;
+        return window.localStorage.getItem(key);
       },
       setItemAsync: async (key: string, value: string) => {
-        if (typeof window === 'undefined') return;
-        localStorage.setItem(key, value);
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        window.localStorage.setItem(key, value);
       },
       deleteItemAsync: async (key: string) => {
-        if (typeof window === 'undefined') return;
-        localStorage.removeItem(key);
+        if (typeof window === 'undefined' || !window.localStorage) return;
+        window.localStorage.removeItem(key);
       }
     };
   }
@@ -146,8 +151,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   initialize: async () => {
-    // Skip during SSR
-    if (typeof window === 'undefined') return;
+    // Skip only during Web SSR
+    if (Platform.OS === 'web' && typeof window === 'undefined') return;
 
     set({ isLoading: true });
     try {

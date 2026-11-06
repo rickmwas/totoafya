@@ -40,7 +40,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
         style={styles.tabButtonView}>
         <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
-          {children}
+          {children as any}
         </ThemedText>
       </ThemedView>
     </Pressable>

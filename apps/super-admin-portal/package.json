@@ -11,6 +11,10 @@
   "dependencies": {
     "@sentry/react": "^10.65.0",
     "@totoafya/api-client": "*",
+    "@totoafya/auth": "*",
+    "@totoafya/business-logic": "*",
+    "@totoafya/design-system": "*",
+    "@totoafya/shared-ui": "*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.475.0",
     "react": "^18.2.0",

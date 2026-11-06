@@ -39,7 +39,7 @@ export async function deriveKeyFromPin(pin: string, saltBase64: string): Promise
   return await window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: saltBytes,
+      salt: saltBytes as any,
       iterations: 100000,
       hash: 'SHA-256',
     },
@@ -67,10 +67,10 @@ export async function encryptString(
   const ciphertextBuffer = await window.crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
-      iv: iv,
+      iv: iv as any,
     },
     key,
-    plaintextBytes
+    plaintextBytes as any
   );
 
   const ciphertextBytes = new Uint8Array(ciphertextBuffer);
@@ -93,10 +93,10 @@ export async function decryptString(
   const decryptedBuffer = await window.crypto.subtle.decrypt(
     {
       name: 'AES-GCM',
-      iv: iv,
+      iv: iv as any,
     },
     key,
-    ciphertextBytes
+    ciphertextBytes as any
   );
 
   const dec = new TextDecoder();

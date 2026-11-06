@@ -138,7 +138,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-1.5 h-10 px-4 bg-[#0047FF] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#003BCC] active:scale-[0.97] transition-all shadow-[0_4px_12px_rgba(0,71,255,0.2)]"
+          className="flex items-center gap-1.5 h-10 px-4 bg-[#006B5F] text-white text-[13px] font-bold rounded-[12px] hover:bg-[#0A2E2B] active:scale-[0.97] transition-all shadow-sm"
         >
           <Plus size={15} /> Add Staff
         </button>
@@ -186,13 +186,13 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
               </div>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="text-[#666666] font-semibold">Temporary Password:</span>
-                <span className="font-bold text-[#0047FF] font-mono bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                <span className="font-bold text-[#006B5F] font-mono bg-[#006B5F]/10 px-2 py-0.5 rounded-md border border-[#006B5F]/20">
                   {createdStaffInfo.tempPassword}
                 </span>
               </div>
               <div className="flex flex-col gap-1 text-[12px] pt-2 border-t border-[#E5E5E5]">
                 <span className="text-[#666666] font-semibold">Activation Link:</span>
-                <span className="text-[#0047FF] font-mono text-[11px] break-all bg-white p-2 rounded-lg border border-[#E5E5E5]">
+                <span className="text-[#006B5F] font-mono text-[11px] break-all bg-white p-2 rounded-lg border border-[#E5E5E5]">
                   {createdStaffInfo.activationLink}
                 </span>
               </div>
@@ -207,7 +207,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2500);
                 }}
-                className="flex-1 h-11 bg-[#0047FF] text-white text-[13px] font-bold rounded-[14px] hover:bg-[#003BCC] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(0,71,255,0.2)]"
+                className="flex-1 h-11 bg-[#006B5F] text-white text-[13px] font-bold rounded-[14px] hover:bg-[#0A2E2B] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm"
               >
                 {copied ? <Check size={16} /> : <Copy size={16} />}
                 <span>{copied ? 'Copied to Clipboard!' : 'Copy Credentials'}</span>
@@ -245,7 +245,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Full Name</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <User size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -260,7 +260,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Email Address</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Mail size={14} className="text-[#A0A0A0]" />
                     <input
                       type="email"
@@ -275,7 +275,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Employee ID / License #</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Key size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -289,7 +289,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Phone Number</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Phone size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -303,7 +303,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Designation</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Activity size={14} className="text-[#A0A0A0]" />
                     <input
                       type="text"
@@ -317,7 +317,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Assigned Facility</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <Building size={14} className="text-[#A0A0A0]" />
                     <select
                       required
@@ -335,7 +335,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
 
                 <div className="flex flex-col gap-1.5 col-span-2">
                   <label className="text-[10px] tracking-[0.15em] font-bold uppercase text-[#A0A0A0] px-1">Staff Role</label>
-                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#0047FF] focus-within:bg-white transition-all">
+                  <div className="flex items-center gap-2 px-3.5 bg-[#FAFAFA] rounded-[14px] border border-transparent focus-within:border-[#006B5F] focus-within:bg-white transition-all">
                     <User size={14} className="text-[#A0A0A0]" />
                     <select
                       required
@@ -353,7 +353,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="h-12 bg-[#0047FF] text-white text-[14px] font-bold rounded-[16px] hover:bg-[#003BCC] active:scale-[0.98] transition-all disabled:opacity-50 mt-2 shadow-[0_4px_12px_rgba(0,71,255,0.25)]"
+                className="h-12 bg-[#006B5F] text-white text-[14px] font-bold rounded-[16px] hover:bg-[#0A2E2B] active:scale-[0.98] transition-all disabled:opacity-50 mt-2 shadow-sm"
               >
                 {submitting ? 'Registering & Inviting...' : 'Register and Invite Staff'}
               </button>
@@ -370,7 +370,7 @@ export default function FacilityNurses({ nurses, facilities, onRefresh }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name, email, or employee ID..."
-            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#0047FF]"
+            className="w-full h-10 pl-9 pr-4 bg-white border border-[#E5E5E5] rounded-[12px] text-[13px] text-[#0A0A0A] placeholder:text-[#A0A0A0] outline-none focus:border-[#006B5F]"
           />
         </div>
       </div>

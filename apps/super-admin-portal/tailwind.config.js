@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  presets: [require('../../packages/design-system/src/tailwind-preset.js')],
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "../../packages/shared-ui/src/**/*.{ts,tsx,js,jsx}",
+  ],
   theme: {
     extend: {
       fontFamily: {

@@ -14,8 +14,30 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     db.auth.me().then((u) => {
-      setUser(u);
-      setIsAuthenticated(true);
+      if (u) {
+        setUser(u);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } else {
+        // If user explicitly navigated to /login, leave them unauthenticated so Login screen renders
+        if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+          setUser(null);
+          setIsAuthenticated(false);
+          setAuthError(null);
+        } else {
+          // In local mode: auto-grant default user so they are never blocked
+          const isLocal = import.meta.env.VITE_DATABASE_PROVIDER === 'local' || !import.meta.env.VITE_DATABASE_PROVIDER;
+          if (isLocal && db.auth.quickLogin) {
+            const defaultUser = db.auth.quickLogin('user');
+            setUser(defaultUser);
+            setIsAuthenticated(true);
+            setAuthError(null);
+          } else {
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        }
+      }
     }).catch(() => {
       setIsAuthenticated(false);
     }).finally(() => {
@@ -32,9 +54,20 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAppState = async () => {
-    const u = await db.auth.me();
-    setUser(u);
-    setIsAuthenticated(true);
+    try {
+      const u = await db.auth.me();
+      if (u) {
+        setUser(u);
+        setIsAuthenticated(true);
+        setAuthError(null);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   return (

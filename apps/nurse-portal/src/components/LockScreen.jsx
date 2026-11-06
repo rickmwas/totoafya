@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { useStation } from '@/context/StationContext';
 import { Lock, Unlock, ShieldAlert, BadgePlus, LogOut } from 'lucide-react';
 
 export default function LockScreen() {
-  const { user, unlockWithPin, loginWithBadge, logout } = useAuth();
+  const { user, unlockWithPin, loginWithBadge, logout, isLocked: isAuthLocked } = useAuth();
+  let stationCtx = null;
+  try {
+    stationCtx = useStation();
+  } catch {}
   const [pin, setPin] = useState('');
   const [badgeToken, setBadgeToken] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showBadgeInput, setShowBadgeInput] = useState(false);
+
+  const activeNurseName = user?.full_name || stationCtx?.nurse?.full_name || 'Clinic Nurse';
 
   const handleKeyPress = (num) => {
     if (pin.length < 6) {
@@ -30,10 +37,19 @@ export default function LockScreen() {
     setLoading(true);
     setError('');
     try {
-      await unlockWithPin(pin);
+      if (stationCtx?.unlockStation) {
+        stationCtx.unlockStation(pin);
+      }
+      if (isAuthLocked && unlockWithPin) {
+        await unlockWithPin(pin);
+      }
     } catch (err) {
-      setError(err.message || 'Incorrect PIN code');
-      setPin('');
+      if (stationCtx && !stationCtx.isLocked && pin.length >= 4) {
+        // successfully unlocked station context
+      } else {
+        setError(err.message || 'Incorrect PIN code');
+        setPin('');
+      }
     } finally {
       setLoading(false);
     }
@@ -63,7 +79,7 @@ export default function LockScreen() {
         {/* User profile avatar */}
         <div className="relative mb-6">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg">
-            <span className="text-3xl font-bold font-serif">{user?.full_name ? user.full_name[0] : 'N'}</span>
+            <span className="text-3xl font-bold font-serif">{activeNurseName ? activeNurseName[0] : 'N'}</span>
           </div>
           <div className="absolute -bottom-1 -right-1 bg-amber-500 w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-900 shadow">
             <Lock className="w-3.5 h-3.5 text-slate-950" />
@@ -71,7 +87,7 @@ export default function LockScreen() {
         </div>
 
         <div className="text-center mb-6">
-          <h2 className="text-xl font-bold tracking-tight text-white">{user?.full_name || 'Clinic Nurse'}</h2>
+          <h2 className="text-xl font-bold tracking-tight text-white">{activeNurseName}</h2>
           <p className="text-xs text-slate-400 mt-1">Session Locked • Enter PIN to unlock</p>
         </div>
 

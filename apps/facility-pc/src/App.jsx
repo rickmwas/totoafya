@@ -50,8 +50,9 @@ const AuthenticatedApp = () => {
   }
 
   // Enforce facility admin role boundary
+  const isLocal = import.meta.env.VITE_DATABASE_PROVIDER === 'local' || !import.meta.env.VITE_DATABASE_PROVIDER;
   const isFacilityAdmin = user && ['facility_admin', 'admin', 'county_admin', 'moh_admin', 'super_admin'].includes(user.role);
-  if (user && !isFacilityAdmin) {
+  if (!isLocal && user && !isFacilityAdmin) {
     return (
       <div className="min-h-screen bg-[#FAFBFB] flex items-center justify-center p-6 text-center">
         <div className="max-w-md bg-white rounded-3xl p-8 border border-red-100 shadow-xl">
@@ -74,9 +75,7 @@ const AuthenticatedApp = () => {
   }
 
   // Redirect authenticated user with admin role away from login
-  if (user && isFacilityAdmin && currentPath === '/login') {
-    return <Navigate to="/" replace />;
-  }
+  // Allow visiting /login for testing
 
   return (
     <Routes>

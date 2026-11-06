@@ -1,261 +1,287 @@
-import db from '@/api/totoafyaClient';
 import React, { useState, useEffect } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Circle, Check, ChevronLeft, MoreVertical, Shield } from 'lucide-react';
-import { useLang } from '@/context/LanguageContext';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Shield,
+  Calendar,
+  Baby,
+  ChevronRight,
+  ArrowLeft,
+  Sparkles,
+} from 'lucide-react';
+import { dataClient } from '@totoafya/api-client';
+import { KENYA_VACCINE_SCHEDULE } from '@totoafya/business-logic';
+import { Button, Badge, Card, CardHeader, CardTitle, CardContent } from '@totoafya/shared-ui';
 import AppShell from '@/components/layout/AppShell';
-import { useRequireOnboarding } from '@/hooks/useRequireOnboarding';
-import { format, parseISO, differenceInDays } from 'date-fns';
-import { cn } from '@/lib/utils';
-
-const KENYA_VACCINE_SCHEDULE = [
-  { name: 'BCG', age_weeks: 0, description: 'Tuberculosis' },
-  { name: 'OPV 0', age_weeks: 0, description: 'Polio (birth)' },
-  { name: 'OPV 1 + Penta 1 + PCV 1 + Rota 1', age_weeks: 6, description: 'Polio, DPT-HepB-Hib, Pneumonia, Rotavirus' },
-  { name: 'OPV 2 + Penta 2 + PCV 2 + Rota 2', age_weeks: 10, description: 'Second dose' },
-  { name: 'OPV 3 + Penta 3 + PCV 3 + IPV', age_weeks: 14, description: 'Third dose + Inactivated Polio' },
-  { name: 'Vitamin A + Measles 1', age_weeks: 36, description: '9 months: Measles & Vitamin A' },
-  { name: 'Measles 2 + Vitamin A', age_weeks: 74, description: '18 months booster' },
-];
-
-const statusColor = { given: 'text-[#1eb96c] bg-[#e8f7ee]', due: 'text-[#e68a00] bg-[#fffbf0]', overdue: 'text-[#ff5f58] bg-[#fff5f5]', scheduled: 'text-toto-gray bg-toto-gray/5' };
-
-const getVaccineDescription = (name) => {
-  const cleanName = name.split('+')[0].trim();
-  const match = KENYA_VACCINE_SCHEDULE.find(v => v.name.includes(cleanName) || cleanName.includes(v.name));
-  return match ? match.description : null;
-};
+import { useLang } from '@/context/LanguageContext';
+import { parseISO, format } from 'date-fns';
 
 export default function VaccinationSchedule({ hideShell = false }) {
-  const { t, lang } = useLang();
-  const { loading: checkingOnboarding } = useRequireOnboarding();
+  const navigate = useNavigate();
+  const { lang } = useLang();
+  const isSw = lang === 'sw';
+
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [vaccines, setVaccines] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [scheduleTab, setScheduleTab] = useState('upcoming'); // 'upcoming' | 'completed' | 'all'
+  const [activeTab, setActiveTab] = useState('upcoming'); // 'upcoming' | 'completed' | 'all'
 
-  useEffect(() => { loadChildren(); }, []);
-  useEffect(() => { if (selectedChild) loadVaccines(selectedChild.id); }, [selectedChild]);
+  useEffect(() => {
+    loadScopedChildren();
+  }, []);
 
-  const loadChildren = async () => {
-    const kids = await db.entities.Child.list('-created_date', 20);
-    setChildren(kids);
-    if (kids.length > 0) setSelectedChild(kids[0]);
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (selectedChild) {
+      loadChildVaccines(selectedChild.id);
+    }
+  }, [selectedChild]);
 
-  const loadVaccines = async (childId) => {
-    const v = await db.entities.Immunization.filter({ child_id: childId }, 'scheduled_date', 50);
-    setVaccines(v);
-  };
-
-  const markGiven = async (vaccine) => {
-    setSaving(true);
+  const loadScopedChildren = async () => {
+    setLoading(true);
     try {
-      await db.entities.Immunization.update(vaccine.id, {
-        status: 'given',
-        given_date: new Date().toISOString().split('T')[0],
-      });
-      await loadVaccines(selectedChild.id);
-    } catch (err) {
-      console.error(err);
-      alert(lang === 'sw' ? 'Imeshindwa kusasisha chanjo.' : 'Failed to update vaccine.');
+      const user = await dataClient.auth.me();
+      if (!user) {
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      let motherId = user.mother_id;
+      if (!motherId) {
+        const mothers = await dataClient.mothers.filter({ user_id: user.id });
+        if (mothers.length > 0) motherId = mothers[0].id;
+      }
+
+      let kids = [];
+      if (motherId) {
+        kids = await dataClient.children.filter({ mother_id: motherId });
+      } else if (dataClient.mode === 'mock') {
+        const allMothers = await dataClient.mothers.list();
+        const demoMother = allMothers[0];
+        if (demoMother) kids = await dataClient.children.filter({ mother_id: demoMother.id });
+      }
+
+      setChildren(kids);
+      if (kids.length > 0) {
+        setSelectedChild(kids[0]);
+      }
+    } catch (e) {
+      console.error('Failed to load children for vaccines:', e);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  const seedSchedule = async () => {
-    if (!selectedChild) return;
-    setSaving(true);
+  const loadChildVaccines = async (childId) => {
     try {
-      const dob = parseISO(selectedChild.date_of_birth);
-      const records = KENYA_VACCINE_SCHEDULE.map(v => ({
-        child_id: selectedChild.id,
-        vaccine_name: v.name,
-        age_weeks: v.age_weeks,
-        scheduled_date: new Date(dob.getTime() + v.age_weeks * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        status: 'scheduled',
-        dose_number: 1,
-      }));
-      await db.entities.Immunization.bulkCreate(records);
-      await loadVaccines(selectedChild.id);
-    } catch (err) {
-      console.error(err);
-      alert(lang === 'sw' ? 'Imeshindwa kutengeneza ratiba.' : 'Failed to generate schedule.');
-    } finally {
-      setSaving(false);
+      const v = await dataClient.immunizations.filter({ child_id: childId }, 'scheduled_date', 50);
+      setVaccines(v);
+    } catch (e) {
+      console.warn('Failed to load child immunizations:', e);
     }
   };
 
-  const filteredVaccines = vaccines.filter(v => {
-    if (scheduleTab === 'upcoming') return v.status !== 'given';
-    if (scheduleTab === 'completed') return v.status === 'given';
+  const filteredVaccines = vaccines.filter((v) => {
+    if (activeTab === 'upcoming') return v.status !== 'given';
+    if (activeTab === 'completed') return v.status === 'given';
     return true;
   });
 
-  const renderContent = () => {
-    if (!selectedChild) {
-      return (
-        <div className="px-6 py-12 text-center">
-          <p className="text-[14px] text-toto-gray font-semibold">
-            {lang === 'sw' ? 'Ongeza mtoto kwanza.' : 'Add a child first.'}
-          </p>
+  const content = (
+    <div className="bg-[#F8FAFC] min-h-screen pb-16 font-sans text-slate-900">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-4 bg-white border-b border-slate-200/80 sticky top-0 z-20">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <h1 className="text-lg font-extrabold text-slate-900">
+              {isSw ? 'Ratiba ya Chanjo (KEPI)' : 'KEPI Vaccine Schedule'}
+            </h1>
+          </div>
+          <Badge variant="secondary">MOH Kenya</Badge>
         </div>
-      );
-    }
 
-    return (
-      <div className="px-4">
-        {/* Child Selector for Vaccines */}
+        {/* Child Selector Tabs */}
         {children.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-3.5 scrollbar-none">
-            {children.map(child => (
-              <button
-                key={child.id}
-                onClick={() => setSelectedChild(child)}
-                className={cn(
-                  'flex-shrink-0 px-4 py-1.5 rounded-full text-[13px] font-bold transition-all',
-                  selectedChild?.id === child.id ? 'bg-[#0d623d] text-white shadow-sm' : 'bg-white border border-[#e5e7eb] text-toto-gray'
-                )}
-              >
-                {child.full_name.split(' ')[0]}
-              </button>
-            ))}
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-2">
+            {children.map((child) => {
+              const isSelected = selectedChild?.id === child.id;
+              return (
+                <button
+                  key={child.id}
+                  onClick={() => setSelectedChild(child)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+                    isSelected
+                      ? 'bg-[#006B5F] text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  👶 {child.full_name?.split(' ')[0]}
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Schedule Sub-tabs: Upcoming, Completed, All (Screen 07 Tabs) */}
-        <div className="flex bg-[#f0f2f0] p-1 rounded-[16px] w-full mb-5 border border-[#e5e7eb]">
-          {[
-            { key: 'upcoming', label: lang === 'sw' ? 'Zinazokuja' : 'Upcoming' },
-            { key: 'completed', label: lang === 'sw' ? 'Zilizopewa' : 'Completed' },
-            { key: 'all', label: lang === 'sw' ? 'Zote' : 'All' }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setScheduleTab(tab.key)}
-              className={cn(
-                'flex-1 py-2 text-xs font-bold rounded-[12px] transition-all',
-                scheduleTab === tab.key ? 'bg-white text-toto-black shadow-sm' : 'text-toto-gray hover:text-toto-black'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Seed schedule container */}
-        {vaccines.length === 0 && (
-          <div className="bg-white rounded-[24px] p-6 border border-[#e5e7eb] text-center mb-6">
-            <Shield className="w-10 h-10 text-toto-teal mx-auto mb-3" />
-            <h4 className="text-[15px] font-bold text-toto-black">
-              {lang === 'sw' ? 'Ratiba ya Chanjo haijatengenezwa' : 'No vaccine schedule generated'}
-            </h4>
-            <p className="text-[12.5px] text-toto-gray mt-1 leading-relaxed">
-              {lang === 'sw' ? 'Tengeneza ratiba rasmi ya chanjo ya Kenya kwa mtoto wako.' : 'Generate the standard Kenyan immunization schedule for your baby.'}
-            </p>
-            <button
-              onClick={seedSchedule}
-              disabled={saving}
-              className="mt-4 bg-toto-teal hover:bg-toto-teal-dark text-white px-6 py-2.5 rounded-full text-[13px] font-bold shadow-sm active:scale-95 transition-all"
-            >
-              {lang === 'sw' ? 'Tengeneza Ratiba' : 'Generate Schedule'}
-            </button>
-          </div>
-        )}
-
-        {/* Vaccine List (Screen 07 Layout) */}
-        <div className="flex flex-col gap-3">
-          {filteredVaccines.sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date)).map(vaccine => {
-            const isGiven = vaccine.status === 'given';
-            const daysLeft = differenceInDays(parseISO(vaccine.scheduled_date), new Date());
-            
-            // Map badge colors
-            let badgeClass = 'text-toto-gray bg-toto-gray/5';
-            let badgeText = lang === 'sw' ? 'Imepangwa' : 'Scheduled';
-            if (vaccine.status === 'given') {
-              badgeClass = 'text-emerald-700 bg-emerald-50 border-emerald-100';
-              badgeText = lang === 'sw' ? 'Ilipewa' : 'Completed';
-            } else if (daysLeft < 0) {
-              badgeClass = 'text-rose-700 bg-rose-50 border-rose-100';
-              badgeText = lang === 'sw' ? 'Imechelewa' : 'Overdue';
-            } else if (daysLeft <= 14) {
-              badgeClass = 'text-amber-700 bg-amber-50 border-amber-100';
-              badgeText = lang === 'sw' ? 'Karibu' : 'Due';
-            }
-
-            return (
-              <div 
-                key={vaccine.id}
-                className="bg-white border border-[#e5e7eb] rounded-[24px] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.015)] flex flex-col gap-3 hover:border-toto-teal/20 transition-all"
-              >
-                <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <h4 className="text-[14px] font-extrabold text-[#131714] leading-snug">
-                      {vaccine.vaccine_name}
-                    </h4>
-                    {getVaccineDescription(vaccine.vaccine_name) && (
-                      <p className="text-[11.5px] text-toto-gray mt-0.5 font-medium leading-tight">
-                        {lang === 'sw' ? 'Kuhusu: ' : 'Prevents: '} <span className="font-semibold text-toto-teal">{getVaccineDescription(vaccine.vaccine_name)}</span>
-                      </p>
-                    )}
-                    <p className="text-[11.5px] text-toto-light mt-1 font-semibold font-numeric-tabular">
-                      {lang === 'sw' ? 'Tarehe: ' : 'Due date: '} {format(parseISO(vaccine.scheduled_date), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-                  
-                  <div className={cn("px-3 py-1 rounded-full text-[11px] font-bold border flex-shrink-0", badgeClass)}>
-                    {isGiven ? badgeText : `${badgeText} ${format(parseISO(vaccine.scheduled_date), 'd MMM')}`}
-                  </div>
-                </div>
-
-                {!isGiven && (
-                  <button
-                    onClick={() => markGiven(vaccine)}
-                    disabled={saving}
-                    className="w-full h-11 bg-toto-teal hover:bg-toto-teal-dark active:scale-[0.98] text-white rounded-full font-bold text-[13.5px] shadow-sm transition-all flex items-center justify-center gap-1.5 mt-1"
-                  >
-                    <Check size={14} strokeWidth={2.5} />
-                    {lang === 'sw' ? 'Weka Alama ya Kupewa' : 'Mark as Administered'}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  if (checkingOnboarding) return null;
-
-  if (hideShell) {
-    return renderContent();
-  }
-
-  return (
-    <AppShell>
-      <div className="bg-[#f7f9f7] min-h-screen pb-12 font-sans text-[#131714]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
-          <Link to="/" className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform">
-            <ChevronLeft size={20} className="text-[#131714]" />
-          </Link>
-          <h1 className="text-[18px] font-extrabold text-[#131714]">
-            {lang === 'sw' ? 'Chanjo' : 'Vaccines'}
-          </h1>
-          <button 
-            className="w-10 h-10 bg-white rounded-full border border-[#e5e7eb] flex items-center justify-center shadow-sm active:scale-95 transition-transform"
-            onClick={() => alert(lang === 'sw' ? 'Chaguo' : 'Options')}
+        {/* Filter Pills */}
+        <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl mt-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('upcoming')}
+            className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+              activeTab === 'upcoming'
+                ? 'bg-white text-[#006B5F] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
           >
-            <MoreVertical size={20} className="text-[#131714]" />
+            {isSw ? 'Zinazofuata' : 'Upcoming'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('completed')}
+            className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+              activeTab === 'completed'
+                ? 'bg-white text-[#006B5F] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            {isSw ? 'Zilizopewa' : 'Administered'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('all')}
+            className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+              activeTab === 'all'
+                ? 'bg-white text-[#006B5F] shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            {isSw ? 'Zote (KEPI)' : 'All Doses'}
           </button>
         </div>
-
-        {renderContent()}
       </div>
-    </AppShell>
+
+      {/* KEPI Info Box */}
+      <div className="p-4">
+        <div className="p-3.5 bg-teal-50 border border-teal-200 rounded-2xl flex items-start gap-2.5 text-xs text-teal-900 mb-4">
+          <Shield className="w-5 h-5 text-[#006B5F] shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold block">
+              {isSw ? 'Mpango wa Kitaifa wa Chanjo wa Kenya (KEPI)' : 'Kenya Expanded Programme on Immunization'}
+            </span>
+            <p className="text-[11px] text-teal-800 mt-0.5 leading-relaxed">
+              {isSw
+                ? 'Chanjo zote za KEPI hutolewa bila malipo katika vituo vyote vya afya vya umma nchini Kenya ili kumlinda mtoto dhidi ya magonjwa hatari.'
+                : 'All standard KEPI vaccines are provided free of charge at all public health facilities across Kenya to protect against polio, measles, tuberculosis, and rotavirus.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Selected Child Identity Banner */}
+        {selectedChild && (
+          <div className="mb-4 flex items-center justify-between text-xs text-slate-600 px-1">
+            <span>
+              {isSw ? 'Ratiba ya:' : 'Timeline for:'}{' '}
+              <strong className="text-slate-900">{selectedChild.full_name}</strong>
+            </span>
+            <span>
+              DOB: {selectedChild.date_of_birth || selectedChild.dob || '2026-02-10'}
+            </span>
+          </div>
+        )}
+
+        {/* Timeline List */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-8 h-8 border-2 border-[#006B5F] border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs text-slate-500 mt-2 font-semibold">
+              {isSw ? 'Inapakia ratiba...' : 'Loading schedule...'}
+            </p>
+          </div>
+        ) : filteredVaccines.length > 0 ? (
+          <div className="space-y-3">
+            {filteredVaccines.map((v) => {
+              const isGiven = v.status === 'given';
+              const isOverdue = v.status === 'overdue';
+              return (
+                <div
+                  key={v.id}
+                  className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex items-start justify-between gap-3"
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                        isGiven
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : isOverdue
+                          ? 'bg-rose-50 text-rose-600'
+                          : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {isGiven ? (
+                        <CheckCircle2 size={20} />
+                      ) : isOverdue ? (
+                        <AlertCircle size={20} />
+                      ) : (
+                        <Clock size={20} />
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-extrabold text-slate-900 leading-tight">
+                        {v.vaccine_name}
+                      </h4>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        {isGiven
+                          ? `${isSw ? 'Ilipewa mnamo' : 'Administered on'}: ${v.administered_date || v.date_given}`
+                          : `${isSw ? 'Tarehe iliyopangwa' : 'Due date'}: ${v.scheduled_date}`}
+                      </div>
+                      {v.batch_number && (
+                        <div className="text-[10px] font-mono text-slate-400 mt-1">
+                          Batch: {v.batch_number} {v.clinician_name && `• Nurse: ${v.clinician_name}`}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Badge variant={isGiven ? 'normal' : isOverdue ? 'sam' : 'scheduled'}>
+                    {isGiven
+                      ? isSw ? 'Imepewa' : 'Given'
+                      : isOverdue
+                      ? isSw ? 'Imechelewa' : 'Overdue'
+                      : isSw ? 'Inasubiri' : 'Upcoming'}
+                  </Badge>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 bg-white rounded-2xl border border-dashed border-slate-200 text-center text-xs text-slate-500">
+            <Baby className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <p className="font-bold text-slate-700">
+              {children.length === 0
+                ? isSw ? 'Bado hujasajili mtoto' : 'No children registered'
+                : isSw ? 'Hakuna chanjo katika orodha hii' : 'No vaccines in this filter'}
+            </p>
+            {children.length === 0 && (
+              <Link to="/add-child" className="mt-3 inline-block">
+                <Button variant="primary" size="sm">
+                  {isSw ? 'Sajili Mtoto' : 'Register Child'}
+                </Button>
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
+
+  return hideShell ? content : <AppShell>{content}</AppShell>;
 }

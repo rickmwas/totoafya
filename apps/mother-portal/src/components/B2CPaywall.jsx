@@ -1,102 +1,151 @@
-import React, { useState } from 'react';
-import { CreditCard, Check, Sparkles, AlertTriangle, ShieldAlert, Loader2, ArrowRight } from 'lucide-react';
-import db from '@/api/totoafyaClient';
+import React, { useState, useEffect } from 'react';
+import { CreditCard, Check, ShieldAlert, Loader2, Phone, CheckCircle2, RefreshCw } from 'lucide-react';
+import { dataClient } from '@totoafya/api-client';
+import { Button, Input, Badge, Card, CardContent } from '@totoafya/shared-ui';
 
 export default function B2CPaywall({ user, onPaid, lang = 'en' }) {
+  const isSw = lang === 'sw';
   const [selectedPlan, setSelectedPlan] = useState('monthly'); // 'monthly' | 'yearly'
-  const [phone, setPhone] = useState('');
-  const [step, setStep] = useState('select'); // 'select' | 'sending' | 'pin_sent' | 'success'
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [step, setStep] = useState('select'); // 'select' | 'sending' | 'pin_sent' | 'checking' | 'success'
   const [error, setError] = useState(null);
+  const [checkoutRequestId, setCheckoutRequestId] = useState(null);
+  const [subscriptionInfo, setSubscriptionInfo] = useState(null);
+  const [loadingStatus, setLoadingStatus] = useState(true);
 
   const price = selectedPlan === 'monthly' ? 150 : 1000;
-  const planLabel = selectedPlan === 'monthly' 
-    ? (lang === 'sw' ? 'kila mwezi' : 'monthly')
-    : (lang === 'sw' ? 'kila mwaka' : 'yearly');
+
+  useEffect(() => {
+    async function loadStatus() {
+      try {
+        const motherId = user?.mother_id || user?.id;
+        if (motherId && dataClient.payments?.getSubscriptionStatus) {
+          const info = await dataClient.payments.getSubscriptionStatus(motherId);
+          setSubscriptionInfo(info);
+        }
+      } catch (err) {
+        console.warn('Could not load subscription status:', err);
+      } finally {
+        setLoadingStatus(false);
+      }
+    }
+    loadStatus();
+  }, [user]);
 
   const initiatePayment = async (e) => {
-    e.preventDefault();
-    if (!phone.match(/^(?:\+254|0)?(7|1)\d{8}$/)) {
-      setError(lang === 'sw' ? 'Tafadhali weka nambari halali ya M-Pesa' : 'Please enter a valid Safaricom M-Pesa number');
+    if (e) e.preventDefault();
+    const cleanPhone = phone.replace(/\s+/g, '');
+    if (!cleanPhone.match(/^(?:\+254|0)?(7|1)\d{8}$/)) {
+      setError(
+        isSw
+          ? 'Tafadhali weka nambari halali ya Safaricom M-Pesa (mfano: 0712345678)'
+          : 'Please enter a valid Safaricom M-Pesa number (e.g. 0712345678)'
+      );
       return;
     }
 
     setError(null);
     setStep('sending');
 
-    // Simulate STK Push sending
-    setTimeout(() => {
-      setStep('pin_sent');
-    }, 1500);
-  };
-
-  const confirmPayment = async () => {
-    setStep('sending');
     try {
-      // Find and update mother record
-      const mothersStore = JSON.parse(localStorage.getItem('db_Mother') || '[]');
-      const motherIdx = mothersStore.findIndex(m => m.user_id === user.id || m.id === user.mother_id);
-      
-      if (motherIdx !== -1) {
-        mothersStore[motherIdx].subscription_status = 'active';
-        // Compute expiration date
-        const expDate = new Date();
-        if (selectedPlan === 'monthly') {
-          expDate.setMonth(expDate.getMonth() + 1);
-        } else {
-          expDate.setFullYear(expDate.getFullYear() + 1);
-        }
-        mothersStore[motherIdx].subscription_expires_at = expDate.toISOString();
-        localStorage.setItem('db_Mother', JSON.stringify(mothersStore));
-      }
+      // Server-mediated STK push via dataClient
+      const res = await dataClient.payments.initiateSTKPush(
+        cleanPhone,
+        price,
+        selectedPlan === 'monthly' ? 'TOTOAFYA_MONTHLY_150' : 'TOTOAFYA_ANNUAL_1000'
+      );
 
-      setStep('success');
-      setTimeout(() => {
-        if (onPaid) onPaid();
-      }, 1500);
+      setCheckoutRequestId(res?.checkoutRequestId || res?.checkout_request_id || 'checkout-' + Date.now());
+      setStep('pin_sent');
     } catch (err) {
-      setError(err.message || 'Payment simulation failed');
+      console.error('STK push initiation failed:', err);
+      setError(
+        err.message ||
+          (isSw
+            ? 'Imeshindwa kuanzisha malipo ya M-Pesa. Tafadhali jaribu tena.'
+            : 'Failed to initiate M-Pesa STK push. Please verify phone number and retry.')
+      );
       setStep('select');
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#F7F5F0] flex flex-col justify-center items-center p-4 font-sans text-slate-800">
-      <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-[32px] p-6 shadow-xl flex flex-col overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-700/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-8 -left-8 w-44 h-44 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+  const verifyPayment = async () => {
+    if (!checkoutRequestId) return;
+    setStep('checking');
+    setError(null);
 
+    try {
+      const status = await dataClient.payments.checkPaymentStatus(checkoutRequestId);
+      const isCompleted = typeof status === 'string' ? status === 'completed' : status?.status === 'completed';
+
+      if (isCompleted) {
+        setStep('success');
+        setTimeout(() => {
+          if (onPaid) onPaid();
+        }, 1500);
+      } else {
+        setError(
+          isSw
+            ? 'Malipo bado hayajathibitishwa. Hakikisha umeingiza PIN kwenye simu yako kisha ubofye Thibitisha tena.'
+            : 'Payment not yet confirmed. Please ensure you entered your M-Pesa PIN on your phone and click Verify again.'
+        );
+        setStep('pin_sent');
+      }
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      setError(
+        err.message ||
+          (isSw ? 'Hitilafu wakati wa kuthibitisha malipo.' : 'Error verifying payment status.')
+      );
+      setStep('pin_sent');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col justify-center items-center p-4 font-sans text-slate-800">
+      <div className="w-full max-w-[420px] bg-white border border-slate-200/80 rounded-[32px] p-6 shadow-xl flex flex-col overflow-hidden relative">
         {step === 'select' && (
           <>
             {/* Header */}
             <div className="text-center mb-6 mt-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-wider mb-3">
-                <ShieldAlert size={12} />
-                <span>{lang === 'sw' ? 'Muda wa Majaribio Umekwisha' : 'Trial Period Expired'}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold uppercase tracking-wider mb-3">
+                <ShieldAlert size={13} />
+                <span>{isSw ? 'Kipindi cha Majaribio Kimeisha' : 'Trial Period Expired'}</span>
               </div>
-              <h2 className="text-[26px] font-bold text-slate-900 tracking-tight leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-                {lang === 'sw' ? 'Endelea Kumlinda Mwanao' : 'Keep Your Child Protected'}
+              <h2 className="text-[24px] font-extrabold text-slate-900 tracking-tight leading-tight">
+                {isSw ? 'Endelea Kumlinda Mwanao' : 'Keep Your Child Protected'}
               </h2>
-              <p className="text-[13px] text-slate-500 mt-2 leading-relaxed">
-                {lang === 'sw' 
-                  ? 'Kipindi chako cha majaribio cha siku 30 kimeisha. Lipia ili uendelee kupata ushauri wa AI, ratiba ya chanjo na ufuatiliaji wa afya.'
-                  : 'Your 30-day grace trial has expired. Subscribe to continue receiving custom health alerts, smart vaccination schedules, and AI consultations.'}
+              <p className="text-[13px] text-slate-600 mt-2 leading-relaxed">
+                {isSw
+                  ? 'Kipindi chako cha majaribio cha siku 30 kimekamilika. Lipia ili uendelee kupata ushauri wa AI, ratiba ya chanjo ya KEPI na ufuatiliaji wa afya.'
+                  : 'Your 30-day grace trial has expired. Subscribe via M-Pesa to continue receiving WHO growth charts, KEPI vaccine reminders, and AI clinical consultations.'}
               </p>
             </div>
 
+            {/* Current Status Badge */}
+            {subscriptionInfo && (
+              <div className="mb-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-500">{isSw ? 'Hali ya Sasa:' : 'Current Status:'}</span>
+                <Badge variant={subscriptionInfo.status === 'active' ? 'normal' : 'mam'}>
+                  {subscriptionInfo.status.toUpperCase()}
+                </Badge>
+              </div>
+            )}
+
             {/* Benefits */}
             <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-6">
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                {lang === 'sw' ? 'FAIDA ZA PREMIUM' : 'PREMIUM BENEFITS'}
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-3">
+                {isSw ? 'FAIDA ZA PREMIUM' : 'PREMIUM CLINICAL BENEFITS'}
               </p>
               <ul className="space-y-2.5">
                 {[
-                  lang === 'sw' ? 'Ushauri wa AI saa 24/7' : '24/7 Maternal AI Health Assistant',
-                  lang === 'sw' ? 'Ufuatiliaji wa uzito na urefu wa mtoto' : 'WHO Smart Growth Tracking & Charts',
-                  lang === 'sw' ? 'Vikumbusho vya chanjo kwa njia ya SMS' : 'Automatic Vaccine Reminders via SMS & Push',
+                  isSw ? 'Ushauri wa AI wa afya ya uzazi saa 24/7' : '24/7 Maternal AI Clinical Assistant',
+                  isSw ? 'Ufuatiliaji wa uzito & urefu wa mtoto (Chati za WHO)' : 'WHO Nutrition & Growth Monitoring Charts',
+                  isSw ? 'Vikumbusho vya chanjo za KEPI kwa njia ya SMS' : 'Automated KEPI Vaccine Schedule & Reminders',
                 ].map((b, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-xs text-slate-700 font-medium">
-                    <div className="w-4 h-4 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check size={10} className="text-emerald-700" strokeWidth={3} />
+                    <div className="w-4 h-4 rounded-full bg-teal-50 border border-teal-200 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={10} className="text-[#006B5F]" strokeWidth={3} />
                     </div>
                     <span>{b}</span>
                   </li>
@@ -104,137 +153,159 @@ export default function B2CPaywall({ user, onPaid, lang = 'en' }) {
               </ul>
             </div>
 
-            {/* Plan Selector */}
-            <div className="flex gap-3 mb-6">
+            {/* Plan Selection */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
               <button
                 type="button"
                 onClick={() => setSelectedPlan('monthly')}
-                className={`flex-1 p-4 rounded-2xl border text-left transition-all ${
-                  selectedPlan === 'monthly' 
-                    ? 'border-emerald-700 bg-emerald-50/20 shadow-sm' 
+                className={`p-4 rounded-2xl border text-left transition-all ${
+                  selectedPlan === 'monthly'
+                    ? 'border-[#006B5F] bg-[#E6F4F1] shadow-sm ring-1 ring-[#006B5F]'
                     : 'border-slate-200 hover:border-slate-300 bg-white'
                 }`}
               >
-                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  {lang === 'sw' ? 'Kila Mwezi' : 'Monthly Plan'}
-                </p>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-[20px] font-extrabold text-slate-900">KES 150</span>
-                  <span className="text-[11px] text-slate-500">/{lang === 'sw' ? 'mwezi' : 'mo'}</span>
-                </div>
+                <div className="text-xs font-bold text-slate-600 mb-1">{isSw ? 'Kila Mwezi' : 'Monthly'}</div>
+                <div className="text-xl font-extrabold text-[#006B5F]">KES 150</div>
+                <div className="text-[10px] text-slate-500 mt-1">{isSw ? 'Siku 30' : '30 days access'}</div>
               </button>
+
               <button
                 type="button"
                 onClick={() => setSelectedPlan('yearly')}
-                className={`flex-1 p-4 rounded-2xl border text-left transition-all relative overflow-hidden ${
-                  selectedPlan === 'yearly' 
-                    ? 'border-emerald-700 bg-emerald-50/20 shadow-sm' 
+                className={`p-4 rounded-2xl border text-left transition-all relative ${
+                  selectedPlan === 'yearly'
+                    ? 'border-[#006B5F] bg-[#E6F4F1] shadow-sm ring-1 ring-[#006B5F]'
                     : 'border-slate-200 hover:border-slate-300 bg-white'
                 }`}
               >
-                <div className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg">
-                  SAVE 45%
-                </div>
-                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  {lang === 'sw' ? 'Kila Mwaka' : 'Annual Plan'}
-                </p>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="text-[20px] font-extrabold text-slate-900">KES 1,000</span>
-                  <span className="text-[11px] text-slate-500">/{lang === 'sw' ? 'mwaka' : 'yr'}</span>
-                </div>
+                <span className="absolute -top-2 right-2 px-1.5 py-0.5 bg-[#C98A2C] text-white text-[9px] font-bold rounded-full">
+                  {isSw ? 'Okoa 45%' : 'Save 45%'}
+                </span>
+                <div className="text-xs font-bold text-slate-600 mb-1">{isSw ? 'Kila Mwaka' : 'Annual'}</div>
+                <div className="text-xl font-extrabold text-[#006B5F]">KES 1,000</div>
+                <div className="text-[10px] text-slate-500 mt-1">{isSw ? 'Miezi 12' : '12 months access'}</div>
               </button>
             </div>
 
-            {/* M-Pesa payment form */}
-            <form onSubmit={initiatePayment} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                  {lang === 'sw' ? 'NAMBARI YA SIMU YA M-PESA' : 'SAFARICOM M-PESA NUMBER'}
-                </label>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    placeholder="e.g. 0712345678"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full h-[52px] pl-4 pr-12 rounded-[16px] bg-slate-50 border border-slate-200 text-[14px] font-semibold focus:outline-none focus:border-emerald-700 focus:bg-white transition-all text-slate-900"
-                  />
-                  <div className="absolute right-4 top-3.5 flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-emerald-700 tracking-wider">LIPA NA M-PESA</span>
-                  </div>
-                </div>
-                {error && <p className="text-rose-600 text-xs mt-1.5 px-1 font-medium">{error}</p>}
-              </div>
+            {/* Phone Input & Action */}
+            <form onSubmit={initiatePayment} className="space-y-4">
+              <Input
+                label={isSw ? 'Nambari ya Simu ya M-Pesa' : 'M-Pesa Phone Number'}
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="0712 345 678"
+                error={error}
+                helperText={isSw ? 'Utapokea arifa ya PIN kwenye simu yako' : 'You will receive an STK PIN prompt on this device'}
+                leftIcon={<Phone size={18} className="text-slate-400" />}
+              />
 
-              <button
+              <Button
                 type="submit"
-                className="w-full h-13 bg-emerald-700 hover:bg-emerald-600 active:scale-[0.99] text-white rounded-2xl font-bold text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 mt-2"
+                variant="primary"
+                size="lg"
+                className="w-full"
               >
-                <span>{lang === 'sw' ? 'Lipia Sasa' : 'Pay with M-Pesa'}</span>
-                <ArrowRight size={16} />
-              </button>
+                <CreditCard size={18} />
+                <span>
+                  {isSw ? `Lipia KES ${price} kupitia M-Pesa` : `Subscribe for KES ${price} via M-Pesa`}
+                </span>
+              </Button>
             </form>
           </>
         )}
 
+        {/* Sending STK Push State */}
         {step === 'sending' && (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <Loader2 size={40} className="text-emerald-700 animate-spin mb-4" />
-            <h3 className="text-[18px] font-bold text-slate-900">
-              {lang === 'sw' ? 'Tuma Ombi la M-Pesa...' : 'Initiating M-Pesa STK Push...'}
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4 text-[#006B5F]">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {isSw ? 'Inatuma Ombi la M-Pesa...' : 'Sending M-Pesa STK Push...'}
             </h3>
-            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-              {lang === 'sw' 
-                ? `Tunasafirisha ombi la malipo ya KES ${price} kwenda namba ${phone}.`
-                : `Sending payment request of KES ${price} to ${phone}. Please wait.`}
+            <p className="text-xs text-slate-500 max-w-[260px]">
+              {isSw
+                ? 'Tafadhali subiri kidogo wakati tunaunganisha na Safaricom...'
+                : 'Connecting to Safaricom Daraja gateway. Please hold on...'}
             </p>
           </div>
         )}
 
+        {/* PIN Sent / Waiting for Customer */}
         {step === 'pin_sent' && (
-          <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center border border-amber-100 mb-5">
-              <Sparkles size={26} className="text-amber-600" />
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4 border border-emerald-200">
+              <Phone className="w-8 h-8 animate-bounce" />
             </div>
-            <h3 className="text-[20px] font-bold text-slate-900 leading-tight">
-              {lang === 'sw' ? 'Weka PIN ya M-Pesa' : 'Check M-Pesa Push Prompt'}
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {isSw ? 'Weka PIN yako ya M-Pesa' : 'Enter M-Pesa PIN on Your Phone'}
             </h3>
-            <p className="text-xs text-slate-500 mt-3 leading-relaxed">
-              {lang === 'sw' 
-                ? `Tafadhali ingiza PIN yako ya M-Pesa kwenye simu yako ili kukubali malipo ya KES ${price} ya huduma ya ${planLabel}.`
-                : `A push prompt has been sent to ${phone}. Please enter your M-Pesa PIN on your phone to approve the KES ${price} subscription.`}
+            <p className="text-xs text-slate-600 max-w-[280px] mb-6 leading-relaxed">
+              {isSw
+                ? `Arifa ya M-Pesa imetumwa kwa ${phone}. Weka PIN yako ya siri kukamilisha malipo ya KES ${price}.`
+                : `An M-Pesa STK prompt was dispatched to ${phone}. Enter your secret PIN to confirm payment of KES ${price}.`}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 w-full">
-              <button
-                onClick={confirmPayment}
-                className="w-full h-12 bg-emerald-700 hover:bg-emerald-600 active:scale-[0.98] text-white rounded-xl font-bold text-[13px] shadow transition-colors"
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+                {error}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 w-full">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full"
+                onClick={verifyPayment}
               >
-                {lang === 'sw' ? 'Tayari Nimeshalipia' : 'Confirm Payment Completed'}
-              </button>
-              <button
+                <CheckCircle2 size={18} />
+                <span>{isSw ? 'Nimeshalipa (Thibitisha)' : "I've Completed Payment (Verify)"}</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="md"
+                className="w-full"
                 onClick={() => setStep('select')}
-                className="w-full h-12 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-[13px] transition-colors"
               >
-                {lang === 'sw' ? 'Ghairi' : 'Cancel & Go Back'}
-              </button>
+                <span>{isSw ? 'Badilisha Nambari au Mpango' : 'Change Phone or Plan'}</span>
+              </Button>
             </div>
           </div>
         )}
 
-        {step === 'success' && (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center border border-emerald-200 mb-5 animate-bounce">
-              <Check size={30} className="text-emerald-700 animate-pulse" strokeWidth={3} />
+        {/* Checking Status */}
+        {step === 'checking' && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center mb-4 text-[#006B5F]">
+              <RefreshCw className="w-8 h-8 animate-spin" />
             </div>
-            <h3 className="text-[22px] font-bold text-slate-900 leading-none">
-              {lang === 'sw' ? 'Malipo Yamekamilika!' : 'Payment Received!'}
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {isSw ? 'Inathibitisha Malipo...' : 'Verifying Transaction...'}
             </h3>
-            <p className="text-xs text-slate-500 mt-3 leading-relaxed">
-              {lang === 'sw' 
-                ? `Usajili wako wa ${planLabel} umeanza rasmi. Karibu tena TotoAfya!`
-                : `Your ${planLabel} premium plan is active. Unlocking TotoAfya maternal services...`}
+            <p className="text-xs text-slate-500 max-w-[260px]">
+              {isSw
+                ? 'Inawasiliana na seva ya benki kuthibitisha risiti yako ya M-Pesa...'
+                : 'Querying server-side payment callback to activate your subscription...'}
+            </p>
+          </div>
+        )}
+
+        {/* Success */}
+        {step === 'success' && (
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mb-4 shadow-lg shadow-emerald-900/10">
+              <Check className="w-8 h-8 stroke-[3]" />
+            </div>
+            <h3 className="text-xl font-extrabold text-slate-900 mb-2">
+              {isSw ? 'Malipo Yamethibitishwa!' : 'Subscription Activated!'}
+            </h3>
+            <p className="text-xs text-slate-600 max-w-[280px]">
+              {isSw
+                ? 'Asante kwa kumlinda mwanao. Uanachama wako wa TotoAfya Premium sasa unatumika.'
+                : 'Thank you for protecting your family. Your TotoAfya Premium clinical access is now active.'}
             </p>
           </div>
         )}

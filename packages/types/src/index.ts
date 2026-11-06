@@ -14,6 +14,7 @@ export interface Facility {
 
 export interface Nurse {
   id: string;
+  user_id?: string;
   facility_id?: string;
   full_name: string;
   email: string;
@@ -57,6 +58,8 @@ export interface Mother {
   facility_emergency_phone?: string;
   language_preference?: 'en' | 'sw';
   profile_complete?: boolean;
+  subscription_status?: 'active' | 'trial' | 'expired' | 'sponsored';
+  subscription_expires_at?: string;
   avatar_url?: string;
   created_at?: string;
   updated_at?: string;
@@ -221,4 +224,40 @@ export interface AIAlert {
   ai_confidence?: number;
   created_at?: string;
   updated_at?: string;
+}
+
+export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'auth' | 'export' | string;
+
+export interface AuditLog {
+  id: string;
+  user_id?: string;
+  actor_id?: string;
+  actor_name?: string;
+  actor_role?: string;
+  facility_id?: string;
+  action: AuditAction;
+  entity?: string;
+  entity_type?: string;
+  event_type?: string;
+  entity_id?: string;
+  details?: Record<string, any>;
+  ip_address?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type CreateAuditLogDTO = Partial<AuditLog> & {
+  action: string;
+  entity?: string;
+};
+
+export interface FacilityCensus {
+  facilityId: string;
+  totalMothers: number;
+  activePregnancies: number;
+  totalChildren: number;
+  ancVisitsToday: number;
+  vaccinesToday: number;
+  samCases: number;
+  mamCases: number;
 }

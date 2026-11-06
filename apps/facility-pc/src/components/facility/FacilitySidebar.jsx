@@ -5,10 +5,11 @@ import { cn } from '@/lib/utils';
 export default function FacilitySidebar({ activeTab, setActiveTab, alertCount, isOpen, onClose, facilityName }) {
   const navItems = [
     { key: 'overview',   icon: LayoutDashboard, label: 'Overview' },
-    { key: 'mothers',    icon: Users,           label: 'Mothers' },
+    { key: 'queue',      icon: Users,           label: 'Patient Queue' },
+    { key: 'mothers',    icon: Heart,           label: 'Mothers' },
     { key: 'children',   icon: Baby,            label: 'Children' },
     { key: 'vaccines',   icon: Shield,          label: 'Vaccines' },
-    { key: 'nurses',     icon: Stethoscope,     label: 'Nurses' },
+    { key: 'nurses',     icon: Stethoscope,     label: 'Nurses & Stations' },
     { key: 'analytics',  icon: BarChart2,       label: 'Analytics' },
     { key: 'alerts',     icon: Bell,            label: 'Alerts' },
     { key: 'billing',    icon: CreditCard,      label: 'Billing & Quota' },

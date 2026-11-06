@@ -3,8 +3,21 @@
   "private": true,
   "version": "1.0.0",
   "main": "index.js",
+  "module": "index.js",
   "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./*": "./src/*.jsx"
+  },
   "dependencies": {
-    "@sentry/react": "^10.65.0"
+    "@sentry/react": "^10.65.0",
+    "@totoafya/design-system": "*",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
+    "tailwind-merge": "^3.0.2"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   }
 }

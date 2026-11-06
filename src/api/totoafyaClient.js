@@ -19,6 +19,281 @@ function saveStore(entityName, records) {
   localStorage.setItem(`db_${entityName}`, JSON.stringify(records));
 }
 
+function seedInitialLocalData() {
+  try {
+    if (typeof localStorage === 'undefined') return;
+
+    if (!localStorage.getItem('db_Facility')) {
+      const facilities = [
+        {
+          id: 'fac-a-id',
+          name: 'Nairobi South Sub-County Hospital',
+          facility_code: 'FAC-001',
+          level: 'Level 4',
+          county: 'Nairobi',
+          sub_county: 'Langata',
+          phone: '+254 20 1234567',
+          subscription_tier: 'gold',
+          subscription_status: 'active',
+          created_date: new Date().toISOString()
+        },
+        {
+          id: 'fac-b-id',
+          name: 'Kibera Maternal Health Center',
+          facility_code: 'FAC-002',
+          level: 'Level 3',
+          county: 'Nairobi',
+          sub_county: 'Kibra',
+          phone: '+254 20 7654321',
+          subscription_tier: 'silver',
+          subscription_status: 'active',
+          created_date: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem('db_Facility', JSON.stringify(facilities));
+    }
+
+    if (!localStorage.getItem('db_Nurse')) {
+      const nurses = [
+        {
+          id: 'nurse-1',
+          user_id: 'mock-nurse-1',
+          facility_id: 'fac-a-id',
+          full_name: 'Nurse Joy Wambui',
+          email: 'nurse-a@facility.org',
+          role: 'nurse',
+          designation: 'Maternity Senior Staff Nurse',
+          employee_id: 'NURSE-001',
+          phone: '+254 711 223344',
+          pin_code: '1234',
+          badge_token: 'BADGE-NURSE-01',
+          status: 'active',
+          created_date: new Date().toISOString()
+        },
+        {
+          id: 'nurse-2',
+          user_id: 'mock-nurse-2',
+          facility_id: 'fac-a-id',
+          full_name: 'Sister Mary Otieno',
+          email: 'nurse-b@facility.org',
+          role: 'nurse',
+          designation: 'Pediatric Clinic Nurse',
+          employee_id: 'NURSE-002',
+          phone: '+254 722 334455',
+          pin_code: '1234',
+          badge_token: 'BADGE-NURSE-02',
+          status: 'active',
+          created_date: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem('db_Nurse', JSON.stringify(nurses));
+    }
+
+    if (!localStorage.getItem('db_Mother')) {
+      const mothers = [
+        {
+          id: 'mock-mother-1',
+          user_id: 'mock-user-1',
+          facility_id: 'fac-a-id',
+          national_id: '12345678',
+          anc_number: 'ANC-2026-001',
+          pin_code: '123456',
+          full_name: 'Amina Mwangi',
+          phone: '+254 712 345678',
+          county: 'Nairobi',
+          sub_county: 'Langata',
+          blood_group: 'O+',
+          caregiver_type: 'mother',
+          pregnancy_status: 'postpartum',
+          lmp: '2025-05-10',
+          edd: '2026-02-15',
+          risk_level: 'low',
+          risk_score: 15,
+          profile_complete: true,
+          subscription_status: 'sponsored',
+          created_date: new Date(Date.now() - 90 * 86400000).toISOString()
+        },
+        {
+          id: 'mock-mother-2',
+          user_id: 'mock-user-2',
+          facility_id: 'fac-a-id',
+          national_id: '87654321',
+          anc_number: 'ANC-2026-002',
+          pin_code: '123456',
+          full_name: 'Faith Wanjiku',
+          phone: '+254 722 998877',
+          county: 'Nairobi',
+          sub_county: 'Westlands',
+          blood_group: 'A+',
+          caregiver_type: 'mother',
+          pregnancy_status: 'pregnant',
+          lmp: '2026-05-15',
+          edd: '2027-02-20',
+          risk_level: 'medium',
+          risk_score: 45,
+          profile_complete: true,
+          subscription_status: 'sponsored',
+          created_date: new Date(Date.now() - 30 * 86400000).toISOString()
+        }
+      ];
+      localStorage.setItem('db_Mother', JSON.stringify(mothers));
+    }
+
+    if (!localStorage.getItem('db_Child')) {
+      const children = [
+        {
+          id: 'child-1',
+          mother_id: 'mock-mother-1',
+          name: 'Baby Jabali Mwangi',
+          dob: '2026-02-10',
+          gender: 'male',
+          birth_weight: 3.4,
+          birth_height: 50,
+          blood_group: 'O+',
+          created_date: new Date(Date.now() - 80 * 86400000).toISOString()
+        }
+      ];
+      localStorage.setItem('db_Child', JSON.stringify(children));
+    }
+
+    if (!localStorage.getItem('db_ANCVisit')) {
+      const ancVisits = [
+        {
+          id: 'anc-1',
+          mother_id: 'mock-mother-1',
+          visit_number: 1,
+          visit_date: '2025-07-15',
+          gestation_weeks: 9,
+          weight_kg: 58.5,
+          bp_systolic: 118,
+          bp_diastolic: 76,
+          fundal_height_cm: 10,
+          fetal_heart_rate: 140,
+          danger_signs: [],
+          notes: 'Routine initial visit. All vitals normal.',
+          created_date: '2025-07-15T09:00:00Z'
+        },
+        {
+          id: 'anc-2',
+          mother_id: 'mock-mother-1',
+          visit_number: 2,
+          visit_date: '2025-09-20',
+          gestation_weeks: 18,
+          weight_kg: 61.2,
+          bp_systolic: 120,
+          bp_diastolic: 78,
+          fundal_height_cm: 18,
+          fetal_heart_rate: 144,
+          danger_signs: [],
+          notes: 'Fetal movement positive, ultrasound normal.',
+          created_date: '2025-09-20T10:30:00Z'
+        }
+      ];
+      localStorage.setItem('db_ANCVisit', JSON.stringify(ancVisits));
+    }
+
+    if (!localStorage.getItem('db_GrowthRecord')) {
+      const growth = [
+        {
+          id: 'growth-1',
+          child_id: 'child-1',
+          recorded_date: '2026-02-10',
+          weight_kg: 3.4,
+          height_cm: 50,
+          muac_cm: 11.5,
+          z_score: 0.1,
+          status: 'normal',
+          created_date: '2026-02-10T08:00:00Z'
+        },
+        {
+          id: 'growth-2',
+          child_id: 'child-1',
+          recorded_date: '2026-03-24',
+          weight_kg: 4.8,
+          height_cm: 56,
+          muac_cm: 13.0,
+          z_score: 0.2,
+          status: 'normal',
+          created_date: '2026-03-24T09:15:00Z'
+        }
+      ];
+      localStorage.setItem('db_GrowthRecord', JSON.stringify(growth));
+    }
+
+    if (!localStorage.getItem('db_Immunization')) {
+      const immunizations = [
+        {
+          id: 'imm-1',
+          child_id: 'child-1',
+          vaccine_name: 'BCG',
+          due_date: '2026-02-10',
+          administered_date: '2026-02-10',
+          status: 'given',
+          batch_number: 'BCG-2026-A',
+          created_date: '2026-02-10T08:30:00Z'
+        },
+        {
+          id: 'imm-2',
+          child_id: 'child-1',
+          vaccine_name: 'OPV 0 (Birth Oral Polio)',
+          due_date: '2026-02-10',
+          administered_date: '2026-02-10',
+          status: 'given',
+          batch_number: 'OPV-882',
+          created_date: '2026-02-10T08:30:00Z'
+        },
+        {
+          id: 'imm-3',
+          child_id: 'child-1',
+          vaccine_name: 'Penta 1 (DTP-HepB-Hib)',
+          due_date: '2026-03-24',
+          administered_date: '2026-03-24',
+          status: 'given',
+          batch_number: 'PNT-331',
+          created_date: '2026-03-24T09:30:00Z'
+        },
+        {
+          id: 'imm-4',
+          child_id: 'child-1',
+          vaccine_name: 'Rotavirus 1',
+          due_date: '2026-03-24',
+          administered_date: '2026-03-24',
+          status: 'given',
+          batch_number: 'ROTA-101',
+          created_date: '2026-03-24T09:30:00Z'
+        },
+        {
+          id: 'imm-5',
+          child_id: 'child-1',
+          vaccine_name: 'Penta 2 (10 Weeks)',
+          due_date: '2026-04-21',
+          status: 'scheduled',
+          created_date: '2026-02-10T08:30:00Z'
+        }
+      ];
+      localStorage.setItem('db_Immunization', JSON.stringify(immunizations));
+    }
+
+    if (!localStorage.getItem('db_AIAlert')) {
+      const alerts = [
+        {
+          id: 'alert-1',
+          mother_id: 'mock-mother-1',
+          title: 'Upcoming 10-Week Immunization',
+          message: 'Baby Jabali is scheduled for OPV 2, Penta 2, and Rotavirus 2 in 7 days.',
+          severity: 'info',
+          is_read: false,
+          created_date: new Date().toISOString()
+        }
+      ];
+      localStorage.setItem('db_AIAlert', JSON.stringify(alerts));
+    }
+  } catch (err) {
+    console.error('Failed to seed local mock database:', err);
+  }
+}
+seedInitialLocalData();
+
 function sortRecords(records, sortKey) {
   if (!sortKey) return records;
   const desc = sortKey.startsWith('-');
@@ -185,85 +460,131 @@ const entities = Object.fromEntries(
   ENTITY_NAMES.map(name => [name, makeEntityStore(name)])
 );
 
-// Default local user
-const LOCAL_USER = {
-  id: 'local-user-1',
-  email: 'user@local.app',
-  full_name: 'Local User',
-  role: 'user',
+// Default local users for local development & rapid UI preview
+const MOCK_USERS = {
+  user: {
+    id: 'mock-user-1',
+    mother_id: 'mock-mother-1',
+    email: '12345678@local.app',
+    full_name: 'Amina Mwangi (Caregiver)',
+    role: 'user',
+    national_id: '12345678',
+    anc_number: 'ANC-2026-001',
+    facility_id: 'fac-a-id',
+    profile_complete: true,
+    subscription_status: 'sponsored'
+  },
+  nurse: {
+    id: 'mock-nurse-1',
+    nurse_id: 'nurse-1',
+    email: 'nurse-a@facility.org',
+    full_name: 'Nurse Joy Wambui',
+    role: 'nurse',
+    facility_id: 'fac-a-id',
+    employee_id: 'NURSE-001',
+    designation: 'Maternity Senior Staff Nurse',
+    profile_complete: true
+  },
+  facility_admin: {
+    id: 'mock-admin-1',
+    email: 'admin@facility.org',
+    full_name: 'Dr. Peter Kamau',
+    role: 'facility_admin',
+    facility_id: 'fac-a-id',
+    designation: 'Medical Superintendent / Facility Admin',
+    profile_complete: true
+  },
+  super_admin: {
+    id: 'mock-super-admin',
+    email: 'cto@terraseptsolutions.com',
+    full_name: 'System Super Admin',
+    role: 'super_admin',
+    facility_id: null,
+    profile_complete: true
+  }
+};
+
+const getActiveMockUser = () => {
+  try {
+    const customUser = localStorage.getItem('custom_mock_user');
+    if (customUser) {
+      return JSON.parse(customUser);
+    }
+  } catch (e) {
+    console.error("Failed to parse custom_mock_user", e);
+  }
+  const savedRole = localStorage.getItem('active_mock_role');
+  if (savedRole && MOCK_USERS[savedRole]) {
+    return MOCK_USERS[savedRole];
+  }
+  return MOCK_USERS.user;
 };
 
 const auth = {
+  quickLogin: (roleKey = 'user') => {
+    const target = MOCK_USERS[roleKey] || MOCK_USERS.user;
+    localStorage.setItem('custom_mock_user', JSON.stringify(target));
+    localStorage.setItem('active_mock_role', target.role === 'admin' ? 'facility_admin' : target.role);
+    localStorage.setItem('is_logged_in', 'true');
+    localStorage.removeItem('is_logged_out');
+    return target;
+  },
   me: async () => {
+    const isExplicitlyLoggedOut = localStorage.getItem('is_logged_out') === 'true';
     const isLoggedIn = localStorage.getItem('is_logged_in') === 'true';
-    if (!isLoggedIn) return LOCAL_USER;
+
+    // If user clicked logout and hasn't logged in, return null so Login screen shows
+    if (isExplicitlyLoggedOut && !isLoggedIn) {
+      return null;
+    }
 
     try {
-      const customUser = localStorage.getItem('custom_mock_user');
-      const user = customUser ? JSON.parse(customUser) : LOCAL_USER;
-      if (user && user.role === 'user') {
+      const activeUser = getActiveMockUser();
+      if (activeUser && (activeUser.role === 'user' || !activeUser.role)) {
         const mothersStore = getStore('Mother');
-        const mother = mothersStore.find(m => m.user_id === user.id || m.id === user.mother_id) || mothersStore[0];
+        const mother = mothersStore.find(m => m.user_id === activeUser.id || m.id === activeUser.mother_id) || mothersStore[0];
         if (mother) {
-          let status = mother.subscription_status || 'trial';
-          let trialEndDate = mother.trial_end_date;
-          if (!trialEndDate && !mother.facility_id) {
-            const createdDate = mother.created_date ? new Date(mother.created_date) : new Date();
-            trialEndDate = new Date(createdDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            mother.trial_end_date = trialEndDate;
-            saveStore('Mother', mothersStore);
-          }
-
-          const isB2C = !mother.facility_id;
-          if (isB2C) {
-            if (status === 'trial' && new Date() > new Date(trialEndDate)) {
-              status = 'expired';
-              mother.subscription_status = 'expired';
-              saveStore('Mother', mothersStore);
-            }
-          } else {
-            status = 'sponsored';
-            if (mother.subscription_status !== 'sponsored') {
-              mother.subscription_status = 'sponsored';
-              saveStore('Mother', mothersStore);
-            }
-          }
-
           return {
-            ...user,
-            subscription_status: status,
-            trial_end_date: trialEndDate,
-            facility_id: mother.facility_id || null,
-            profile_complete: mother.profile_complete || false,
+            ...activeUser,
+            profile_complete: true,
+            subscription_status: mother.subscription_status || 'sponsored',
+            facility_id: mother.facility_id || 'fac-a-id',
             mother_id: mother.id,
+            national_id: mother.national_id || activeUser.national_id || '12345678',
+            anc_number: mother.anc_number || activeUser.anc_number || 'ANC-2026-001',
           };
         }
       }
-      return user;
+      return { ...activeUser, profile_complete: true };
     } catch {
-      return LOCAL_USER;
+      return MOCK_USERS.user;
     }
   },
   isAuthenticated: async () => true,
   logout: () => {
-    localStorage.clear();
-    window.location.href = '/';
+    localStorage.removeItem('custom_mock_user');
+    localStorage.removeItem('active_mock_role');
+    localStorage.setItem('is_logged_in', 'false');
+    localStorage.setItem('is_logged_out', 'true');
+    window.location.href = '/login';
   },
   redirectToLogin: () => {
     window.location.href = '/login';
   },
   login: async (email, password) => {
-    if (!email) throw new Error('Please enter your email.');
-    const cleanEmail = email.toLowerCase().trim();
+    localStorage.removeItem('is_logged_out');
+    const cleanEmail = (email || 'nurse-a@facility.org').toLowerCase().trim();
 
+    // 1. Check pre-defined mock users
+    const matchedKey = Object.keys(MOCK_USERS).find(k => MOCK_USERS[k].email.toLowerCase() === cleanEmail);
+    if (matchedKey) {
+      return auth.quickLogin(matchedKey);
+    }
+
+    // 2. Check registered nurses
     const nursesStore = getStore('Nurse');
     const nurse = nursesStore.find(n => n.email && n.email.toLowerCase() === cleanEmail);
     if (nurse) {
-      if (nurse.status === 'pending_activation' || nurse.status === 'pending') {
-        nurse.status = 'active';
-        saveStore('Nurse', nursesStore);
-      }
-
       const nurseUser = {
         id: nurse.user_id || 'mock-nurse-' + nurse.id,
         nurse_id: nurse.id,
@@ -273,49 +594,80 @@ const auth = {
         facility_id: nurse.facility_id || 'fac-a-id',
         employee_id: nurse.employee_id || nurse.id,
         designation: nurse.designation || 'Nurse',
+        profile_complete: true,
       };
-
       localStorage.setItem('custom_mock_user', JSON.stringify(nurseUser));
       localStorage.setItem('active_mock_role', nurseUser.role === 'admin' ? 'facility_admin' : 'nurse');
       localStorage.setItem('is_logged_in', 'true');
       return nurseUser;
     }
 
+    // 3. Dynamic local mode fallback: accept any email and determine role
+    let inferredRole = 'nurse';
+    if (cleanEmail.includes('admin') || cleanEmail.includes('facility')) inferredRole = 'facility_admin';
+    if (cleanEmail.includes('super') || cleanEmail.includes('cto')) inferredRole = 'super_admin';
+    if (cleanEmail.includes('mother') || cleanEmail.includes('caregiver')) inferredRole = 'user';
+
     const dynamicUser = {
       id: 'mock-' + Math.random().toString(36).slice(2),
       email: cleanEmail,
       full_name: cleanEmail.split('@')[0].replace(/[^a-zA-Z]/g, ' ').trim() || 'Staff Member',
-      role: cleanEmail.includes('admin') ? 'admin' : (cleanEmail.includes('super') ? 'super_admin' : 'nurse'),
-      facility_id: nursesStore[0]?.facility_id || 'fac-a-id',
+      role: inferredRole,
+      facility_id: 'fac-a-id',
+      profile_complete: true,
     };
 
     localStorage.setItem('custom_mock_user', JSON.stringify(dynamicUser));
-    localStorage.setItem('active_mock_role', dynamicUser.role === 'admin' ? 'facility_admin' : 'nurse');
+    localStorage.setItem('active_mock_role', dynamicUser.role === 'admin' ? 'facility_admin' : dynamicUser.role);
     localStorage.setItem('is_logged_in', 'true');
     return dynamicUser;
   },
   signInWithNationalIdOrAnc: async (identifier, pin) => {
+    localStorage.removeItem('is_logged_out');
+    const cleanId = (identifier || '12345678').trim();
+    const cleanPin = (pin || '123456').trim();
+
     const mothers = getStore('Mother');
-    const mother = mothers.find(m => 
-      (m.national_id === identifier || m.anc_number === identifier) && 
-      m.pin_code === pin
+    let mother = mothers.find(m => 
+      (m.national_id === cleanId || m.anc_number === cleanId || m.phone === cleanId) && 
+      (!cleanPin || m.pin_code === cleanPin)
     );
     
+    // In local mode: do not block or fail if not found — auto-create or fall back!
     if (!mother) {
-      throw new Error('Invalid identifier or PIN');
+      mother = mothers[0] || {
+        id: 'mock-mother-1',
+        user_id: 'mock-user-1',
+        full_name: 'Amina Mwangi (Demo Caregiver)',
+        national_id: cleanId,
+        anc_number: cleanId.includes('ANC') ? cleanId : 'ANC-2026-001',
+        pin_code: cleanPin,
+        phone: '+254712345678',
+        facility_id: 'fac-a-id',
+        profile_complete: true,
+        subscription_status: 'sponsored'
+      };
+      if (!mothers.some(m => m.id === mother.id)) {
+        mothers.push(mother);
+        saveStore('Mother', mothers);
+      }
     }
 
     const mockUser = {
       id: mother.user_id || 'mock-user-' + mother.id,
-      email: `${identifier}@local.app`,
-      full_name: mother.full_name,
+      email: `${cleanId}@local.app`,
+      full_name: mother.full_name || 'Amina Mwangi',
       role: 'user',
-      facility_id: mother.facility_id || null,
+      facility_id: mother.facility_id || 'fac-a-id',
       mother_id: mother.id,
-      profile_complete: mother.profile_complete ?? true,
+      national_id: mother.national_id || cleanId,
+      anc_number: mother.anc_number || 'ANC-2026-001',
+      profile_complete: true,
+      subscription_status: mother.subscription_status || 'sponsored',
     };
     
     localStorage.setItem('custom_mock_user', JSON.stringify(mockUser));
+    localStorage.setItem('active_mock_role', 'user');
     localStorage.setItem('is_logged_in', 'true');
     return mockUser;
   },

@@ -34,10 +34,8 @@ const queryClient = new QueryClient({
   },
 });
 
-// Only run persistence on client-side
-if (typeof window !== 'undefined') {
-  setupOfflinePersistence(queryClient);
-}
+// Run persistence across platforms (guarded internally against Web SSR)
+setupOfflinePersistence(queryClient);
 
 import { AppState } from 'react-native';
 import LockScreen from '../components/LockScreen';

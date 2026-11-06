@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { hasPermission, PERMISSIONS, ROLES } from '../../src/lib/permissions';
+import { hasPermission, PERMISSIONS, ROLES } from '../../packages/auth/src/permissions';
 
 describe('TotoAfya Security Test Suite — Authorization & RLS Controls', () => {
 

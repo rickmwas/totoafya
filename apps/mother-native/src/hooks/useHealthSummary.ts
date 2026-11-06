@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { db } from '@totoafya/api-client';
+import { dataClient } from '@totoafya/api-client';
 import { useAuthStore } from '../store/authStore';
 import { 
   classifyNutritionStatus, 
@@ -22,11 +22,11 @@ export function useHealthSummary() {
     queryFn: async () => {
       if (!userId) return null;
       // Filter mother by user_id or mother_id
-      const records = await db.entities.Mother.filter({ user_id: userId });
+      const records = await dataClient.mothers.filter({ user_id: userId });
       if (records && records.length > 0) return records[0] as Mother;
       
       if (motherId) {
-        return await db.entities.Mother.get(motherId) as Mother;
+        return await dataClient.mothers.get(motherId) as Mother;
       }
       return null;
     },
@@ -40,7 +40,7 @@ export function useHealthSummary() {
     queryKey: ['children', mother?.id],
     queryFn: async () => {
       if (!mother?.id) return [];
-      const records = await db.entities.Child.filter({ mother_id: mother.id });
+      const records = await dataClient.children.filter({ mother_id: mother.id });
       return records as Child[];
     },
     enabled: !!mother?.id,
@@ -56,7 +56,7 @@ export function useHealthSummary() {
     queryKey: ['growth', activeChild?.id],
     queryFn: async () => {
       if (!activeChild?.id) return [];
-      const records = await db.entities.GrowthRecord.filter({ child_id: activeChild.id });
+      const records = await dataClient.growthRecords.filter({ child_id: activeChild.id });
       return records as GrowthRecord[];
     },
     enabled: !!activeChild?.id,
@@ -69,7 +69,7 @@ export function useHealthSummary() {
     queryKey: ['immunizations', activeChild?.id],
     queryFn: async () => {
       if (!activeChild?.id) return [];
-      const records = await db.entities.Immunization.filter({ child_id: activeChild.id });
+      const records = await dataClient.immunizations.filter({ child_id: activeChild.id });
       return records as Immunization[];
     },
     enabled: !!activeChild?.id,
@@ -82,7 +82,7 @@ export function useHealthSummary() {
     queryKey: ['anc_visits', mother?.id],
     queryFn: async () => {
       if (!mother?.id) return [];
-      const records = await db.entities.ANCVisit.filter({ mother_id: mother.id });
+      const records = await dataClient.ancVisits.filter({ mother_id: mother.id });
       return records as ANCVisit[];
     },
     enabled: !!mother?.id && mother?.pregnancy_status === 'pregnant',
@@ -95,7 +95,7 @@ export function useHealthSummary() {
     queryKey: ['alerts', mother?.id],
     queryFn: async () => {
       if (!mother?.id) return [];
-      const records = await db.entities.AIAlert.filter({ mother_id: mother.id });
+      const records = await dataClient.alerts.filter({ mother_id: mother.id });
       return records as AIAlert[];
     },
     enabled: !!mother?.id,
@@ -120,12 +120,12 @@ export function useHealthSummary() {
   // Add a Child
   const addChildMutation = useMutation({
     mutationFn: async (newChild: Omit<Child, 'id' | 'created_at' | 'updated_at'>) => {
-      const child = await db.entities.Child.create(newChild) as Child;
+      const child = await dataClient.children.create(newChild) as Child;
       
       // Auto-generate vaccination schedule for this child
       const schedule = generateVaccinationSchedule(child.id, child.date_of_birth);
       for (const item of schedule) {
-        await db.entities.Immunization.create(item);
+        await dataClient.immunizations.create(item);
       }
 
       return child;
@@ -139,7 +139,7 @@ export function useHealthSummary() {
   // Add Growth record
   const addGrowthMutation = useMutation({
     mutationFn: async (record: Omit<GrowthRecord, 'id' | 'created_at' | 'updated_at'>) => {
-      return await db.entities.GrowthRecord.create(record);
+      return await dataClient.growthRecords.create(record);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['growth', activeChild?.id] });
@@ -149,7 +149,7 @@ export function useHealthSummary() {
   // Record Immunization
   const recordImmunizationMutation = useMutation({
     mutationFn: async ({ id, given_date, facility, administered_by }: { id: string; given_date: string; facility?: string; administered_by?: string }) => {
-      return await db.entities.Immunization.update(id, {
+      return await dataClient.immunizations.update(id, {
         status: 'given',
         given_date,
         facility,
@@ -164,7 +164,7 @@ export function useHealthSummary() {
   // Add ANC Visit
   const addAncVisitMutation = useMutation({
     mutationFn: async (visit: Omit<ANCVisit, 'id' | 'created_at' | 'updated_at'>) => {
-      return await db.entities.ANCVisit.create(visit);
+      return await dataClient.ancVisits.create(visit);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['anc_visits', mother?.id] });
@@ -175,9 +175,9 @@ export function useHealthSummary() {
   const updateMotherMutation = useMutation({
     mutationFn: async (profile: Partial<Mother>) => {
       if (mother?.id) {
-        return await db.entities.Mother.update(mother.id, profile);
+        return await dataClient.mothers.update(mother.id, profile);
       } else {
-        return await db.entities.Mother.create({
+        return await dataClient.mothers.create({
           ...profile,
           user_id: userId,
           profile_complete: true,

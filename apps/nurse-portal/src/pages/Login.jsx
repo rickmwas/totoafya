@@ -1,357 +1,276 @@
-import React, { useState, useEffect } from 'react';
-import db, { supabase } from '@/api/totoafyaClient';
-import { useAuth } from '@/lib/AuthContext';
-import { Shield, ArrowRight, Activity, ShieldAlert, UserCheck, Mail, Lock, Phone, Key, Activity as ActivityIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Stethoscope,
+  Building2,
+  MapPin,
+  Lock,
+  UserCheck,
+  ShieldAlert,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react';
+import { dataClient, mockFacilities, mockNurses } from '@totoafya/api-client';
+import { Button, Input, Card, Badge } from '@totoafya/shared-ui';
+import { useStation } from '../context/StationContext';
 
-export default function Login({ isActivationFlow = false }) {
-  const { checkAppState, user } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  
-  // Login states
+const STATIONS = [
+  'MCH Clinic (Clinic 2)',
+  'Triage & Vitals Station',
+  'Immunization & KEPI Room',
+  'Antenatal Care Wing (ANC)',
+];
+
+export default function Login() {
+  const navigate = useNavigate();
+  const { setFacility, setStation, setNurse, lang, toggleLanguage } = useStation();
+
+  const [selectedFacilityId, setSelectedFacilityId] = useState(
+    mockFacilities[0]?.id || 'fac-pumwani-01'
+  );
+  const [selectedStation, setSelectedStation] = useState(STATIONS[0]);
+  const [pin, setPin] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Activation states
-  const [designation, setDesignation] = useState('');
-  const [phone, setPhone] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [autoVerifying, setAutoVerifying] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get('email');
-    const codeParam = params.get('code');
-    if (emailParam && codeParam) {
-      // Clear the query parameters from the URL bar immediately to prevent duplicate runs on remount
-      window.history.replaceState({}, document.title, window.location.pathname);
-
-      setEmail(emailParam);
-      setPassword(codeParam);
-      setAutoVerifying(true);
-      setLoading(true);
-      setError(null);
-
-      const performAutoLogin = async () => {
-        try {
-          await db.auth.login(emailParam, codeParam);
-          await checkAppState();
-        } catch (err) {
-          console.error("Auto-activation failed:", err);
-          setError(err.message || 'Auto-activation failed. Please enter your credentials manually.');
-          setLoading(false);
-          setAutoVerifying(false);
-        }
-      };
-
-      const timer = setTimeout(performAutoLogin, 800);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isActivationFlow && user?.nurse_id) {
-      db.entities.Nurse.get(user.nurse_id).then(n => {
-        if (n) {
-          setDesignation(n.designation || '');
-          setPhone(n.phone || '');
-          setEmployeeId(n.employee_id || '');
-        }
-      }).catch(err => console.error("Failed to load nurse details:", err));
-    }
-  }, [isActivationFlow, user]);
-
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError('Please enter your email and password.');
-      return;
-    }
+  const handleQuickLogin = async (nurseMock) => {
     setLoading(true);
-    setError(null);
+    setError('');
     try {
-      await db.auth.login(email, password);
-      await checkAppState();
-      window.location.href = '/';
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Invalid email or password.');
-      setLoading(false);
-    }
-  };
+      // Find facility
+      const fac =
+        mockFacilities.find((f) => f.id === nurseMock.facility_id) ||
+        mockFacilities.find((f) => f.id === selectedFacilityId) ||
+        mockFacilities[0];
 
-  const handleActivation = async (e) => {
-    e.preventDefault();
-    if (!password || !confirmPassword) {
-      setError('Please enter and confirm your password.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
+      setFacility(fac);
+      setStation(selectedStation);
+      setNurse(nurseMock);
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      // 1. Update password in Supabase Auth
-      if (supabase) {
-        const { error: authError } = await supabase.auth.updateUser({ password });
-        if (authError) throw authError;
+      // Authenticate in dataClient
+      if (dataClient?.auth?.login) {
+        await dataClient.auth.login(nurseMock.email, 'password123').catch(() => {});
       }
 
-      // 2. Update staff profile details and change status to active
-      await db.entities.Nurse.update(user.nurse_id, {
-        status: 'active',
-        designation,
-        phone,
-        employee_id: employeeId
-      });
-
-      // 3. Refresh Auth session state
-      await checkAppState();
-      window.location.href = '/';
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Failed to activate account.');
+      setError('Clinical authentication failed: ' + (err.message || 'Unknown error'));
+    } finally {
       setLoading(false);
     }
   };
 
-  if (autoVerifying) {
-    return (
-      <div className="min-h-screen bg-[#F7F5F0] flex flex-col justify-center items-center p-4 font-sans text-slate-800 animate-in fade-in duration-300">
-        <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center gap-6">
-          <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain animate-pulse" />
-          <div className="flex flex-col items-center gap-2 text-center mt-2">
-            <h1 className="text-xl font-bold text-slate-900">Verifying Onboarding Code</h1>
-            <p className="text-sm text-slate-500 max-w-[280px] leading-relaxed">
-              We are verifying your invitation. You will be redirected to complete your profile in a moment...
-            </p>
-          </div>
-          <div className="w-6 h-6 border-2 border-[#006B5F] border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  const handleStandardLogin = async (e) => {
+    e?.preventDefault();
+    if (!pin && !email) {
+      setError('Please enter a clinical PIN or work email');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const fac =
+        mockFacilities.find((f) => f.id === selectedFacilityId) || mockFacilities[0];
+      const matchingNurse =
+        mockNurses.find((n) => n.facility_id === fac.id) || mockNurses[0];
 
-  if (isActivationFlow) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 font-sans text-slate-800 animate-in fade-in duration-300">
-        <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center">
-          
-          <div className="flex flex-col items-center gap-2 mb-6">
-            <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain" />
-            <span className="text-[10px] font-bold tracking-widest text-[#0047FF] uppercase mt-1">Account Activation</span>
-          </div>
+      setFacility(fac);
+      setStation(selectedStation);
+      setNurse(matchingNurse);
 
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
-              Welcome to TotoAfya!
-            </h1>
-            <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-              Complete your profile and set up a secure password to activate your account.
-            </p>
-          </div>
+      if (dataClient?.auth?.login) {
+        await dataClient.auth
+          .login(email || matchingNurse.email, pin || '1234')
+          .catch(() => {});
+      }
 
-          {error && (
-            <div className="w-full bg-rose-50 border border-rose-100 text-rose-700 text-xs px-4 py-3 rounded-lg mb-5 flex items-start gap-2">
-              <Shield className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
-              <p className="font-semibold leading-relaxed">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleActivation} className="w-full flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Designation / Job Title
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g. Clinical Officer, Nurse-in-Charge"
-                  value={designation}
-                  onChange={(e) => setDesignation(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-[#0047FF] focus:bg-white transition-all text-slate-900"
-                  required
-                />
-                <ActivityIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Contact Phone
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g. +254 712 345678"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-[#0047FF] focus:bg-white transition-all text-slate-900"
-                  required
-                />
-                <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Employee / License Number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g. KNC-20392"
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-[#0047FF] focus:bg-white transition-all text-slate-900"
-                  required
-                />
-                <Key className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Choose Secure Password
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-[#0047FF] focus:bg-white transition-all text-slate-900"
-                  required
-                />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-[#0047FF] focus:bg-white transition-all text-slate-900"
-                  required
-                />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-emerald-700 hover:bg-emerald-600 active:scale-[0.99] text-white rounded-xl font-bold text-sm shadow transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <span>Activate Account</span>
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Failed to authenticate');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 font-sans text-slate-800 animate-in fade-in duration-300">
-      {/* Main Container */}
-      <div className="w-full max-w-[400px] bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center">
-
-        {/* Brand Header */}
-        <div className="flex flex-col items-center gap-2 mb-6">
-          <img src="/logo-horizontal.png" alt="TotoAfya Digital" className="h-10 object-contain" />
-          <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mt-1">Nurse Portal</span>
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col justify-between p-4 sm:p-6 lg:p-8">
+      {/* Top Bar */}
+      <header className="max-w-4xl w-full mx-auto flex items-center justify-between pb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-[#006B5F] flex items-center justify-center text-white shadow-sm">
+            <Stethoscope className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-lg font-black text-[#0A0A0A] tracking-tight leading-none flex items-center gap-2">
+              TotoAfya Clinical
+              <Badge status="scheduled" size="sm" showDot={false}>
+                Nurse Workstation
+              </Badge>
+            </h1>
+            <p className="text-xs text-[#6B7280] mt-1">
+              Maternal & Newborn Clinical Tablet Intake System
+            </p>
+          </div>
         </div>
 
-        {/* Welcome Text */}
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
-            Nurse Staff Login
-          </h1>
-          <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-            Authorized portal for child immunizations, maternal records, and patient registries.
-          </p>
-        </div>
+        <button
+          onClick={toggleLanguage}
+          className="text-xs font-bold text-[#006B5F] bg-white border border-[#D1D5DB] px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+        >
+          {lang === 'en' ? '🇰🇪 Kiswahili' : '🇬🇧 English'}
+        </button>
+      </header>
 
-        {error && (
-          <div className="w-full bg-rose-50 border border-rose-100 text-rose-700 text-xs px-4 py-3 rounded-lg mb-5 flex items-start gap-2">
-            <Shield className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
-            <p className="font-semibold leading-relaxed">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleEmailLogin} className="w-full flex flex-col gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-              Email Address
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                placeholder="nurse@facility.org"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-emerald-600 focus:bg-white transition-all text-slate-900"
-                required
-              />
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+      {/* Main Login Card */}
+      <main className="max-w-xl w-full mx-auto my-auto">
+        <Card className="shadow-lg border-slate-200">
+          <div className="p-6 sm:p-8">
+            <div className="mb-6 text-center">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#006B5F] bg-[#E6F4F1] px-3 py-1 rounded-full">
+                Point-of-Care Authentication
+              </span>
+              <h2 className="text-2xl font-black text-[#0A0A0A] mt-2 tracking-tight">
+                Staff Station Login
+              </h2>
+              <p className="text-xs text-[#6B7280] mt-1">
+                Select your assigned medical facility and clinical room to begin intake.
+              </p>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:border-emerald-600 focus:bg-white transition-all text-slate-900"
-                required
-              />
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-11 bg-emerald-700 hover:bg-emerald-600 active:scale-[0.99] text-white rounded-xl font-bold text-sm shadow transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <span>Verify & Login</span>
+            {error && (
+              <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs font-semibold text-[#DC2626] flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
             )}
-          </button>
-        </form>
 
-        {/* Help Info */}
-        <p className="text-xs text-slate-400 mt-6 text-center leading-relaxed">
-          Authorized clinical staff only. Nurse emails must be pre-registered by the system administrator.
+            {/* Step 1: Facility Selection */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-[#4A4A4A] tracking-wider uppercase flex items-center gap-1.5 mb-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-[#006B5F]" />
+                  <span>Healthcare Facility</span>
+                </label>
+                <select
+                  value={selectedFacilityId}
+                  onChange={(e) => setSelectedFacilityId(e.target.value)}
+                  className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-white border border-[#D1D5DB] rounded-lg text-[#0A0A0A] focus:border-[#006B5F] focus:ring-2 focus:ring-[#006B5F]/20 outline-none"
+                >
+                  {mockFacilities.map((fac) => (
+                    <option key={fac.id} value={fac.id}>
+                      {fac.name} ({fac.level} • {fac.county})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Step 2: Station Selection */}
+              <div>
+                <label className="text-xs font-bold text-[#4A4A4A] tracking-wider uppercase flex items-center gap-1.5 mb-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#006B5F]" />
+                  <span>Clinical Room / Workstation</span>
+                </label>
+                <select
+                  value={selectedStation}
+                  onChange={(e) => setSelectedStation(e.target.value)}
+                  className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-white border border-[#D1D5DB] rounded-lg text-[#0A0A0A] focus:border-[#006B5F] focus:ring-2 focus:ring-[#006B5F]/20 outline-none"
+                >
+                  {STATIONS.map((st) => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Fast 1-Click Nurse Login (Mock/Local Mode) */}
+              <div className="pt-2">
+                <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#C98A2C]" />
+                  <span>Instant Clinical Sign-In (Local Mode)</span>
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin(mockNurses[0])}
+                    disabled={loading}
+                    className="p-3 text-left rounded-xl border border-slate-200 bg-slate-50 hover:bg-teal-50/50 hover:border-[#006B5F] transition-all flex items-center gap-3 group active:scale-[0.98]"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#006B5F] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      JW
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#0A0A0A] group-hover:text-[#006B5F] truncate">
+                        Nurse Joy Wambui
+                      </p>
+                      <p className="text-[11px] text-[#6B7280] truncate">
+                        Pumwani Maternity
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleQuickLogin(mockNurses[2] || mockNurses[0])}
+                    disabled={loading}
+                    className="p-3 text-left rounded-xl border border-slate-200 bg-slate-50 hover:bg-teal-50/50 hover:border-[#006B5F] transition-all flex items-center gap-3 group active:scale-[0.98]"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#C98A2C] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      MO
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#0A0A0A] group-hover:text-[#C98A2C] truncate">
+                        Sister Mary Otieno
+                      </p>
+                      <p className="text-[11px] text-[#6B7280] truncate">
+                        Kilifi Referral
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Standard PIN Entry */}
+              <div className="pt-2 border-t border-slate-100">
+                <form onSubmit={handleStandardLogin} className="space-y-3">
+                  <Input
+                    label="Nurse PIN / Badge Code"
+                    labelSw="Nambari ya Siri ya Muuguzi"
+                    type="password"
+                    maxLength={6}
+                    placeholder="Enter 4-6 digit clinical PIN (e.g. 1234)"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                  />
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    loading={loading}
+                    className="w-full font-bold shadow-md"
+                    icon={ArrowRight}
+                    iconPosition="right"
+                  >
+                    Sign In & Open Station
+                  </Button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </main>
+
+      {/* Footer Disclaimer */}
+      <footer className="text-center text-xs text-[#6B7280] pt-6">
+        <p className="font-semibold text-slate-700">
+          TotoAfya Digital • Kenya Ministry of Health Compliant
         </p>
-      </div>
+        <p className="text-[11px] mt-0.5">
+          Restricted clinical interface for authorized healthcare professionals only.
+        </p>
+      </footer>
     </div>
   );
 }

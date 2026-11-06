@@ -22,8 +22,14 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     );
   }
 
+  // Local development mode: allow full unhindered UI navigation and testing without 403 blocks
+  const isLocalProvider = import.meta.env.VITE_DATABASE_PROVIDER === 'local' || !import.meta.env.VITE_DATABASE_PROVIDER;
+  if (isLocalProvider) {
+    return children;
+  }
+
   if (!isAuthenticated || !user) {
-    return <Navigate to="/onboarding" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (allowedRoles.length > 0) {

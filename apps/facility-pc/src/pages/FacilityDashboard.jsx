@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 import FacilitySidebar from '@/components/facility/FacilitySidebar';
 import FacilityOverview from '@/components/facility/FacilityOverview';
+import FacilityQueue from '@/components/facility/FacilityQueue';
 import FacilityMothers from '@/components/facility/FacilityMothers';
 import FacilityChildren from '@/components/facility/FacilityChildren';
 import FacilityVaccines from '@/components/facility/FacilityVaccines';
@@ -174,7 +175,8 @@ export default function FacilityDashboard() {
   };
 
   const tabs = {
-    overview: <FacilityOverview data={data} />,
+    overview: <FacilityOverview data={data} onNavigateTab={handleTabChange} />,
+    queue: <FacilityQueue mothers={data.mothers} children={data.children} />,
     mothers: <FacilityMothers mothers={data.mothers} facilityId={user?.facility_id} onRefresh={loadAll} />,
     children: <FacilityChildren children={data.children} growthRecords={data.growthRecords} />,
     vaccines: <FacilityVaccines immunizations={data.immunizations} children={data.children} />,

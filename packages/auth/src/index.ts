@@ -7,6 +7,8 @@ export interface UserProfile {
   mother_id?: string;
   nurse_id?: string;
   profile_complete?: boolean;
+  subscription_status?: string;
+  subscription_expires_at?: string;
 }
 
 export type Capability =
@@ -214,3 +216,4 @@ export function validateAncNumber(anc: string): boolean {
 }
 
 export * from './localCrypt';
+export * from './permissions';

@@ -10,6 +10,7 @@ import { ProfileProvider } from '@/context/ProfileContext';
 import { useState, useCallback, useEffect } from 'react';
 import SplashScreen from '@/components/SplashScreen';
 import B2CPaywall from '@/components/B2CPaywall';
+import DevRoleSwitcher from '@/components/DevRoleSwitcher';
 import db from '@/api/totoafyaClient';
 
 // Page imports
@@ -30,9 +31,10 @@ import Care from '@/pages/Care';
 import Profile from '@/pages/Profile';
 import Emergency from '@/pages/Emergency';
 import Community from '@/pages/Community';
+import PregnancyOverview from '@/pages/PregnancyOverview';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, checkAppState } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, user, checkAppState } = useAuth();
   const { lang } = useLang();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -63,8 +65,7 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
     if (authError.type === 'auth_required') {
       if (currentPath !== '/login') {
-        navigateToLogin();
-        return null;
+        return <Navigate to="/login" replace />;
       }
     }
   }
@@ -81,7 +82,7 @@ const AuthenticatedApp = () => {
   }
 
   // Redirect authenticated user with complete profile away from login/onboarding
-  if (user && user.profile_complete && (currentPath === '/login' || currentPath === '/onboarding')) {
+  if (user && user.profile_complete && currentPath === '/onboarding') {
     return <Navigate to="/" replace />;
   }
 
@@ -93,6 +94,7 @@ const AuthenticatedApp = () => {
       <Route path="/vaccines" element={<VaccinationSchedule />} />
       <Route path="/growth" element={<GrowthTracker />} />
       <Route path="/anc" element={<ANCVisitLog />} />
+      <Route path="/pregnancy" element={<PregnancyOverview />} />
       <Route path="/learn" element={<Learn />} />
       <Route path="/ai-health" element={<AIHealthAssistant />} />
       <Route path="/settings" element={<Settings />} />
@@ -109,8 +111,18 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashDone = useCallback(() => setSplashDone(true), []);
+  const [splashDone, setSplashDone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.location.pathname === '/login' ||
+      sessionStorage.getItem('toto_splash_dismissed') === 'true'
+    );
+  });
+
+  const handleSplashDone = useCallback(() => {
+    sessionStorage.setItem('toto_splash_dismissed', 'true');
+    setSplashDone(true);
+  }, []);
 
   return (
     <AuthProvider>
@@ -125,6 +137,7 @@ function App() {
             {/* ── All other routes go through auth guard ─────────── */}
             <Route path="/*" element={<AuthenticatedApp />} />
           </Routes>
+          <DevRoleSwitcher />
         </Router>
         <Toaster />
         </ProfileProvider>

@@ -22,7 +22,11 @@
     "build:facility": "npm run build --workspace=apps/facility-pc",
     "build:superadmin": "npm run build --workspace=apps/super-admin-portal",
     "tauri:facility": "npm run tauri --workspace=apps/facility-pc",
-    "test": "npx vitest run --dir packages/business-logic/src/__tests__"
+    "test": "npx vitest run packages/business-logic/src/__tests__ tests/security tests/contracts tests/integration",
+    "test:contracts": "npx vitest run tests/contracts",
+    "test:integration": "npx vitest run tests/integration",
+    "test:business": "npx vitest run packages/business-logic/src/__tests__",
+    "test:security": "npx vitest run tests/security"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

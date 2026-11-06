@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
-const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || 'https://nurse.totoafya.co.ke';
+const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || '*';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": allowedOrigin,
@@ -23,317 +23,204 @@ serve(async (req) => {
       throw new Error('Supabase environment variables are missing on the function container.');
     }
 
-    if (!resendApiKey) {
-      throw new Error('RESEND_API_KEY environment variable is not configured.');
-    }
-
     // 1. Authenticate caller via JWT Token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401
+        status: 401,
       });
     }
 
     const token = authHeader.replace(/^Bearer\s+/i, '');
-    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { data: { user: callerUser }, error: callerError } = await supabaseClient.auth.getUser(token);
+    const { data: { user: callerUser }, error: callerError } = await supabaseAdmin.auth.getUser(token);
     if (callerError || !callerUser) {
       return new Response(JSON.stringify({ error: `Unauthorized: ${callerError?.message || 'Invalid or expired caller session token'}` }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401
+        status: 401,
       });
     }
 
-    // 2. Authorize caller role (Must be facility_admin, admin, or super_admin)
-    const { data: callerNurse } = await supabaseClient
+    // 2. Authorize caller role from verified database record or app_metadata
+    const { data: callerNurse } = await supabaseAdmin
       .from('nurses')
-      .select('role, facility_id')
+      .select('role, facility_id, status')
       .eq('user_id', callerUser.id)
       .maybeSingle();
 
-    const callerRole = callerNurse?.role || callerUser.user_metadata?.role;
-    if (!callerRole || !['facility_admin', 'admin', 'super_admin', 'county_admin'].includes(callerRole)) {
-      return new Response(JSON.stringify({ error: 'Forbidden: Insufficient privilege to invite staff' }), {
+    const verifiedRole = callerNurse?.role || callerUser.app_metadata?.role;
+    const isAuthorized = ['facility_admin', 'admin', 'super_admin', 'county_admin'].includes(verifiedRole);
+
+    if (!isAuthorized) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Insufficient privileges to invite clinical staff' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 403
+        status: 403,
       });
     }
 
     // Parse invitation body
-    const { email, redirectTo, full_name, role } = await req.json();
+    const { email, redirectTo, full_name, role, facility_id, employee_id, phone, designation } = await req.json();
 
     if (!email) {
-      return new Response(JSON.stringify({ error: 'Email is required' }), {
+      return new Response(JSON.stringify({ error: 'Staff email address is required' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
+        status: 400,
       });
     }
 
     const cleanEmail = email.toLowerCase().trim();
 
-    // Generate a secure random temporary password (e.g. Toto@ followed by 6 random chars)
-    const randomChars = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const tempPassword = `Toto@${randomChars}`;
+    // 3. Multi-Tenant Facility Isolation Enforcement
+    // If caller is facility_admin, force assigned facility_id to match caller's facility
+    let targetFacilityId = facility_id;
+    if (verifiedRole === 'facility_admin' || verifiedRole === 'admin') {
+      if (!callerNurse?.facility_id) {
+        return new Response(JSON.stringify({ error: 'Forbidden: Caller is not assigned to an active healthcare facility' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403,
+        });
+      }
+      targetFacilityId = callerNurse.facility_id;
+    }
 
-    // Check if the nurse profile exists and already has a user_id
-    const { data: nurseRecord, error: nurseFetchError } = await supabaseClient
-      .from('nurses')
-      .select('user_id, id')
-      .ilike('email', cleanEmail)
-      .maybeSingle();
+    const targetPortalUrl = redirectTo || (role === 'admin' ? 'https://facility.totoafya.co.ke/login' : 'https://nurse.totoafya.co.ke/login');
 
-    if (nurseFetchError) throw nurseFetchError;
-
-    let authUser = null;
-
-    if (nurseRecord && nurseRecord.user_id) {
-      // If a user_id is already linked, update the password for the existing auth user
-      const { data: updateData, error: updateError } = await supabaseClient.auth.admin.updateUserById(
-        nurseRecord.user_id,
-        { password: tempPassword }
-      );
-      if (updateError) throw updateError;
-      authUser = updateData?.user;
-    } else {
-      // Create a new auth user
-      const { data: createData, error: createError } = await supabaseClient.auth.admin.createUser({
-        email: cleanEmail,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
+    // 4. Secure GoTrue Invitation: Generate cryptographic action link (No plaintext passwords)
+    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'invite',
+      email: cleanEmail,
+      options: {
+        redirectTo: targetPortalUrl,
+        data: {
           role: role || 'nurse',
-          full_name: full_name || 'Staff Member'
-        }
-      });
+          full_name: full_name || 'Staff Member',
+          facility_id: targetFacilityId || null,
+        },
+      },
+    });
 
-      if (createError) {
-        // Handle user already exists in auth.users but not linked to public.nurses
-        if (createError.message?.includes('already exists') || createError.status === 422) {
-          const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers();
-          if (listError) throw listError;
-          const existingUser = users.find(u => u.email?.toLowerCase() === cleanEmail);
-          if (existingUser) {
-            const { data: updateData, error: updateError } = await supabaseClient.auth.admin.updateUserById(
-              existingUser.id,
-              { password: tempPassword }
-            );
-            if (updateError) throw updateError;
-            authUser = updateData?.user;
+    if (linkError) {
+      throw linkError;
+    }
 
-            // Link the auth user ID to the nurse record explicitly
-            const { error: linkError } = await supabaseClient
-              .from('nurses')
-              .update({ user_id: existingUser.id })
-              .ilike('email', cleanEmail);
-            if (linkError) throw linkError;
-          } else {
-            throw createError;
-          }
+    const secureActivationLink = linkData?.properties?.action_link;
+    const newUserId = linkData?.user?.id;
+
+    // 5. Upsert public.nurses record
+    const { data: nurseRecord, error: nurseError } = await supabaseAdmin
+      .from('nurses')
+      .upsert({
+        user_id: newUserId || null,
+        facility_id: targetFacilityId || null,
+        full_name: full_name || 'Staff Member',
+        email: cleanEmail,
+        role: role || 'nurse',
+        employee_id: employee_id || null,
+        phone: phone || null,
+        designation: designation || null,
+        status: 'pending_activation',
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'email' })
+      .select()
+      .single();
+
+    if (nurseError) {
+      console.warn('Failed to upsert nurses table record:', nurseError.message);
+    }
+
+    // 6. Dispatch transactional email via Resend if API key is configured
+    let emailSent = false;
+    let emailError = null;
+
+    if (resendApiKey && secureActivationLink) {
+      try {
+        const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'TotoAfya Onboarding <onboarding@resend.dev>';
+        const resendRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${resendApiKey}`,
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [cleanEmail],
+            subject: 'Activate Your TotoAfya Clinical Account 🌿',
+            html: `
+              <!DOCTYPE html>
+              <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Activate Your TotoAfya Account</title>
+                  <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #F7F5F0; margin: 0; padding: 40px 20px; }
+                    .card { max-width: 500px; margin: 0 auto; background-color: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 24px; padding: 40px; box-shadow: 0 8px 30px rgba(0, 107, 95, 0.04); }
+                    .welcome-title { font-size: 22px; font-weight: 800; color: #0A0A0A; text-align: center; margin-top: 10px; margin-bottom: 12px; }
+                    .description { font-size: 14px; color: #555555; line-height: 1.6; text-align: center; margin-bottom: 28px; }
+                    .btn-box { text-align: center; margin-bottom: 28px; }
+                    .btn { display: inline-block; background-color: #006B5F; color: #FFFFFF !important; padding: 14px 32px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(0, 107, 95, 0.2); }
+                    .notice { font-size: 12px; color: #777777; text-align: center; line-height: 1.5; }
+                    .footer { border-top: 1px solid #EEEEEE; padding-top: 20px; margin-top: 28px; font-size: 11px; color: #999999; text-align: center; }
+                  </style>
+                </head>
+                <body>
+                  <div class="card">
+                    <h2 class="welcome-title">Welcome to TotoAfya Digital, ${full_name || 'Staff Member'}!</h2>
+                    <p class="description">
+                      You have been registered as an authorized healthcare provider. Click the secure button below to set your confidential password and activate your account.
+                    </p>
+                    <div class="btn-box">
+                      <a href="${secureActivationLink}" class="btn" target="_blank">Set Password & Activate</a>
+                    </div>
+                    <p class="notice">
+                      This one-time activation link is cryptographically protected and expires in 24 hours. For security reasons, do not share this link with anyone.
+                    </p>
+                    <div class="footer">
+                      TotoAfya Digital Health Platform • Protecting Mothers & Children Across Kenya
+                    </div>
+                  </div>
+                </body>
+              </html>
+            `,
+          }),
+        });
+
+        if (resendRes.ok) {
+          emailSent = true;
         } else {
-          throw createError;
+          emailError = await resendRes.text();
+          console.warn('Resend email error:', emailError);
         }
-      } else {
-        authUser = createData?.user;
+      } catch (mailErr: any) {
+        emailError = mailErr.message;
+        console.warn('Failed to send email via Resend:', mailErr);
       }
     }
 
-    if (!authUser) {
-      throw new Error('Failed to resolve or create auth user.');
-    }
-
-    const activationLink = `${redirectTo || 'https://nurse.totoafya.co.ke/login'}?email=${encodeURIComponent(cleanEmail)}&code=${encodeURIComponent(tempPassword)}`;
-
-    // 2. Dispatch a beautiful, premium, customized HTML email using Resend
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${resendApiKey}`,
-      },
-      body: JSON.stringify({
-        from: Deno.env.get('RESEND_FROM_EMAIL') || "TotoAfya Onboarding <onboarding@resend.dev>",
-        to: [cleanEmail],
-        subject: "Activate Your TotoAfya Staff Account 🌿",
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Activate Your TotoAfya Account</title>
-              <style>
-                body {
-                  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                  background-color: #F7F5F0;
-                  margin: 0;
-                  padding: 40px 20px;
-                }
-                .card {
-                  max-width: 500px;
-                  margin: 0 auto;
-                  background-color: #FFFFFF;
-                  border: 1px solid #E5E5E5;
-                  border-radius: 24px;
-                  padding: 40px;
-                  box-shadow: 0 8px 30px rgba(0, 107, 95, 0.04);
-                }
-                .logo-container {
-                  text-align: center;
-                  margin-bottom: 32px;
-                }
-                .logo-img {
-                  height: 38px;
-                  object-fit: contain;
-                }
-                .welcome-title {
-                  font-size: 24px;
-                  font-weight: 800;
-                  color: #0A0A0A;
-                  text-align: center;
-                  margin-top: 0;
-                  margin-bottom: 12px;
-                  letter-spacing: -0.03em;
-                }
-                .description {
-                  font-size: 14.5px;
-                  color: #555555;
-                  line-height: 1.6;
-                  text-align: center;
-                  margin-bottom: 32px;
-                }
-                .credentials-box {
-                  background-color: #F7F5F0;
-                  border-radius: 16px;
-                  padding: 24px;
-                  margin-bottom: 32px;
-                  border: 1px solid #E5E5E5;
-                }
-                .credential-row {
-                  margin-bottom: 14px;
-                  font-size: 14px;
-                  color: #555555;
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                }
-                .credential-row:last-child {
-                  margin-bottom: 0;
-                }
-                .credential-label {
-                  font-weight: 700;
-                  color: #555555;
-                }
-                .credential-value {
-                  font-family: 'Courier New', Courier, monospace;
-                  font-weight: 700;
-                  color: #006B5F;
-                  font-size: 15px;
-                  background-color: #FFFFFF;
-                  padding: 6px 12px;
-                  border-radius: 8px;
-                  border: 1px solid #E5E5E5;
-                }
-                .button-container {
-                  text-align: center;
-                  margin-bottom: 32px;
-                }
-                .btn {
-                  display: inline-block;
-                  background-color: #006B5F;
-                  color: #FFFFFF !important;
-                  padding: 14px 32px;
-                  font-size: 14px;
-                  font-weight: 700;
-                  text-decoration: none;
-                  border-radius: 14px;
-                  box-shadow: 0 6px 18px rgba(0, 107, 95, 0.2);
-                  transition: all 0.25s ease;
-                }
-                .footer {
-                  border-top: 1px solid #E5E5E5;
-                  padding-top: 24px;
-                  font-size: 12px;
-                  color: #A0A0A0;
-                  line-height: 1.6;
-                  text-align: center;
-                }
-                .fallback-link {
-                  color: #006B5F;
-                  word-break: break-all;
-                  text-decoration: none;
-                  font-weight: 600;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="card">
-                <div class="logo-container">
-                  <img class="logo-img" src="https://nurse.totoafya.co.ke/logo-horizontal.png" alt="TotoAfya Digital Logo" />
-                </div>
-                <h2 class="welcome-title">Welcome to TotoAfya, ${full_name || 'Staff Member'}!</h2>
-                <p class="description">
-                  You have been pre-registered as a staff member on the TotoAfya Digital platform. 
-                  Please log in with the temporary credentials below to activate your account.
-                </p>
-                <div class="credentials-box">
-                  <div class="credential-row">
-                    <span class="credential-label">Email:</span>
-                    <span class="credential-value" style="color: #0A0A0A; font-family: sans-serif;">${cleanEmail}</span>
-                  </div>
-                  <div class="credential-row">
-                    <span class="credential-label">Temporary Password:</span>
-                    <span class="credential-value">${tempPassword}</span>
-                  </div>
-                </div>
-                <div class="button-container">
-                  <a href="${activationLink}" class="btn" target="_blank">Activate Account</a>
-                </div>
-                <p style="font-size: 12px; color: #777777; text-align: center; margin-top: -16px; margin-bottom: 32px; font-style: italic;">
-                  Note: You will be prompted to choose a new secure password and complete your profile immediately after logging in.
-                </p>
-                <div class="footer">
-                  This activation email is sent automatically. If you did not request this, please ignore it.<br/><br/>
-                  If the button does not work, copy and paste this link in your browser:<br/>
-                  <a href="${activationLink}" class="fallback-link">${activationLink}</a>
-                </div>
-              </div>
-            </body>
-          </html>
-        `
-      })
-    });
-
-    let emailSent = false;
-    let emailError = null;
-    let resendData = null;
-
-    if (!resendResponse.ok) {
-      emailError = await resendResponse.text();
-      console.warn(`Resend dispatch notice for ${cleanEmail}:`, emailError);
-    } else {
-      emailSent = true;
-      resendData = await resendResponse.json();
-    }
-
-    return new Response(JSON.stringify({
-      success: true,
-      message: emailSent ? 'Invitation generated and sent via Resend successfully' : 'Account created. Manual credential delivery required due to email provider configuration.',
-      emailSent,
-      emailError,
-      tempPassword,
-      activationLink,
-      resend: resendData
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200
-    });
-  } catch (error) {
+    // 7. Secure response: NO plaintext passwords, NO secret query params
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: emailSent
+          ? 'Staff invitation dispatched securely via email'
+          : 'Staff user provisioned. Email delivery queued or manual activation link available.',
+        email: cleanEmail,
+        staff_id: nurseRecord?.id || null,
+        facility_id: targetFacilityId,
+        emailSent,
+        emailError,
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400
+      status: 400,
     });
   }
 });

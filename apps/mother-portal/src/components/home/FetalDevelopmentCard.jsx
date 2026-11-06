@@ -60,7 +60,7 @@ export default function FetalDevelopmentCard({ mother, lang }) {
   const progress = Math.min((weeksPregnant / 40) * 100, 100);
 
   return (
-    <Link to="/care" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-300">
+    <Link to="/pregnancy" className="block mx-4 mb-5 active:scale-[0.985] transition-all duration-300">
       <div className="rounded-[32px] bg-white border border-[#EEF2EF] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex items-center justify-between gap-6 hover:shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
         
         {/* Left Side Info */}

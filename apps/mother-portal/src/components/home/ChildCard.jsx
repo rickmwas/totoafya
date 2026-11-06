@@ -18,15 +18,27 @@ const STATUS = {
 
 export default function ChildCard({ child, nextVaccine, lastGrowth }) {
   const { t, lang } = useLang();
+  if (!child) return null;
+
   const g = GENDER[child.gender] || GENDER.male;
   const s = STATUS[child.health_status] || STATUS.healthy;
 
-  const dob = parseISO(child.date_of_birth);
-  const years = differenceInYears(new Date(), dob);
-  const months = differenceInMonths(new Date(), dob);
-  const weeks = differenceInWeeks(new Date(), dob);
-  const ageLabel = years >= 1 ? `${years} ${t('years_old')}` : months >= 1 ? `${months} ${t('months_old')}` : `${weeks} ${t('weeks_old')}`;
-  const initials = child.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const rawDob = child.date_of_birth || child.dob;
+  let ageLabel = '';
+  try {
+    if (rawDob) {
+      const dob = typeof rawDob === 'string' ? parseISO(rawDob) : new Date(rawDob);
+      const years = differenceInYears(new Date(), dob);
+      const months = differenceInMonths(new Date(), dob);
+      const weeks = differenceInWeeks(new Date(), dob);
+      ageLabel = years >= 1 ? `${years} ${t('years_old')}` : months >= 1 ? `${months} ${t('months_old')}` : `${weeks} ${t('weeks_old')}`;
+    }
+  } catch (err) {
+    console.warn('Failed to calculate child age:', err);
+  }
+
+  const childName = child.full_name || child.name || 'Child';
+  const initials = childName.split(' ').map(n => n[0]).filter(Boolean).join('').toUpperCase().slice(0, 2) || 'C';
 
   return (
     <Link to={`/child/${child.id}`} className="block active:scale-[0.98] transition-all duration-300">
@@ -41,8 +53,8 @@ export default function ChildCard({ child, nextVaccine, lastGrowth }) {
               <span className="text-white text-[14px] font-black tracking-tight">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-[15px] font-black text-toto-black leading-tight truncate">{child.full_name}</h3>
-              <p className="text-[12px] text-toto-light font-bold mt-0.5 tracking-wide uppercase">{ageLabel}</p>
+              <h3 className="text-[15px] font-black text-toto-black leading-tight truncate">{childName}</h3>
+              {ageLabel && <p className="text-[12px] text-toto-light font-bold mt-0.5 tracking-wide uppercase">{ageLabel}</p>}
             </div>
             <div className="flex items-center gap-2">
               <div className="rounded-full px-3 py-1 border shadow-[inset_0_1px_1px_rgba(0,0,0,0.01)]" style={{ backgroundColor: s.bg, borderColor: `${s.color}15` }}>

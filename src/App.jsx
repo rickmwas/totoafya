@@ -24,8 +24,10 @@ import ChildProfile from '@/pages/ChildProfile';
 import FacilityDashboard from '@/pages/FacilityDashboard';
 import NursePortal from '@/pages/NursePortal';
 import PatentDocument from '@/pages/PatentDocument';
+import Login from '@/pages/Login';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
+import DevRoleSwitcher from '@/components/DevRoleSwitcher';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
@@ -48,40 +50,49 @@ const AuthenticatedApp = () => {
 
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
-    if (authError.type === 'auth_required') { navigateToLogin(); return null; }
+    if (authError.type === 'auth_required') {
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        navigateToLogin();
+        return null;
+      }
+    }
   }
 
   return (
-    <Routes>
-      <Route
-        path="/nurse/*"
-        element={
-          <ProtectedRoute allowedRoles={['nurse', 'doctor', 'facility_admin', 'admin', 'chv', 'super_admin']}>
-            <NursePortal />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/" element={<Home />} />
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/vaccines" element={<VaccinationSchedule />} />
-      <Route path="/growth" element={<GrowthTracker />} />
-      <Route path="/anc" element={<ANCVisitLog />} />
-      <Route path="/learn" element={<Learn />} />
-      <Route path="/ai-health" element={<AIHealthAssistant />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/add-child" element={<AddChild />} />
-      <Route path="/child/:id" element={<ChildProfile />} />
-      <Route
-        path="/facility"
-        element={
-          <ProtectedRoute allowedRoles={['facility_admin', 'admin', 'county_admin', 'moh_admin', 'super_admin']}>
-            <FacilityDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/patent" element={<PatentDocument />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/nurse/*"
+          element={
+            <ProtectedRoute allowedRoles={['nurse', 'doctor', 'facility_admin', 'admin', 'chv', 'super_admin']}>
+              <NursePortal />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Home />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/vaccines" element={<VaccinationSchedule />} />
+        <Route path="/growth" element={<GrowthTracker />} />
+        <Route path="/anc" element={<ANCVisitLog />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/ai-health" element={<AIHealthAssistant />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/add-child" element={<AddChild />} />
+        <Route path="/child/:id" element={<ChildProfile />} />
+        <Route
+          path="/facility"
+          element={
+            <ProtectedRoute allowedRoles={['facility_admin', 'admin', 'county_admin', 'moh_admin', 'super_admin']}>
+              <FacilityDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/patent" element={<PatentDocument />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+      <DevRoleSwitcher />
+    </>
   );
 };
 
