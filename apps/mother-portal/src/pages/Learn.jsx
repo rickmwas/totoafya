@@ -25,7 +25,13 @@ import {
   HelpCircle,
   AlertTriangle,
   RotateCcw,
-  Sparkle
+  Sparkle,
+  Baby,
+  Salad,
+  Syringe,
+  Sprout,
+  HeartPulse,
+  Users
 } from 'lucide-react';
 
 import { useLang } from '@/context/LanguageContext';
@@ -34,14 +40,14 @@ import { cn } from '@/lib/utils';
 
 // Category Configuration with Premium Branding Colors
 const CATEGORY_CONFIG = {
-  breastfeeding: { icon: '🤱', color: '#E91E8C', bg: '#FFF0F6', en: 'Breastfeeding', sw: 'Kunyonyesha' },
-  nutrition:     { icon: '🥗', color: '#006B4F', bg: '#F0FBF6', en: 'Nutrition', sw: 'Lishe' },
-  immunization:  { icon: '💉', color: '#006B4F', bg: '#E6F4F1', en: 'Immunization', sw: 'Chanjo' },
-  hygiene:       { icon: '🧼', color: '#0099CC', bg: '#EEF9FF', en: 'Hygiene', sw: 'Usafi' },
-  development:   { icon: '🌱', color: '#7C3AED', bg: '#F5F0FF', en: 'Development', sw: 'Maendeleo' },
-  pregnancy:     { icon: '🤰', color: '#F9A825', bg: '#FFF8E1', en: 'Pregnancy', sw: 'Ujauzito' },
-  danger_signs:  { icon: '⚠️', color: '#E51010', bg: '#FFF0F0', en: 'Danger Signs', sw: 'Dalili za Hatari' },
-  family_planning: { icon: '👪', color: '#666666', bg: '#F7F5F0', en: 'Family Planning', sw: 'Uzazi wa Mpango' },
+  breastfeeding: { icon: Baby, color: '#E91E8C', bg: '#FFF0F6', en: 'Breastfeeding', sw: 'Kunyonyesha' },
+  nutrition:     { icon: Salad, color: '#006B4F', bg: '#F0FBF6', en: 'Nutrition', sw: 'Lishe' },
+  immunization:  { icon: Syringe, color: '#006B4F', bg: '#E6F4F1', en: 'Immunization', sw: 'Chanjo' },
+  hygiene:       { icon: Sparkles, color: '#0099CC', bg: '#EEF9FF', en: 'Hygiene', sw: 'Usafi' },
+  development:   { icon: Sprout, color: '#7C3AED', bg: '#F5F0FF', en: 'Development', sw: 'Maendeleo' },
+  pregnancy:     { icon: HeartPulse, color: '#F9A825', bg: '#FFF8E1', en: 'Pregnancy', sw: 'Ujauzito' },
+  danger_signs:  { icon: AlertTriangle, color: '#E51010', bg: '#FFF0F0', en: 'Danger Signs', sw: 'Dalili za Hatari' },
+  family_planning: { icon: Users, color: '#666666', bg: '#F7F5F0', en: 'Family Planning', sw: 'Uzazi wa Mpango' },
 };
 
 // Rich Sample Content with Multimodal formats and interactive quizzes
@@ -613,9 +619,9 @@ export default function Learn() {
 
   const getQuizBadge = (score, total) => {
     const pct = score / total;
-    if (pct === 1) return { en: 'Super Star Student 🌟', sw: 'Mwanafunzi Shujaa 🌟', bg: 'bg-[#FFF8E1] border-[#F9A825]' };
-    if (pct >= 0.5) return { en: 'Knowledge Builder 🌱', sw: 'Mjenzi wa Maarifa 🌱', bg: 'bg-[#F0FBF6] border-[#006B4F]' };
-    return { en: 'Curious Learner 📚', sw: 'Msomaji Mdadisi 📚', bg: 'bg-[#EEF9FF] border-[#0099CC]' };
+    if (pct === 1) return { en: 'Super Star Student', sw: 'Mwanafunzi Shujaa', bg: 'bg-[#FFF8E1] border-[#F9A825]' };
+    if (pct >= 0.5) return { en: 'Knowledge Builder', sw: 'Mjenzi wa Maarifa', bg: 'bg-[#F0FBF6] border-[#006B4F]' };
+    return { en: 'Curious Learner', sw: 'Msomaji Mdadisi', bg: 'bg-[#EEF9FF] border-[#0099CC]' };
   };
 
   // Searching & Category Filters
@@ -850,8 +856,8 @@ export default function Learn() {
                             </div>
                           </div>
                           <div className="absolute top-3 left-3">
-                            <span className="text-[9px] tracking-[0.1em] uppercase font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: cat.color }}>
-                              {cat.icon} {lang === 'sw' ? cat.sw : cat.en}
+                            <span className="text-[9px] tracking-[0.1em] uppercase font-bold px-2 py-0.5 rounded-full text-white flex items-center gap-1" style={{ backgroundColor: cat.color }}>
+                              {cat.icon && <cat.icon size={11} className="shrink-0" />} {lang === 'sw' ? cat.sw : cat.en}
                             </span>
                           </div>
                           <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 rounded-full px-2.5 py-0.5 backdrop-blur-sm">
@@ -889,7 +895,7 @@ export default function Learn() {
                         : 'bg-white border border-[#e5e7eb] text-[#6e7772] hover:bg-[#f0f2f0]'
                     )}
                   >
-                    {config && <span>{config.icon}</span>}
+                    {config && config.icon && <config.icon size={13} className="shrink-0" />}
                     {cat === 'all'
                       ? (lang === 'sw' ? 'Zote' : 'All')
                       : (lang === 'sw' ? config?.sw : config?.en) || cat}

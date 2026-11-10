@@ -13,13 +13,17 @@ import type {
   FacilityCensus,
 } from '@totoafya/types';
 
+import type { StorageAdapter } from './IStorageAdapter';
+
+export * from './IStorageAdapter';
+
 export type FilterValue = string | number | boolean | null | string[] | number[];
 
 export type FilterCriteria<T> = {
   [K in keyof T]?: FilterValue;
 } & {
   query?: string;
-} & Record<string, any>;
+} & Record<string, unknown>; // ZERO 'any' types per code-standards.md
 
 export type SyncStatus = 'synced' | 'pending' | 'syncing' | 'error' | 'offline';
 
@@ -70,7 +74,7 @@ export interface AuthSessionUser {
 export interface IAuthService {
   login(email: string, password?: string): Promise<AuthSessionUser>;
   signInWithNationalIdOrAnc(identifier: string, pin?: string, activationCode?: string | null): Promise<AuthSessionUser>;
-  signUpMother(identifier: string, pin: string, metadata: Record<string, any>): Promise<AuthSessionUser>;
+  signUpMother(identifier: string, pin: string, metadata: Record<string, unknown>): Promise<AuthSessionUser>;
   logout(): Promise<void>;
   me(): Promise<AuthSessionUser | null>;
   isAuthenticated(): Promise<boolean>;
@@ -133,6 +137,20 @@ export interface INurseRepository extends IRepository<Nurse> {
   invite(dto: InviteStaffDTO): Promise<{ success: boolean; message?: string; nurse?: Nurse }>;
 }
 
+export interface ClinicalAIResponse {
+  readonly response?: string;
+  readonly emergencyDetected?: boolean;
+  readonly risk_score?: number;
+  readonly risk_level?: 'low' | 'medium' | 'high' | 'critical';
+  readonly summary?: string;
+  readonly summary_sw?: string;
+  readonly action_required?: string;
+  readonly disclaimer?: string;
+  readonly redFlags?: string[];
+  readonly facilityPhone?: string;
+  readonly recommendedAction?: string;
+}
+
 export interface IDataClient {
   readonly mode: 'mock' | 'live';
   
@@ -158,6 +176,9 @@ export interface IDataClient {
   // AI & Clinical Decision Support
   readonly ai: IAIService;
 
+  // Backing Transactional Outbox Storage Adapter (optional for in-memory / live)
+  readonly storage?: StorageAdapter;
+
   // Facility Operational Telemetry & Census
   getFacilityCensus(facilityId: string): Promise<FacilityCensus>;
 
@@ -170,5 +191,5 @@ export interface IDataClient {
   onSyncStatusChange(listener: SyncStatusListener): () => void;
 
   // AI & Clinical Decision Support (Legacy / Direct)
-  invokeClinicalAI(prompt: string, context?: Record<string, any>): Promise<any>;
+  invokeClinicalAI(prompt: string, context?: Record<string, unknown>): Promise<ClinicalAIResponse>;
 }

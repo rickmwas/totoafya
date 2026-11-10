@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -13,7 +13,34 @@ import B2CPaywall from '@/components/B2CPaywall';
 import DevRoleSwitcher from '@/components/DevRoleSwitcher';
 import db from '@/api/totoafyaClient';
 
-// Page imports
+// PWA Shell & Integrated Routes (Wave 2 TD-2.2, TD-2.3, TD-2.4)
+import { ResponsivePwaShell } from './shell';
+import { OnboardingFlow } from './routes/onboarding';
+import { DashboardView } from './routes/dashboard';
+
+// Wave 3 TD-3.1 Maternal Records & Emergency SOS
+import {
+  SCR09WeeklyFetalGuide,
+  SCR10KickCounter,
+  SCR11ANCVisitLog,
+  SCR12BirthPlan,
+  SCR21EmergencyTakeover,
+} from './routes/maternal';
+
+// Wave 3 TD-3.2 Child Immunization, WHO Growth & Milestones
+import {
+  SCR13VaccineSchedule,
+  SCR15GrowthTracker,
+  SCR17MilestonesChecklist,
+} from './routes/child';
+
+// Wave 3 TD-3.3 AI Assistant, Sensitive Exceptions & 6-State Lifecycle
+import ArticleDetail from './routes/learning/ArticleDetail';
+import SCR24SyncVault from './routes/settings/SCR24SyncVault';
+import SCR28Bereavement from './routes/sensitive/SCR28Bereavement';
+
+
+// Page imports (Preserved for full platform compatibility)
 import Home from '@/pages/Home';
 import InstallBridge from '@/pages/InstallBridge';
 import Onboarding from '@/pages/Onboarding';
@@ -37,6 +64,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, checkAppState } = useAuth();
   const { lang } = useLang();
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
 
   useEffect(() => {
@@ -64,7 +92,7 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') return <UserNotRegisteredError />;
     if (authError.type === 'auth_required') {
-      if (currentPath !== '/login') {
+      if (currentPath !== '/login' && currentPath !== '/welcome' && currentPath !== '/onboarding') {
         return <Navigate to="/login" replace />;
       }
     }
@@ -72,41 +100,165 @@ const AuthenticatedApp = () => {
 
   // Only redirect mothers (role: 'user') with explicitly incomplete profiles to onboarding.
   // Use === false (not just falsy) to avoid redirect when profile_complete is undefined (mock/no-supabase mode).
-  if (user && user.role === 'user' && user.profile_complete === false && currentPath !== '/onboarding' && currentPath !== '/login') {
+  if (user && user.role === 'user' && user.profile_complete === false && currentPath !== '/onboarding' && currentPath !== '/login' && currentPath !== '/welcome') {
     return <Navigate to="/onboarding" replace />;
   }
 
   // Redirect B2C user with expired subscription to paywall
-  if (user && user.role === 'user' && user.subscription_status === 'expired' && currentPath !== '/login' && currentPath !== '/onboarding') {
+  if (user && user.role === 'user' && user.subscription_status === 'expired' && currentPath !== '/login' && currentPath !== '/onboarding' && currentPath !== '/welcome') {
     return <B2CPaywall user={user} onPaid={checkAppState} lang={lang} />;
   }
 
   // Redirect authenticated user with complete profile away from login/onboarding
-  if (user && user.profile_complete && currentPath === '/onboarding') {
+  if (user && user.profile_complete && (currentPath === '/onboarding' || currentPath === '/welcome')) {
     return <Navigate to="/" replace />;
   }
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Home />} />
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/vaccines" element={<VaccinationSchedule />} />
-      <Route path="/growth" element={<GrowthTracker />} />
-      <Route path="/anc" element={<ANCVisitLog />} />
-      <Route path="/pregnancy" element={<PregnancyOverview />} />
-      <Route path="/learn" element={<Learn />} />
-      <Route path="/ai-health" element={<AIHealthAssistant />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/care" element={<Care />} />
-      <Route path="/more" element={<Profile />} />
-      <Route path="/emergency" element={<Emergency />} />
-      <Route path="/community" element={<Community />} />
-      <Route path="/add-child" element={<AddChild />} />
-      <Route path="/child/:id" element={<ChildProfile />} />
-      <Route path="/patent" element={<PatentDocument />} />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <ResponsivePwaShell lang={lang}>
+      <Routes>
+        {/* ── Core Wave 2 Routes (Onboarding & Dashboard Integration) ── */}
+        <Route
+          path="/welcome"
+          element={
+            <OnboardingFlow
+              initialStep={1}
+              initialLang={lang}
+              onComplete={() => navigate('/')}
+              onNavigateLogin={() => navigate('/login')}
+            />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <OnboardingFlow
+              initialStep={2}
+              initialLang={lang}
+              onComplete={() => navigate('/')}
+              onNavigateLogin={() => navigate('/login')}
+            />
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <OnboardingFlow
+              initialStep={1}
+              initialLang={lang}
+              onComplete={() => navigate('/')}
+              onNavigateLogin={() => navigate('/login')}
+            />
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <DashboardView
+              initialLang={lang}
+              motherName={user?.name || user?.full_name || 'Faith'}
+              onNavigate={(path) => navigate(path)}
+              onEmergencyCall={() => navigate('/emergency')}
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardView
+              initialLang={lang}
+              motherName={user?.name || user?.full_name || 'Faith'}
+              onNavigate={(path) => navigate(path)}
+              onEmergencyCall={() => navigate('/emergency')}
+            />
+          }
+        />
+
+        {/* ── Wave 3 TD-3.1 Maternal Records & Emergency SOS ───────── */}
+        <Route
+          path="/pregnancy/detail"
+          element={<SCR09WeeklyFetalGuide lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/pregnancy/kicks"
+          element={
+            <SCR10KickCounter
+              lang={lang}
+              onNavigate={(path) => navigate(path)}
+              onEmergency={() => navigate('/emergency')}
+            />
+          }
+        />
+        <Route
+          path="/pregnancy/anc"
+          element={
+            <SCR11ANCVisitLog
+              lang={lang}
+              onNavigate={(path) => navigate(path)}
+              motherName={user?.name || user?.full_name || 'Faith'}
+            />
+          }
+        />
+        <Route
+          path="/anc"
+          element={
+            <SCR11ANCVisitLog
+              lang={lang}
+              onNavigate={(path) => navigate(path)}
+              motherName={user?.name || user?.full_name || 'Faith'}
+            />
+          }
+        />
+        <Route
+          path="/pregnancy/birth-plan"
+          element={<SCR12BirthPlan lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/emergency"
+          element={<SCR21EmergencyTakeover lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+
+        {/* ── Wave 3 TD-3.2 Child Immunization, WHO Growth & Milestones ─ */}
+        <Route
+          path="/records/vaccines"
+          element={<SCR13VaccineSchedule lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/vaccines"
+          element={<SCR13VaccineSchedule lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/records/growth"
+          element={<SCR15GrowthTracker lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/growth"
+          element={<SCR15GrowthTracker lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+        <Route
+          path="/records/milestones"
+          element={<SCR17MilestonesChecklist lang={lang} onNavigate={(path) => navigate(path)} />}
+        />
+
+        {/* ── Wave 3 TD-3.3 AI Assistant, Sensitive Exceptions & Lifecycle ─ */}
+        <Route path="/guide/article" element={<ArticleDetail />} />
+        <Route path="/settings/sync" element={<SCR24SyncVault />} />
+        <Route path="/sensitive/bereavement" element={<SCR28Bereavement />} />
+
+        {/* ── Preserved Platform Compatibility Routes ───────────────── */}
+        <Route path="/pregnancy" element={<PregnancyOverview />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/ai-health" element={<AIHealthAssistant />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/care" element={<Care />} />
+        <Route path="/more" element={<Profile />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/add-child" element={<AddChild />} />
+        <Route path="/child/:id" element={<ChildProfile />} />
+        <Route path="/patent" element={<PatentDocument />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </ResponsivePwaShell>
   );
 };
 

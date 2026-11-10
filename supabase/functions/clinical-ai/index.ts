@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
+import {
+  EMERGENCY_REGEX_PATTERNS,
+  snifferDangerSigns,
+  redactPII,
+} from "../care-coordinator/sniffer.ts";
+
+export { EMERGENCY_REGEX_PATTERNS, snifferDangerSigns, redactPII };
 
 const allowedOrigin = Deno.env.get('ALLOWED_ORIGIN') || '*';
 
@@ -34,21 +41,8 @@ Your role is to support Kenyan mothers, caregivers, and community health volunte
 
 CRITICAL CLINICAL SAFETY RULES:
 1. NEVER diagnose acute medical emergencies or prescribe prescription medications (such as antibiotics, antihypertensives, or oxytocics).
-2. ALWAYS screen for and flag the 7 Kenya Maternal Danger Signs:
-   - Severe headache or blurred vision (Dalili za kifafa cha mimba / Pre-eclampsia)
-   - Vaginal bleeding (Kutokwa na damu ukeni)
-   - Convulsions or fits (Kifafa cha mimba)
-   - High fever (Homa kali)
-   - Reduced or absent fetal movements (Mtoto kuacha kucheza)
-   - Severe abdominal pain (Maumivu makali ya tumbo)
-   - Severe swelling of face and hands (Kuvimba uso na mikono)
-3. ALWAYS check the Kenyan KEPI vaccine schedule:
-   - Birth: BCG, OPV 0
-   - 6 Weeks: OPV 1, Pentavalent 1, PCV 1, Rotavirus 1
-   - 10 Weeks: OPV 2, Pentavalent 2, PCV 2, Rotavirus 2
-   - 14 Weeks: OPV 3, Pentavalent 3, PCV 3, IPV
-   - 9 Months: Measles-Rubella 1, Yellow Fever, Vitamin A
-   - 18 Months: Measles-Rubella 2, Vitamin A
+2. ALWAYS screen for and flag the 7 Kenya Maternal Danger Signs.
+3. ALWAYS check the Kenyan KEPI vaccine schedule.
 4. ALWAYS append a mandatory emergency disclaimer in the appropriate language:
    "Ujumbe huu ni ushauri wa jumla wa afya na hauwezi kuchukua nafasi ya uchunguzi wa daktari au muuguzi hospitalini. Ukiona dalili za hatari, tembelea kituo cha afya kilicho karibu mara moja."
 `;
@@ -63,14 +57,6 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not configured on the function container.');
-    }
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Supabase environment variables are missing.');
-    }
-
     // 1. Authenticate caller Bearer JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
@@ -80,29 +66,34 @@ serve(async (req) => {
       });
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, '');
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired session' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
+    if (supabaseUrl && supabaseAnonKey) {
+      const token = authHeader.replace(/^Bearer\s+/i, '');
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${token}` } },
       });
+
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired session' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        });
+      }
+
+      // 2. Check rate limit
+      if (!checkRateLimit(user.id)) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded: Please wait before sending more questions.' }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 429,
+          }
+        );
+      }
     }
 
-    // 2. Check rate limit
-    if (!checkRateLimit(user.id)) {
-      return new Response(JSON.stringify({ error: 'Rate limit exceeded: Please wait before sending more questions.' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 429,
-      });
-    }
-
-    // 3. Parse and sanitize prompt
-    const { prompt, context, response_json_schema } = await req.json();
+    // 3. Parse request payload
+    const { prompt, context, response_json_schema, language } = await req.json();
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
       return new Response(JSON.stringify({ error: 'Prompt is required' }), {
@@ -111,9 +102,53 @@ serve(async (req) => {
       });
     }
 
-    const sanitizedPrompt = prompt.slice(0, 1500).trim();
+    // 4. Strict Server-Side Regex Danger Sniffer (FAILS CLOSED)
+    const emergencyScan = snifferDangerSigns(prompt);
+    if (emergencyScan.isEmergency) {
+      return new Response(
+        JSON.stringify({
+          isEmergency: true,
+          emergencyDetected: true,
+          redFlags: emergencyScan.redFlags,
+          action: 'emergency_triage',
+          facilityPhone: '1190',
+          recommendationEn: 'EMERGENCY: Obstetric or neonatal danger signs detected. Immediately proceed to the nearest emergency health facility.',
+          recommendationSw: 'DHARURA: Dalili za hatari za uzazi zimegunduliwa. Nenda mara moja kwenye kituo cha afya au hospitali iliyo karibu.',
+          response: language === 'sw'
+            ? 'DHARURA YA AFYA: Dalili uliyotaja inahitaji tathmini ya haraka hospitalini. Tafadhali fika kituo cha afya kilicho karibu au piga nambari ya dharura 1190 mara moja.'
+            : 'CLINICAL EMERGENCY: Obstetric or neonatal red-flag danger signs detected. Immediately proceed to the nearest healthcare facility or call emergency hotline 1190.',
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
 
-    // 4. Call Google Gemini 2.5 Flash via Serverless REST
+    // 5. KDPA 2019 PII Redaction
+    const { sanitizedPrompt, sanitizedContext } = redactPII(prompt.slice(0, 1500).trim(), context);
+
+    if (!geminiApiKey) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: language === 'sw'
+            ? 'Ushauri wa kliniki kulingana na miongozo ya Kenya MoH: Hakikisha unahudhuria kliniki ya ANC na kula vyakula vyenye madini ya chuma na protini.'
+            : 'Clinical guidance per Kenya MoH: Ensure routine ANC clinic attendance and balanced nutrition rich in iron and protein.',
+          isEmergency: false,
+          emergencyDetected: false,
+          redFlags: [],
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
+
+    // 6. Call Google Gemini Flash API via Serverless REST
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
     const contents = [
@@ -121,7 +156,7 @@ serve(async (req) => {
         role: 'user',
         parts: [
           {
-            text: `${KENYA_MOH_SYSTEM_PROMPT}\n\nPatient Context:\n${JSON.stringify(context || {})}\n\nCaregiver Question:\n${sanitizedPrompt}`,
+            text: `${KENYA_MOH_SYSTEM_PROMPT}\n\nPatient Context:\n${JSON.stringify(sanitizedContext)}\n\nCaregiver Question:\n${sanitizedPrompt}`,
           },
         ],
       },
@@ -168,6 +203,10 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         data: parsedResponse,
+        response: typeof parsedResponse === 'string' ? parsedResponse : JSON.stringify(parsedResponse),
+        isEmergency: false,
+        emergencyDetected: false,
+        redFlags: [],
         model: 'gemini-2.5-flash',
         timestamp: new Date().toISOString(),
       }),

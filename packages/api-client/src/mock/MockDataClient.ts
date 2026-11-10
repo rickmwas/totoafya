@@ -28,7 +28,11 @@ import type {
   IAIService,
   InviteStaffDTO,
   INurseRepository,
+  ClinicalAIResponse,
+  StorageAdapter,
 } from '../contracts/IDataClient';
+
+import { InMemoryStorageAdapter } from '../storage/InMemoryStorageAdapter';
 
 import type { FacilityCensus } from '@totoafya/types';
 
@@ -401,19 +405,23 @@ export class MockAuthService implements IAuthService {
     return user;
   }
 
-  async signUpMother(identifier: string, _pin: string, metadata: Record<string, any>): Promise<AuthSessionUser> {
+  async signUpMother(identifier: string, _pin: string, metadata: Record<string, unknown>): Promise<AuthSessionUser> {
     const newMotherId = 'mother-' + generateId();
+    const fullName = typeof metadata.full_name === 'string' ? metadata.full_name : 'Caregiver';
+    const facilityId = typeof metadata.facility_id === 'string' ? metadata.facility_id : 'fac-pumwani-01';
+    const phone = typeof metadata.phone === 'string' ? metadata.phone : null;
+    const profileComplete = typeof metadata.profile_complete === 'boolean' ? metadata.profile_complete : true;
     const user: AuthSessionUser = {
       id: 'auth-' + newMotherId,
       email: `${identifier}@local.app`,
-      full_name: metadata.full_name || 'Caregiver',
+      full_name: fullName,
       role: 'mother',
-      facility_id: metadata.facility_id || 'fac-pumwani-01',
+      facility_id: facilityId,
       mother_id: newMotherId,
       national_id: identifier.includes('ANC') ? null : identifier,
       anc_number: identifier.includes('ANC') ? identifier : null,
-      phone: metadata.phone || null,
-      profile_complete: metadata.profile_complete ?? true,
+      phone,
+      profile_complete: profileComplete,
       subscription_status: 'trial',
       trial_end_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
     };
@@ -615,11 +623,13 @@ export class MockDataClient implements IDataClient {
   readonly auth: MockAuthService;
   readonly payments: MockPaymentService;
   readonly ai: MockAIService;
+  readonly storage: StorageAdapter;
 
   private pendingMutations = 0;
   private syncListeners = new Set<SyncStatusListener>();
 
   constructor() {
+    this.storage = new InMemoryStorageAdapter();
     const onMutation = () => {
       this.pendingMutations++;
       this.notifyListeners();
@@ -744,7 +754,7 @@ export class MockDataClient implements IDataClient {
     return this.sync();
   }
 
-  async invokeClinicalAI(prompt: string): Promise<any> {
+  async invokeClinicalAI(prompt: string, _context?: Record<string, unknown>): Promise<ClinicalAIResponse> {
     const p = prompt.toLowerCase();
     const hasDanger =
       p.includes('danger') ||
@@ -755,6 +765,7 @@ export class MockDataClient implements IDataClient {
       p.includes('damu');
 
     return {
+      emergencyDetected: hasDanger,
       risk_score: hasDanger ? 80 : 15,
       risk_level: hasDanger ? 'high' : 'low',
       summary: hasDanger

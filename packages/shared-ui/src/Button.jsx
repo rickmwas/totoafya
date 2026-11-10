@@ -4,9 +4,9 @@ import { cn } from './utils';
 
 const variantClasses = {
   primary:
-    'bg-[#006B5F] hover:bg-[#00544B] text-white shadow-sm hover:shadow focus-visible:ring-[#006B5F]',
+    'bg-[#006B5F] hover:bg-[#004D44] text-white shadow-sm hover:shadow focus-visible:ring-[#006B5F]',
   secondary:
-    'bg-[#C98A2C] hover:bg-[#B27823] text-white shadow-sm hover:shadow focus-visible:ring-[#C98A2C]',
+    'bg-[#E68A00] hover:bg-[#CC7A00] text-[#1A202C] font-bold shadow-sm hover:shadow focus-visible:ring-[#E68A00]',
   outline:
     'border border-[#D1D5DB] bg-white text-[#0A0A0A] hover:bg-slate-50 hover:border-slate-400 focus-visible:ring-[#006B5F]',
   danger:
@@ -18,10 +18,10 @@ const variantClasses = {
 };
 
 const sizeClasses = {
-  sm: 'min-h-[36px] px-3 py-1.5 text-xs rounded-md gap-1.5',
-  md: 'min-h-[44px] px-4 py-2.5 text-sm rounded-lg gap-2', // Enforces 44px minimum touch target
+  sm: 'min-h-[44px] px-3.5 py-1.5 text-xs rounded-md gap-1.5',
+  md: 'min-h-[48px] px-5 py-2.5 text-sm rounded-lg gap-2', // Enforces 48px minimum touch target
   lg: 'min-h-[52px] px-6 py-3.5 text-base rounded-xl gap-2.5 font-bold',
-  icon: 'min-h-[44px] min-w-[44px] p-2.5 rounded-lg flex items-center justify-center',
+  icon: 'min-h-[48px] min-w-[48px] p-2.5 rounded-lg flex items-center justify-center',
 };
 
 export const Button = forwardRef(function Button(

@@ -7,7 +7,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./tailwind-preset": "./src/tailwind-preset.js",
-    "./tokens": "./src/tokens.ts"
+    "./tokens": "./src/tokens.ts",
+    "./tokens.json": "./src/tokens.json",
+    "./theme.css": "./src/theme.css",
+    "./contrast-rules": "./src/contrast-rules.ts",
+    "./swahili-rules": "./src/swahili-rules.ts"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test src/__tests__/tokens.test.ts"
   },
   "dependencies": {
     "@sentry/react": "^10.65.0"

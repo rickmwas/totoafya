@@ -54,8 +54,8 @@ export const Input = forwardRef(function Input(
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : helperText ? helperId : undefined}
           className={cn(
-            'w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-white border rounded-lg',
-            'text-[#0A0A0A] placeholder:text-[#6B7280] transition-all duration-150',
+            'w-full min-h-[48px] px-3.5 py-2.5 text-sm bg-white border rounded-lg',
+            'text-[#1A202C] placeholder:text-[#6B7280] transition-all duration-150',
             'border-[#D1D5DB] focus:border-[#006B5F] focus:ring-2 focus:ring-[#006B5F]/20 focus:outline-none',
             'disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed disabled:border-slate-200',
             error && 'border-[#DC2626] focus:border-[#DC2626] focus:ring-[#DC2626]/20 bg-red-50/20 text-[#DC2626]',

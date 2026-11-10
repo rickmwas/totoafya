@@ -95,14 +95,16 @@ export function SyncStatusBar({
             onClick={onSync}
             disabled={isSyncing}
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold text-[#006B5F] bg-[#E6F4F1] hover:bg-[#D5EDE8] transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#006B5F]',
+              'min-h-[48px] min-w-[48px] inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-bold text-[#006B5F] bg-[#E6F4F1] hover:bg-[#D5EDE8] active:bg-[#C2E4DD] transition-colors',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#006B5F]',
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
             title={isSw ? 'Landanisha sasa' : 'Sync now'}
+            aria-label={isSw ? 'Landanisha sasa' : 'Sync now'}
           >
             <RefreshCw
-              className={cn('w-3 h-3', isSyncing && 'animate-spin text-[#006B5F]')}
+              className={cn('w-3.5 h-3.5 shrink-0', isSyncing && 'animate-spin text-[#006B5F]')}
+              aria-hidden="true"
             />
             <span>{isSyncing ? (isSw ? 'Inalandanisha...' : 'Syncing...') : (isSw ? 'Landanisha' : 'Sync')}</span>
           </button>

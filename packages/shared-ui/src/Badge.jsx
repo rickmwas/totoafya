@@ -61,15 +61,24 @@ const variantConfig = {
     defaultLabelSw: 'MAM (Utapiamlo wa Wastani)',
   },
 
-  // Overdue / Critical / SAM / High-Risk ANC
+  // Overdue / Catch-up Care (Savannah Ochre per Anti-Pattern 7, never punitive red)
   overdue: {
-    bg: 'bg-[#FEF2F2]',
-    text: 'text-[#DC2626]',
-    border: 'border-[#FCA5A5]',
-    dot: 'bg-[#DC2626] animate-pulse',
-    icon: AlertTriangle,
-    defaultLabel: 'Overdue',
-    defaultLabelSw: 'Imechelewa',
+    bg: 'bg-[#FFFBEB]',
+    text: 'text-[#B45309]',
+    border: 'border-[#FDE68A]',
+    dot: 'bg-[#B45309]',
+    icon: Clock,
+    defaultLabel: 'Catch-up Due',
+    defaultLabelSw: 'Kukamilisha Huduma',
+  },
+  catch_up: {
+    bg: 'bg-[#FFFBEB]',
+    text: 'text-[#B45309]',
+    border: 'border-[#FDE68A]',
+    dot: 'bg-[#B45309]',
+    icon: Clock,
+    defaultLabel: 'Catch-up Due',
+    defaultLabelSw: 'Kukamilisha Huduma',
   },
   critical: {
     bg: 'bg-[#FEF2F2]',

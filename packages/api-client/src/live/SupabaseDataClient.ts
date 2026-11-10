@@ -30,6 +30,8 @@ import type {
   STKPushParams,
   InviteStaffDTO,
   INurseRepository,
+  ClinicalAIResponse,
+  StorageAdapter,
 } from '../contracts/IDataClient';
 
 export interface OutboxMutation {
@@ -38,7 +40,7 @@ export interface OutboxMutation {
   table: string;
   record_id: string;
   action: 'create' | 'update' | 'delete' | 'bulkCreate';
-  payload: any;
+  payload: Record<string, unknown>;
   timestamp: string;
   attempts: number;
 }
@@ -412,9 +414,11 @@ export class SupabaseAuthService implements IAuthService {
     return this.resolveSessionUser(data.user);
   }
 
-  async signUpMother(identifier: string, pin: string, metadata: Record<string, any>): Promise<AuthSessionUser> {
+  async signUpMother(identifier: string, pin: string, metadata: Record<string, unknown>): Promise<AuthSessionUser> {
     const email = `${identifier.toLowerCase().replace(/[^a-z0-9]/g, '')}@totoafya.org`;
     const securePin = `toto_${pin}`;
+
+    const fullName = typeof metadata.full_name === 'string' ? metadata.full_name : identifier;
 
     const { data, error } = await this.supabase.auth.signUp({
       email,
@@ -422,7 +426,7 @@ export class SupabaseAuthService implements IAuthService {
       options: {
         data: {
           role: 'mother',
-          full_name: metadata.full_name || identifier,
+          full_name: fullName,
         },
       },
     });
@@ -452,9 +456,9 @@ export class SupabaseAuthService implements IAuthService {
     return {
       id: data.user!.id,
       email: data.user!.email || email,
-      full_name: metadata.full_name,
+      full_name: typeof metadata.full_name === 'string' ? metadata.full_name : fullName,
       role: 'mother',
-      facility_id: metadata.facility_id,
+      facility_id: typeof metadata.facility_id === 'string' ? metadata.facility_id : undefined,
       mother_id: motherRecord.id,
       profile_complete: motherRecord.profile_complete,
       subscription_status: 'trial',
@@ -1011,16 +1015,17 @@ export class SupabaseDataClient implements IDataClient {
     return this.sync();
   }
 
-  async invokeClinicalAI(prompt: string, context: Record<string, any> = {}): Promise<any> {
+  async invokeClinicalAI(prompt: string, context: Record<string, unknown> = {}): Promise<ClinicalAIResponse> {
     try {
       const { data, error } = await this.supabase.functions.invoke('clinical-ai', {
         body: { prompt, context },
       });
 
       if (error) throw error;
-      return data;
-    } catch (err: any) {
-      console.warn('[ClinicalAI] Edge function invoke failed, fallback to local guidance:', err.message);
+      return data as ClinicalAIResponse;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[ClinicalAI] Edge function invoke failed, fallback to local guidance:', msg);
       return {
         risk_score: 20,
         risk_level: 'low',
